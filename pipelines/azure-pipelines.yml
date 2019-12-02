@@ -21,4 +21,4 @@ steps:
     inputs:
       command: 'build'
       projects: 'src/Dfe.Spi.EntitySquasher/Dfe.Spi.EntitySquasher.Functions/Dfe.Spi.EntitySquasher.Functions.csproj'
-      arguments: '--configuration Release --output $(Build.BinariesDirectory)'
+      arguments: '--configuration Release --output $(Build.BinariesDirectory) --no-restore'
