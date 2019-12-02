@@ -1,6 +1,7 @@
 ﻿namespace Dfe.Spi.EntitySquasher.Application.Models
 {
     using Dfe.Spi.EntitySquasher.Application.Definitions;
+    using Dfe.Spi.Models;
 
     /// <summary>
     /// Response object for
@@ -8,6 +9,13 @@
     /// </summary>
     public class GetSquashedEntityResponse
     {
-        // TODO...
+        /// <summary>
+        /// Gets or sets the requested, squashed entity.
+        /// </summary>
+        public ModelsBase ModelsBase
+        {
+            get;
+            set;
+        }
     }
 }
