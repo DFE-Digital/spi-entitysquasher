@@ -5,6 +5,10 @@ pool:
   vmImage: 'ubuntu-latest'
 
 steps:
+  - task: NuGetToolInstaller@1
+    displayName: 'Use NuGet 4.7.1'
+    inputs:
+      versionSpec: '4.7.1'
   - task: NuGetCommand@2
     displayName: 'Restore NuGet Packages'
     inputs:
