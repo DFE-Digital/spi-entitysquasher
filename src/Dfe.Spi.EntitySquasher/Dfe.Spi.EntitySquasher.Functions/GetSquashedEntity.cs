@@ -2,6 +2,7 @@ namespace Dfe.Spi.EntitySquasher.Functions
 {
     using Dfe.Spi.EntitySquasher.Application.Definitions;
     using Dfe.Spi.EntitySquasher.Application.Models;
+    using Dfe.Spi.Models;
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.Azure.WebJobs;
@@ -58,8 +59,9 @@ namespace Dfe.Spi.EntitySquasher.Functions
                 this.getSquashedEntityProcessor.GetSquashedEntity(
                     getSquashedEntityRequest);
 
-            // TODO: Wire up to above response.
-            toReturn = new StatusCodeResult(200);
+            ModelsBase modelsBase = getSquashedEntityResponse.ModelsBase;
+
+            toReturn = new JsonResult(modelsBase);
 
             return toReturn;
         }
