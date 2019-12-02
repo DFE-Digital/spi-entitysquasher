@@ -1,5 +1,7 @@
 namespace Dfe.Spi.EntitySquasher.Functions
 {
+    using System;
+    using System.IO;
     using Dfe.Spi.EntitySquasher.Application.Definitions;
     using Dfe.Spi.EntitySquasher.Application.Models;
     using Dfe.Spi.Models;
@@ -8,6 +10,7 @@ namespace Dfe.Spi.EntitySquasher.Functions
     using Microsoft.Azure.WebJobs;
     using Microsoft.Azure.WebJobs.Extensions.Http;
     using Microsoft.Extensions.Logging;
+    using Newtonsoft.Json;
 
     /// <summary>
     /// Entry class for the <c>get-squashed-entity</c> function.
@@ -49,11 +52,22 @@ namespace Dfe.Spi.EntitySquasher.Functions
         {
             IActionResult toReturn = null;
 
+            if (httpRequest == null)
+            {
+                throw new ArgumentNullException(nameof(httpRequest));
+            }
+
+            string getSquashedEntityRequestStr = null;
+            using (StreamReader streamReader = new StreamReader(httpRequest.Body))
+            {
+                getSquashedEntityRequestStr = streamReader.ReadToEnd();
+            }
+
+            logger.LogDebug($"Body: {getSquashedEntityRequestStr}");
+
             GetSquashedEntityRequest getSquashedEntityRequest =
-                new GetSquashedEntityRequest()
-                {
-                    // Nothing for now.
-                };
+                JsonConvert.DeserializeObject<GetSquashedEntityRequest>(
+                    getSquashedEntityRequestStr);
 
             GetSquashedEntityResponse getSquashedEntityResponse =
                 this.getSquashedEntityProcessor.GetSquashedEntity(
