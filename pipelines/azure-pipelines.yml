@@ -9,5 +9,5 @@ steps:
     displayName: 'Build Function App'
     inputs:
       command: 'build'
-      projects: 'src/Dfe.Spi.Models/Dfe.Spi.Models/Dfe.Spi.Models.csproj'
+      projects: 'src/Dfe.Spi.EntitySquasher/Dfe.Spi.EntitySquasher.Functions/Dfe.Spi.EntitySquasher.Functions.csproj'
       arguments: '--configuration Release --output $(Build.BinariesDirectory)'
