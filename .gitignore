@@ -265,3 +265,4 @@ local.settings.json
 
 # XML Docs
 Dfe.Spi.EntitySquasher.Functions.xml
+Dfe.Spi.EntitySquasher.Application.xml
