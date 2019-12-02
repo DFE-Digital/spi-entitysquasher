@@ -7,7 +7,7 @@
     /// Response object for
     /// <see cref="IGetSquashedEntityProcessor.GetSquashedEntity(GetSquashedEntityRequest)" />.
     /// </summary>
-    public class GetSquashedEntityResponse
+    public class GetSquashedEntityResponse : RequestResponseBase
     {
         /// <summary>
         /// Gets or sets the requested, squashed entity.

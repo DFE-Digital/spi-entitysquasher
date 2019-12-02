@@ -6,7 +6,7 @@
     /// Request object for
     /// <see cref="IGetSquashedEntityProcessor.GetSquashedEntity(GetSquashedEntityRequest)" />.
     /// </summary>
-    public class GetSquashedEntityRequest
+    public class GetSquashedEntityRequest : RequestResponseBase
     {
         // TODO...
     }
