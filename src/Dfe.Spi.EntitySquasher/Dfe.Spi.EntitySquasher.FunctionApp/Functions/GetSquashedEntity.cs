@@ -48,17 +48,13 @@ namespace Dfe.Spi.EntitySquasher.FunctionApp.Functions
         /// <param name="httpRequest">
         /// An instance of <see cref="HttpContext" />.
         /// </param>
-        /// <param name="logger">
-        /// An instance of type <see cref="ILogger" />.
-        /// </param>
         /// <returns>
         /// An instance of type <see cref="IActionResult" />.
         /// </returns>
         [FunctionName("get-squashed-entity")]
         public IActionResult Run(
             [HttpTrigger(AuthorizationLevel.Function, "POST", Route = null)]
-            HttpRequest httpRequest,
-            ILogger logger)
+            HttpRequest httpRequest)
         {
             IActionResult toReturn = null;
 
@@ -78,7 +74,6 @@ namespace Dfe.Spi.EntitySquasher.FunctionApp.Functions
                     getSquashedEntityRequestStr);
 
             ILoggerWrapper loggerWrapper = this.loggerWrapperFactory.Create(
-                logger,
                 getSquashedEntityRequest);
 
             IGetSquashedEntityProcessor getSquashedEntityProcessor =

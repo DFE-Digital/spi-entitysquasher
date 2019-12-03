@@ -6,7 +6,9 @@
     using Dfe.Spi.EntitySquasher.Application.Definitions.Factories;
     using Dfe.Spi.EntitySquasher.Application.Factories;
     using Microsoft.Azure.Functions.Extensions.DependencyInjection;
+    using Microsoft.Azure.WebJobs.Logging;
     using Microsoft.Extensions.DependencyInjection;
+    using Microsoft.Extensions.Logging;
 
     /// <summary>
     /// Functions startup class.
@@ -24,8 +26,24 @@
 
             functionsHostBuilder
                 .Services
-                .AddSingleton<ILoggerWrapperFactory, LoggerWrapperFactory>()
+                .AddScoped<ILogger>(this.CreateILogger)
+                .AddScoped<ILoggerWrapperFactory, LoggerWrapperFactory>()
                 .AddSingleton<IGetSquashedEntityProcessorFactory, GetSquashedEntityProcessorFactory>();
+        }
+
+        private ILogger CreateILogger(IServiceProvider serviceProvider)
+        {
+            ILogger toReturn = null;
+
+            ILoggerFactory loggerFactory =
+                serviceProvider.GetService<ILoggerFactory>();
+
+            string categoryName = LogCategories.CreateFunctionUserCategory(
+                nameof(Dfe.Spi.EntitySquasher));
+
+            toReturn = loggerFactory.CreateLogger(categoryName);
+
+            return toReturn;
         }
     }
 }
