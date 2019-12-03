@@ -7,6 +7,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dfe.Spi.EntitySquasher.Appl
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dfe.Spi.EntitySquasher.FunctionApp", "Dfe.Spi.EntitySquasher.FunctionApp\Dfe.Spi.EntitySquasher.FunctionApp.csproj", "{AC4B4B8A-DC6A-4A7E-B3F4-182CFCF9DB05}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Build", "Build", "{08842A01-2864-45A1-9BCB-58C2B9302AF4}"
+	ProjectSection(SolutionItems) = preProject
+		..\..\pipelines\azure-pipelines.yml = ..\..\pipelines\azure-pipelines.yml
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
