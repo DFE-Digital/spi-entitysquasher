@@ -1,8 +1,10 @@
-﻿namespace Dfe.Spi.EntitySquasher.Functions
+﻿namespace Dfe.Spi.EntitySquasher.FunctionApp
 {
     using System;
-    using Dfe.Spi.EntitySquasher.Application;
-    using Dfe.Spi.EntitySquasher.Application.Definitions;
+    using Dfe.Spi.Common.Logging.Definitions.Factories;
+    using Dfe.Spi.Common.Logging.Factories;
+    using Dfe.Spi.EntitySquasher.Application.Definitions.Factories;
+    using Dfe.Spi.EntitySquasher.Application.Factories;
     using Microsoft.Azure.Functions.Extensions.DependencyInjection;
     using Microsoft.Extensions.DependencyInjection;
 
@@ -22,7 +24,8 @@
 
             functionsHostBuilder
                 .Services
-                .AddSingleton<IGetSquashedEntityProcessor, GetSquashedEntityProcessor>();
+                .AddSingleton<ILoggerWrapperFactory, LoggerWrapperFactory>()
+                .AddSingleton<IGetSquashedEntityProcessorFactory, GetSquashedEntityProcessorFactory>();
         }
     }
 }

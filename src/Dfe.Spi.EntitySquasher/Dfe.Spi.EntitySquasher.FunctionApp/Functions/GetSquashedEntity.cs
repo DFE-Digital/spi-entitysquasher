@@ -1,8 +1,11 @@
-namespace Dfe.Spi.EntitySquasher.Functions
+namespace Dfe.Spi.EntitySquasher.FunctionApp.Functions
 {
     using System;
     using System.IO;
+    using Dfe.Spi.Common.Logging.Definitions;
+    using Dfe.Spi.Common.Logging.Definitions.Factories;
     using Dfe.Spi.EntitySquasher.Application.Definitions;
+    using Dfe.Spi.EntitySquasher.Application.Definitions.Factories;
     using Dfe.Spi.EntitySquasher.Application.Models;
     using Dfe.Spi.Models;
     using Microsoft.AspNetCore.Http;
@@ -17,19 +20,26 @@ namespace Dfe.Spi.EntitySquasher.Functions
     /// </summary>
     public class GetSquashedEntity
     {
-        private readonly IGetSquashedEntityProcessor getSquashedEntityProcessor;
+        private readonly IGetSquashedEntityProcessorFactory getSquashedEntityProcessorFactory;
+        private readonly ILoggerWrapperFactory loggerWrapperFactory;
 
         /// <summary>
         /// Initialises a new instance of the <see cref="GetSquashedEntity" />
         /// class.
         /// </summary>
-        /// <param name="getSquashedEntityProcessor">
-        /// An instance of type <see cref="IGetSquashedEntityProcessor" />.
+        /// <param name="getSquashedEntityProcessorFactory">
+        /// An instance of type
+        /// <see cref="IGetSquashedEntityProcessorFactory" />.
+        /// </param>
+        /// <param name="loggerWrapperFactory">
+        /// An instance of type <see cref="ILoggerWrapperFactory" />.
         /// </param>
         public GetSquashedEntity(
-            IGetSquashedEntityProcessor getSquashedEntityProcessor)
+            IGetSquashedEntityProcessorFactory getSquashedEntityProcessorFactory,
+            ILoggerWrapperFactory loggerWrapperFactory)
         {
-            this.getSquashedEntityProcessor = getSquashedEntityProcessor;
+            this.getSquashedEntityProcessorFactory = getSquashedEntityProcessorFactory;
+            this.loggerWrapperFactory = loggerWrapperFactory;
         }
 
         /// <summary>
@@ -63,14 +73,20 @@ namespace Dfe.Spi.EntitySquasher.Functions
                 getSquashedEntityRequestStr = streamReader.ReadToEnd();
             }
 
-            logger.LogDebug($"Body: {getSquashedEntityRequestStr}");
-
             GetSquashedEntityRequest getSquashedEntityRequest =
                 JsonConvert.DeserializeObject<GetSquashedEntityRequest>(
                     getSquashedEntityRequestStr);
 
+            ILoggerWrapper loggerWrapper = this.loggerWrapperFactory.Create(
+                logger,
+                getSquashedEntityRequest);
+
+            IGetSquashedEntityProcessor getSquashedEntityProcessor =
+                this.getSquashedEntityProcessorFactory.Create(
+                    loggerWrapper);
+
             GetSquashedEntityResponse getSquashedEntityResponse =
-                this.getSquashedEntityProcessor.GetSquashedEntity(
+                getSquashedEntityProcessor.GetSquashedEntity(
                     getSquashedEntityRequest);
 
             ModelsBase modelsBase = getSquashedEntityResponse.ModelsBase;

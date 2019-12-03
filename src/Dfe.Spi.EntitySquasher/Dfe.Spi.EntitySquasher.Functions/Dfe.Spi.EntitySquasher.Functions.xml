@@ -1,0 +1,48 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Dfe.Spi.EntitySquasher.FunctionApp</name>
+    </assembly>
+    <members>
+        <member name="T:Dfe.Spi.EntitySquasher.FunctionApp.Functions.GetSquashedEntity">
+            <summary>
+            Entry class for the <c>get-squashed-entity</c> function.
+            </summary>
+        </member>
+        <member name="M:Dfe.Spi.EntitySquasher.FunctionApp.Functions.GetSquashedEntity.#ctor(Dfe.Spi.EntitySquasher.Application.Definitions.Factories.IGetSquashedEntityProcessorFactory,Dfe.Spi.Common.Logging.Definitions.Factories.ILoggerWrapperFactory)">
+            <summary>
+            Initialises a new instance of the <see cref="T:Dfe.Spi.EntitySquasher.FunctionApp.Functions.GetSquashedEntity" />
+            class.
+            </summary>
+            <param name="getSquashedEntityProcessorFactory">
+            An instance of type
+            <see cref="T:Dfe.Spi.EntitySquasher.Application.Definitions.Factories.IGetSquashedEntityProcessorFactory" />.
+            </param>
+            <param name="loggerWrapperFactory">
+            An instance of type <see cref="T:Dfe.Spi.Common.Logging.Definitions.Factories.ILoggerWrapperFactory" />.
+            </param>
+        </member>
+        <member name="M:Dfe.Spi.EntitySquasher.FunctionApp.Functions.GetSquashedEntity.Run(Microsoft.AspNetCore.Http.HttpRequest,Microsoft.Extensions.Logging.ILogger)">
+            <summary>
+            Entry method for the <c>get-squashed-entity</c> function.
+            </summary>
+            <param name="httpRequest">
+            An instance of <see cref="T:Microsoft.AspNetCore.Http.HttpContext" />.
+            </param>
+            <param name="logger">
+            An instance of type <see cref="T:Microsoft.Extensions.Logging.ILogger" />.
+            </param>
+            <returns>
+            An instance of type <see cref="T:Microsoft.AspNetCore.Mvc.IActionResult" />.
+            </returns>
+        </member>
+        <member name="T:Dfe.Spi.EntitySquasher.FunctionApp.Startup">
+            <summary>
+            Functions startup class.
+            </summary>
+        </member>
+        <member name="M:Dfe.Spi.EntitySquasher.FunctionApp.Startup.Configure(Microsoft.Azure.Functions.Extensions.DependencyInjection.IFunctionsHostBuilder)">
+            <inheritdoc />
+        </member>
+    </members>
+</doc>
