@@ -20,5 +20,5 @@ steps:
     displayName: 'Build Function App'
     inputs:
       command: 'build'
-      projects: 'src/Dfe.Spi.EntitySquasher/Dfe.Spi.EntitySquasher.Functions/Dfe.Spi.EntitySquasher.Functions.csproj'
+      projects: 'src/Dfe.Spi.EntitySquasher/Dfe.Spi.EntitySquasher.FunctionApp/Dfe.Spi.EntitySquasher.FunctionApp.csproj'
       arguments: '--configuration Release --output $(Build.BinariesDirectory) --no-restore'
