@@ -264,5 +264,4 @@ __pycache__/
 local.settings.json
 
 # XML Docs
-Dfe.Spi.EntitySquasher.FunctionApp.xml
-Dfe.Spi.EntitySquasher.Application.xml
+Dfe.Spi.EntitySquasher.*.xml
