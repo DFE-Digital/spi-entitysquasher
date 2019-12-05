@@ -1,10 +1,14 @@
 ﻿namespace Dfe.Spi.EntitySquasher.FunctionApp
 {
     using System;
-    using Dfe.Spi.Common.Logging.Definitions.Factories;
-    using Dfe.Spi.Common.Logging.Factories;
-    using Dfe.Spi.EntitySquasher.Application.Definitions.Factories;
-    using Dfe.Spi.EntitySquasher.Application.Factories;
+    using Dfe.Spi.Common.Logging;
+    using Dfe.Spi.Common.Logging.Definitions;
+    using Dfe.Spi.EntitySquasher.Application;
+    using Dfe.Spi.EntitySquasher.Application.Definitions;
+    using Dfe.Spi.EntitySquasher.Application.Definitions.SettingsProviders;
+    using Dfe.Spi.EntitySquasher.AzureStorage;
+    using Dfe.Spi.EntitySquasher.Domain.Definitions;
+    using Dfe.Spi.EntitySquasher.FunctionApp.SettingsProviders;
     using Microsoft.Azure.Functions.Extensions.DependencyInjection;
     using Microsoft.Azure.WebJobs.Logging;
     using Microsoft.Extensions.DependencyInjection;
@@ -27,8 +31,10 @@
             functionsHostBuilder
                 .Services
                 .AddScoped<ILogger>(this.CreateILogger)
-                .AddScoped<ILoggerWrapperFactory, LoggerWrapperFactory>()
-                .AddSingleton<IGetSquashedEntityProcessorFactory, GetSquashedEntityProcessorFactory>();
+                .AddScoped<ILoggerWrapper, LoggerWrapper>()
+                .AddScoped<IGetSquashedEntityProcessorSettingsProvider, GetSquashedEntityProcessorSettingsProvider>()
+                .AddScoped<IGetSquashedEntityProcessor, GetSquashedEntityProcessor>()
+                .AddScoped<IAlgorithmDeclarationConfigurationFileManager, AlgorithmDeclarationConfigurationFileManager>();
         }
 
         private ILogger CreateILogger(IServiceProvider serviceProvider)

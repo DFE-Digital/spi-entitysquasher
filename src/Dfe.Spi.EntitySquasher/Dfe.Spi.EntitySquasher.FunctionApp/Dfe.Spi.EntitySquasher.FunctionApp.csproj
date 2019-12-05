@@ -7,9 +7,12 @@
   
   <ItemGroup>
     <!-- Dfe.Spi.* -->
-    <PackageReference Include="Dfe.Spi.Common.Logging" Version="1.0.1" PrivateAssets="All" />
+    <PackageReference Include="Dfe.Spi.Common.Logging" Version="1.0.3" PrivateAssets="All" />
     <PackageReference Include="Dfe.Spi.Common.Models" Version="1.0.0" PrivateAssets="All" />
     <PackageReference Include="Dfe.Spi.Models" Version="1.0.0" PrivateAssets="All" />
+
+    <!-- Other -->
+    <PackageReference Include="Meridian.MeaningfulToString" Version="1.0.4" PrivateAssets="All" />
 
     <!-- Microsoft -->
     <PackageReference Include="Microsoft.Azure.Functions.Extensions" Version="1.0.0" PrivateAssets="All" />
@@ -34,6 +37,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Dfe.Spi.EntitySquasher.Application\Dfe.Spi.EntitySquasher.Application.csproj" />
+    <ProjectReference Include="..\Dfe.Spi.EntitySquasher.AzureStorage\Dfe.Spi.EntitySquasher.AzureStorage.csproj" />
   </ItemGroup>
   
   <ItemGroup>

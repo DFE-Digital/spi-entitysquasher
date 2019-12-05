@@ -3,16 +3,13 @@ namespace Dfe.Spi.EntitySquasher.FunctionApp.Functions
     using System;
     using System.IO;
     using Dfe.Spi.Common.Logging.Definitions;
-    using Dfe.Spi.Common.Logging.Definitions.Factories;
     using Dfe.Spi.EntitySquasher.Application.Definitions;
-    using Dfe.Spi.EntitySquasher.Application.Definitions.Factories;
     using Dfe.Spi.EntitySquasher.Application.Models;
     using Dfe.Spi.Models;
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.Azure.WebJobs;
     using Microsoft.Azure.WebJobs.Extensions.Http;
-    using Microsoft.Extensions.Logging;
     using Newtonsoft.Json;
 
     /// <summary>
@@ -20,26 +17,25 @@ namespace Dfe.Spi.EntitySquasher.FunctionApp.Functions
     /// </summary>
     public class GetSquashedEntity
     {
-        private readonly IGetSquashedEntityProcessorFactory getSquashedEntityProcessorFactory;
-        private readonly ILoggerWrapperFactory loggerWrapperFactory;
+        private readonly IGetSquashedEntityProcessor getSquashedEntityProcessor;
+        private readonly ILoggerWrapper loggerWrapper;
 
         /// <summary>
         /// Initialises a new instance of the <see cref="GetSquashedEntity" />
         /// class.
         /// </summary>
-        /// <param name="getSquashedEntityProcessorFactory">
-        /// An instance of type
-        /// <see cref="IGetSquashedEntityProcessorFactory" />.
+        /// <param name="getSquashedEntityProcessor">
+        /// An instance of type <see cref="IGetSquashedEntityProcessor" />.
         /// </param>
-        /// <param name="loggerWrapperFactory">
-        /// An instance of type <see cref="ILoggerWrapperFactory" />.
+        /// <param name="loggerWrapper">
+        /// An instance of type <see cref="ILoggerWrapper" />.
         /// </param>
         public GetSquashedEntity(
-            IGetSquashedEntityProcessorFactory getSquashedEntityProcessorFactory,
-            ILoggerWrapperFactory loggerWrapperFactory)
+            IGetSquashedEntityProcessor getSquashedEntityProcessor,
+            ILoggerWrapper loggerWrapper)
         {
-            this.getSquashedEntityProcessorFactory = getSquashedEntityProcessorFactory;
-            this.loggerWrapperFactory = loggerWrapperFactory;
+            this.getSquashedEntityProcessor = getSquashedEntityProcessor;
+            this.loggerWrapper = loggerWrapper;
         }
 
         /// <summary>
@@ -63,6 +59,9 @@ namespace Dfe.Spi.EntitySquasher.FunctionApp.Functions
                 throw new ArgumentNullException(nameof(httpRequest));
             }
 
+            // Set the context of the logger.
+            this.loggerWrapper.SetContext(httpRequest.Headers);
+
             string getSquashedEntityRequestStr = null;
             using (StreamReader streamReader = new StreamReader(httpRequest.Body))
             {
@@ -73,15 +72,8 @@ namespace Dfe.Spi.EntitySquasher.FunctionApp.Functions
                 JsonConvert.DeserializeObject<GetSquashedEntityRequest>(
                     getSquashedEntityRequestStr);
 
-            ILoggerWrapper loggerWrapper = this.loggerWrapperFactory.Create(
-                getSquashedEntityRequest);
-
-            IGetSquashedEntityProcessor getSquashedEntityProcessor =
-                this.getSquashedEntityProcessorFactory.Create(
-                    loggerWrapper);
-
             GetSquashedEntityResponse getSquashedEntityResponse =
-                getSquashedEntityProcessor.GetSquashedEntity(
+                this.getSquashedEntityProcessor.GetSquashedEntity(
                     getSquashedEntityRequest);
 
             ModelsBase modelsBase = getSquashedEntityResponse.ModelsBase;
