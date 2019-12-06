@@ -1,4 +1,4 @@
-﻿namespace Dfe.Spi.EntitySquasher.Domain.Definitions
+﻿namespace Dfe.Spi.EntitySquasher.Application.Definitions
 {
     using System.Threading.Tasks;
     using Dfe.Spi.EntitySquasher.Domain.Models.Acdf;
