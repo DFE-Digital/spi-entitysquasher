@@ -11,18 +11,18 @@
     {
         /// <summary>
         /// Returns a <see cref="AlgorithmConfigurationDeclarationFile" /> for
-        /// a given <paramref name="algoritm" />.
+        /// a given <paramref name="algorithm" />.
         /// </summary>
-        /// <param name="algoritm">
+        /// <param name="algorithm">
         /// The algorithm.
         /// </param>
         /// <returns>
         /// An instance of
         /// <see cref="AlgorithmConfigurationDeclarationFile" />, unless not
-        /// found for the given <paramref name="algoritm" />, in which case
+        /// found for the given <paramref name="algorithm" />, in which case
         /// null.
         /// </returns>
         Task<AlgorithmConfigurationDeclarationFile> GetAlgorithmConfigurationDeclarationFileAsync(
-            string algoritm);
+            string algorithm);
     }
 }
