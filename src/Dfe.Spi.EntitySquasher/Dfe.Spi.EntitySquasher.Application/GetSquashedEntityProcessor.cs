@@ -7,14 +7,14 @@
     using Dfe.Spi.EntitySquasher.Application.Definitions.SettingsProviders;
     using Dfe.Spi.EntitySquasher.Application.Models;
     using Dfe.Spi.EntitySquasher.Domain.Definitions;
-    using Dfe.Spi.EntitySquasher.Domain.Models.Adcf;
+    using Dfe.Spi.EntitySquasher.Domain.Models.Acdf;
 
     /// <summary>
     /// Implements <see cref="IGetSquashedEntityProcessor" />.
     /// </summary>
     public class GetSquashedEntityProcessor : IGetSquashedEntityProcessor
     {
-        private readonly IAlgorithmDeclarationConfigurationFileManager algorithmDeclarationConfigurationFileManager;
+        private readonly IAlgorithmConfigurationDeclarationFileManager algorithmConfigurationDeclarationFileManager;
         private readonly IGetSquashedEntityProcessorSettingsProvider getSquashedEntityProcessorSettingsProvider;
         private readonly ILoggerWrapper loggerWrapper;
 
@@ -22,9 +22,9 @@
         /// Initialises a new instance of the
         /// <see cref="GetSquashedEntityProcessor" /> class.
         /// </summary>
-        /// <param name="algorithmDeclarationConfigurationFileManager">
+        /// <param name="algorithmConfigurationDeclarationFileManager">
         /// An instance of type
-        /// <see cref="IAlgorithmDeclarationConfigurationFileManager" />.
+        /// <see cref="IAlgorithmConfigurationDeclarationFileManager" />.
         /// </param>
         /// <param name="getSquashedEntityProcessorSettingsProvider">
         /// An instance of type
@@ -34,11 +34,11 @@
         /// An instance of type <see cref="ILoggerWrapper" />.
         /// </param>
         public GetSquashedEntityProcessor(
-            IAlgorithmDeclarationConfigurationFileManager algorithmDeclarationConfigurationFileManager,
+            IAlgorithmConfigurationDeclarationFileManager algorithmConfigurationDeclarationFileManager,
             IGetSquashedEntityProcessorSettingsProvider getSquashedEntityProcessorSettingsProvider,
             ILoggerWrapper loggerWrapper)
         {
-            this.algorithmDeclarationConfigurationFileManager = algorithmDeclarationConfigurationFileManager;
+            this.algorithmConfigurationDeclarationFileManager = algorithmConfigurationDeclarationFileManager;
             this.getSquashedEntityProcessorSettingsProvider = getSquashedEntityProcessorSettingsProvider;
             this.loggerWrapper = loggerWrapper;
         }
@@ -61,21 +61,21 @@
 
             this.loggerWrapper.Debug(
                 $"Fetching " +
-                $"{nameof(AlgorithmDeclarationConfigurationFile)}...");
+                $"{nameof(AlgorithmConfigurationDeclarationFile)}...");
 
-            AlgorithmDeclarationConfigurationFile algorithmDeclarationConfigurationFile =
-                await this.algorithmDeclarationConfigurationFileManager.GetAlgorithmDeclarationConfigurationFileAsync(
+            AlgorithmConfigurationDeclarationFile algorithmConfigurationDeclarationFile =
+                await this.algorithmConfigurationDeclarationFileManager.GetAlgorithmConfigurationDeclarationFileAsync(
                     algorithm)
                     .ConfigureAwait(false);
 
             this.loggerWrapper.Info(
-                $"{nameof(algorithmDeclarationConfigurationFile)} = " +
-                $"{algorithmDeclarationConfigurationFile}");
+                $"{nameof(algorithmConfigurationDeclarationFile)} = " +
+                $"{algorithmConfigurationDeclarationFile}");
 
             // TODO:
             // 1) Pull from the requested adapters and;
             // 2) Squash the entities together according to the rules outlined
-            //    in the ADCF.
+            //    in the ACDF.
             return toReturn;
         }
 

@@ -1,4 +1,4 @@
-﻿namespace Dfe.Spi.EntitySquasher.Domain.Models.Adcf
+﻿namespace Dfe.Spi.EntitySquasher.Domain.Models.Acdf
 {
     /// <summary>
     /// The serialised form of a field setting.

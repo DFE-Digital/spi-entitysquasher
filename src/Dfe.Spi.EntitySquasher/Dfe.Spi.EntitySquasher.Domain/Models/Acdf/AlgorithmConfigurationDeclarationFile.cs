@@ -1,11 +1,11 @@
-﻿namespace Dfe.Spi.EntitySquasher.Domain.Models.Adcf
+﻿namespace Dfe.Spi.EntitySquasher.Domain.Models.Acdf
 {
     using System.Collections.Generic;
 
     /// <summary>
-    /// The serialised form of the algorithm declaration configuration file.
+    /// The serialised form of the Algorithm Configuration Declaration File.
     /// </summary>
-    public class AlgorithmDeclarationConfigurationFile : AcdfBase
+    public class AlgorithmConfigurationDeclarationFile : AcdfBase
     {
         /// <summary>
         /// Gets or sets a set of <see cref="Entity" /> instances.

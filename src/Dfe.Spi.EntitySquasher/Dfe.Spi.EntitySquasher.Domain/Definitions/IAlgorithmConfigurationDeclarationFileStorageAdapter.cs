@@ -1,17 +1,17 @@
 ﻿namespace Dfe.Spi.EntitySquasher.Domain.Definitions
 {
     using System.Threading.Tasks;
-    using Dfe.Spi.EntitySquasher.Domain.Models.Adcf;
+    using Dfe.Spi.EntitySquasher.Domain.Models.Acdf;
 
     /// <summary>
     /// Describes the operations of the
-    /// <see cref="AlgorithmDeclarationConfigurationFile" /> storage adapter.
+    /// <see cref="AlgorithmConfigurationDeclarationFile" /> storage adapter.
     /// </summary>
-    public interface IAlgorithmDeclarationConfigurationFileStorageAdapter
+    public interface IAlgorithmConfigurationDeclarationFileStorageAdapter
     {
         /// <summary>
         /// Gets from storage the specified
-        /// <see cref="AlgorithmDeclarationConfigurationFile" />, based on the
+        /// <see cref="AlgorithmConfigurationDeclarationFile" />, based on the
         /// supplied <paramref name="algorithm" />.
         /// </summary>
         /// <param name="algorithm">
@@ -19,9 +19,9 @@
         /// </param>
         /// <returns>
         /// An instance of
-        /// <see cref="AlgorithmDeclarationConfigurationFile" />.
+        /// <see cref="AlgorithmConfigurationDeclarationFile" />.
         /// </returns>
-        Task<AlgorithmDeclarationConfigurationFile> GetAlgorithmDeclarationConfigurationFileAsync(
+        Task<AlgorithmConfigurationDeclarationFile> GetAlgorithmConfigurationDeclarationFileAsync(
             string algorithm);
     }
 }

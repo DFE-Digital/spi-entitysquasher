@@ -2,13 +2,13 @@
 {
     /// <summary>
     /// Describes the operations of the
-    /// <see cref="IAlgorithmDeclarationConfigurationFileStorageAdapter" />
+    /// <see cref="IAlgorithmConfigurationDeclarationFileStorageAdapter" />
     /// settings provider.
     /// </summary>
-    public interface IAlgorithmDeclarationConfigurationFileStorageAdapterSettingsProvider
+    public interface IAlgorithmConfigurationDeclarationFileStorageAdapterSettingsProvider
     {
         /// <summary>
-        /// Gets the filename format of the Algorithm Declaration Configuration
+        /// Gets the filename format of the Algorithm Configuration Declaration
         /// Files.
         /// </summary>
         string AcdfFilenameFormat
@@ -18,19 +18,19 @@
 
         /// <summary>
         /// Gets the connection string to the storage account hosting the
-        /// container which holds the Algorithm Declaration Configuration
+        /// container which holds the Algorithm Configuration Declaration
         /// Files.
         /// </summary>
-        string AdcfStorageConnectionString
+        string AcdfStorageConnectionString
         {
             get;
         }
 
         /// <summary>
-        /// Gets the name of the container holding the Algorithm Declaration
-        /// Configuration Files.
+        /// Gets the name of the container holding the Algorithm Configuration
+        /// Declaration Files.
         /// </summary>
-        string AdcfStorageContainerName
+        string AcdfStorageContainerName
         {
             get;
         }

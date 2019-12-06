@@ -1,16 +1,16 @@
 ﻿namespace Dfe.Spi.EntitySquasher.Domain.Definitions
 {
     using System.Threading.Tasks;
-    using Dfe.Spi.EntitySquasher.Domain.Models.Adcf;
+    using Dfe.Spi.EntitySquasher.Domain.Models.Acdf;
 
     /// <summary>
     /// Describes the operations of the
-    /// <see cref="AlgorithmDeclarationConfigurationFile" /> manager.
+    /// <see cref="AlgorithmConfigurationDeclarationFile" /> manager.
     /// </summary>
-    public interface IAlgorithmDeclarationConfigurationFileManager
+    public interface IAlgorithmConfigurationDeclarationFileManager
     {
         /// <summary>
-        /// Returns a <see cref="AlgorithmDeclarationConfigurationFile" /> for
+        /// Returns a <see cref="AlgorithmConfigurationDeclarationFile" /> for
         /// a given <paramref name="algoritm" />.
         /// </summary>
         /// <param name="algoritm">
@@ -18,11 +18,11 @@
         /// </param>
         /// <returns>
         /// An instance of
-        /// <see cref="AlgorithmDeclarationConfigurationFile" />, unless not
+        /// <see cref="AlgorithmConfigurationDeclarationFile" />, unless not
         /// found for the given <paramref name="algoritm" />, in which case
         /// null.
         /// </returns>
-        Task<AlgorithmDeclarationConfigurationFile> GetAlgorithmDeclarationConfigurationFileAsync(
+        Task<AlgorithmConfigurationDeclarationFile> GetAlgorithmConfigurationDeclarationFileAsync(
             string algoritm);
     }
 }

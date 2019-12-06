@@ -38,8 +38,8 @@
 
             serviceCollection
                 .AddScoped<IGetSquashedEntityProcessor, GetSquashedEntityProcessor>()
-                .AddScoped<IAlgorithmDeclarationConfigurationFileStorageAdapter, AlgorithmDeclarationConfigurationFileStorageAdapter>()
-                .AddScoped<IAlgorithmDeclarationConfigurationFileManager, AlgorithmDeclarationConfigurationFileManager>();
+                .AddScoped<IAlgorithmConfigurationDeclarationFileStorageAdapter, AlgorithmConfigurationDeclarationFileStorageAdapter>()
+                .AddScoped<IAlgorithmConfigurationDeclarationFileManager, AlgorithmConfigurationDeclarationFileManager>();
         }
 
         private static void AddLogging(IServiceCollection serviceCollection)
@@ -54,7 +54,7 @@
         {
             serviceCollection
                 .AddSingleton<IGetSquashedEntityProcessorSettingsProvider, GetSquashedEntityProcessorSettingsProvider>()
-                .AddSingleton<IAlgorithmDeclarationConfigurationFileStorageAdapterSettingsProvider, AlgorithmDeclarationConfigurationFileStorageAdapterSettingsProvider>();
+                .AddSingleton<IAlgorithmConfigurationDeclarationFileStorageAdapterSettingsProvider, AlgorithmConfigurationDeclarationFileStorageAdapterSettingsProvider>();
         }
 
         private static ILogger CreateILogger(IServiceProvider serviceProvider)

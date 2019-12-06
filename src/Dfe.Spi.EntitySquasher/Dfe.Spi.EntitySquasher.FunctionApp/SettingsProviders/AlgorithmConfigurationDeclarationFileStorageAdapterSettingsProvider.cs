@@ -5,11 +5,11 @@
 
     /// <summary>
     /// Initialises a new instance of the
-    /// <see cref="AlgorithmDeclarationConfigurationFileStorageAdapterSettingsProvider" />
+    /// <see cref="AlgorithmConfigurationDeclarationFileStorageAdapterSettingsProvider" />
     /// class.
     /// </summary>
-    public class AlgorithmDeclarationConfigurationFileStorageAdapterSettingsProvider
-        : IAlgorithmDeclarationConfigurationFileStorageAdapterSettingsProvider
+    public class AlgorithmConfigurationDeclarationFileStorageAdapterSettingsProvider
+        : IAlgorithmConfigurationDeclarationFileStorageAdapterSettingsProvider
     {
         /// <inheritdoc />
         public string AcdfFilenameFormat
@@ -24,24 +24,24 @@
         }
 
         /// <inheritdoc />
-        public string AdcfStorageConnectionString
+        public string AcdfStorageConnectionString
         {
             get
             {
                 string toReturn = Environment.GetEnvironmentVariable(
-                    nameof(this.AdcfStorageConnectionString));
+                    nameof(this.AcdfStorageConnectionString));
 
                 return toReturn;
             }
         }
 
         /// <inheritdoc />
-        public string AdcfStorageContainerName
+        public string AcdfStorageContainerName
         {
             get
             {
                 string toReturn = Environment.GetEnvironmentVariable(
-                    nameof(this.AdcfStorageContainerName));
+                    nameof(this.AcdfStorageContainerName));
 
                 return toReturn;
             }

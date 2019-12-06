@@ -9,67 +9,67 @@
     using Dfe.Spi.Common.Logging.Definitions;
     using Dfe.Spi.EntitySquasher.Domain.Definitions;
     using Dfe.Spi.EntitySquasher.Domain.Definitions.SettingsProviders;
-    using Dfe.Spi.EntitySquasher.Domain.Models.Adcf;
+    using Dfe.Spi.EntitySquasher.Domain.Models.Acdf;
     using Microsoft.WindowsAzure.Storage;
     using Microsoft.WindowsAzure.Storage.Blob;
     using Newtonsoft.Json;
 
     /// <summary>
     /// Implements
-    /// <see cref="IAlgorithmDeclarationConfigurationFileStorageAdapter" />.
+    /// <see cref="IAlgorithmConfigurationDeclarationFileStorageAdapter" />.
     /// </summary>
-    public class AlgorithmDeclarationConfigurationFileStorageAdapter :
-        IAlgorithmDeclarationConfigurationFileStorageAdapter
+    public class AlgorithmConfigurationDeclarationFileStorageAdapter :
+        IAlgorithmConfigurationDeclarationFileStorageAdapter
     {
         private readonly ILoggerWrapper loggerWrapper;
 
         private readonly CloudBlobClient cloudBlobClient;
         private readonly string acdfFilenameFormat;
-        private readonly string adcfStorageContainerName;
+        private readonly string acdfStorageContainerName;
 
         /// <summary>
         /// Initialises a new instance of the
-        /// <see cref="AlgorithmDeclarationConfigurationFileStorageAdapter" />
+        /// <see cref="AlgorithmConfigurationDeclarationFileStorageAdapter" />
         /// class.
         /// </summary>
-        /// <param name="algorithmDeclarationConfigurationFileStorageAdapterSettingsProvider">
+        /// <param name="algorithmConfigurationDeclarationFileStorageAdapterSettingsProvider">
         /// An instance of type
-        /// <see cref="IAlgorithmDeclarationConfigurationFileStorageAdapterSettingsProvider" />.
+        /// <see cref="IAlgorithmConfigurationDeclarationFileStorageAdapterSettingsProvider" />.
         /// </param>
         /// <param name="loggerWrapper">
         /// An instance of type <see cref="ILoggerWrapper" />.
         /// </param>
-        public AlgorithmDeclarationConfigurationFileStorageAdapter(
-            IAlgorithmDeclarationConfigurationFileStorageAdapterSettingsProvider algorithmDeclarationConfigurationFileStorageAdapterSettingsProvider,
+        public AlgorithmConfigurationDeclarationFileStorageAdapter(
+            IAlgorithmConfigurationDeclarationFileStorageAdapterSettingsProvider algorithmConfigurationDeclarationFileStorageAdapterSettingsProvider,
             ILoggerWrapper loggerWrapper)
         {
-            if (algorithmDeclarationConfigurationFileStorageAdapterSettingsProvider == null)
+            if (algorithmConfigurationDeclarationFileStorageAdapterSettingsProvider == null)
             {
                 throw new ArgumentNullException(
-                    nameof(algorithmDeclarationConfigurationFileStorageAdapterSettingsProvider));
+                    nameof(algorithmConfigurationDeclarationFileStorageAdapterSettingsProvider));
             }
 
             this.loggerWrapper = loggerWrapper;
 
-            string adcfStorageConnectionString =
-                algorithmDeclarationConfigurationFileStorageAdapterSettingsProvider.AdcfStorageConnectionString;
+            string acdfStorageConnectionString =
+                algorithmConfigurationDeclarationFileStorageAdapterSettingsProvider.AcdfStorageConnectionString;
 
             CloudStorageAccount cloudStorageAccount =
-                CloudStorageAccount.Parse(adcfStorageConnectionString);
+                CloudStorageAccount.Parse(acdfStorageConnectionString);
 
             this.cloudBlobClient = cloudStorageAccount.CreateCloudBlobClient();
 
             this.acdfFilenameFormat =
-                algorithmDeclarationConfigurationFileStorageAdapterSettingsProvider.AcdfFilenameFormat;
-            this.adcfStorageContainerName =
-                algorithmDeclarationConfigurationFileStorageAdapterSettingsProvider.AdcfStorageContainerName;
+                algorithmConfigurationDeclarationFileStorageAdapterSettingsProvider.AcdfFilenameFormat;
+            this.acdfStorageContainerName =
+                algorithmConfigurationDeclarationFileStorageAdapterSettingsProvider.AcdfStorageContainerName;
         }
 
         /// <inheritdoc />
-        public async Task<AlgorithmDeclarationConfigurationFile> GetAlgorithmDeclarationConfigurationFileAsync(
+        public async Task<AlgorithmConfigurationDeclarationFile> GetAlgorithmConfigurationDeclarationFileAsync(
             string algorithm)
         {
-            AlgorithmDeclarationConfigurationFile toReturn = null;
+            AlgorithmConfigurationDeclarationFile toReturn = null;
 
             string filename = string.Format(
                 CultureInfo.InvariantCulture,
@@ -77,17 +77,17 @@
                 algorithm);
 
             IListBlobItem listBlobItem =
-                await this.GetAlgorithmDeclarationConfigurationFileReferenceAsync(
+                await this.GetAlgorithmConfigurationDeclarationFileReferenceAsync(
                     filename)
                 .ConfigureAwait(false);
 
-            string container = this.adcfStorageContainerName;
+            string container = this.acdfStorageContainerName;
 
             if (listBlobItem == null)
             {
                 throw new FileNotFoundException(
                     $"Could not find the " +
-                    $"{nameof(AlgorithmDeclarationConfigurationFile)} with " +
+                    $"{nameof(AlgorithmConfigurationDeclarationFile)} with " +
                     $"filename \"{filename}\" in the root of container " +
                     $"\"{container}\" for the configured connection string!");
             }
@@ -117,7 +117,7 @@
                 }
             }
 
-            toReturn = JsonConvert.DeserializeObject<AlgorithmDeclarationConfigurationFile>(
+            toReturn = JsonConvert.DeserializeObject<AlgorithmConfigurationDeclarationFile>(
                 fileContentRaw);
 
             this.loggerWrapper.Info($"File deserialised: {toReturn}.");
@@ -140,7 +140,7 @@
             return toReturn;
         }
 
-        private async Task<IListBlobItem> GetAlgorithmDeclarationConfigurationFileReferenceAsync(
+        private async Task<IListBlobItem> GetAlgorithmConfigurationDeclarationFileReferenceAsync(
             string filename)
         {
             IListBlobItem toReturn = null;
@@ -148,7 +148,7 @@
             CloudBlobContainer cloudBlobContainer =
                 await this.GetContainerAsync().ConfigureAwait(false);
 
-            string container = this.adcfStorageContainerName;
+            string container = this.acdfStorageContainerName;
 
             this.loggerWrapper.Debug(
                 $"Listing all the files in the root of \"{container}\"...");
@@ -173,7 +173,7 @@
         {
             CloudBlobContainer toReturn = null;
 
-            string container = this.adcfStorageContainerName;
+            string container = this.acdfStorageContainerName;
 
             this.loggerWrapper.Debug(
                 $"Getting container reference for \"{container}\"...");

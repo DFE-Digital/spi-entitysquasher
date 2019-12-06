@@ -1,4 +1,4 @@
-﻿namespace Dfe.Spi.EntitySquasher.Domain.Models.Adcf
+﻿namespace Dfe.Spi.EntitySquasher.Domain.Models.Acdf
 {
     using System.Collections.Generic;
 
