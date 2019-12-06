@@ -63,15 +63,37 @@ namespace Dfe.Spi.EntitySquasher.FunctionApp.Functions
             // Set the context of the logger.
             this.loggerWrapper.SetContext(httpRequest.Headers);
 
-            string getSquashedEntityRequestStr = null;
-            using (StreamReader streamReader = new StreamReader(httpRequest.Body))
+            GetSquashedEntityRequest getSquashedEntityRequest =
+                this.ParseRequest(httpRequest);
+
+            if (getSquashedEntityRequest != null)
             {
-                getSquashedEntityRequestStr = streamReader.ReadToEnd();
+                this.loggerWrapper.Debug(
+                    $"Invoking {nameof(IGetSquashedEntityProcessor)}...");
+
+                toReturn = await this.ProcessWellFormedRequestAsync(
+                    getSquashedEntityRequest)
+                    .ConfigureAwait(false);
+            }
+            else
+            {
+                int statusCode = StatusCodes.Status400BadRequest;
+
+                this.loggerWrapper.Warning(
+                    $"The {nameof(HttpRequest)} made had no body. " +
+                    $"{nameof(statusCode)} {statusCode} will be returned.");
+
+                // No body supplied - return 400 to reflect this.
+                toReturn = new StatusCodeResult(statusCode);
             }
 
-            GetSquashedEntityRequest getSquashedEntityRequest =
-                JsonConvert.DeserializeObject<GetSquashedEntityRequest>(
-                    getSquashedEntityRequestStr);
+            return toReturn;
+        }
+
+        private async Task<IActionResult> ProcessWellFormedRequestAsync(
+            GetSquashedEntityRequest getSquashedEntityRequest)
+        {
+            IActionResult toReturn = null;
 
             try
             {
@@ -80,16 +102,52 @@ namespace Dfe.Spi.EntitySquasher.FunctionApp.Functions
                         getSquashedEntityRequest)
                         .ConfigureAwait(false);
 
+                this.loggerWrapper.Info(
+                    $"{nameof(IGetSquashedEntityProcessor)} invoked with " +
+                    $"success.");
+
                 ModelsBase modelsBase = getSquashedEntityResponse.ModelsBase;
+
+                this.loggerWrapper.Info(
+                    $"Returning {nameof(modelsBase)}: {modelsBase}.");
 
                 toReturn = new JsonResult(modelsBase);
             }
             catch (FileNotFoundException)
             {
-                // TODO: Return a different response code to indicate that
-                //       the ACDF couldn't be found - 404?
-                throw;
+                int statusCode = StatusCodes.Status404NotFound;
+
+                this.loggerWrapper.Warning(
+                    $"The processor threw a " +
+                    $"{nameof(FileNotFoundException)}. {nameof(statusCode)} " +
+                    $"{statusCode} will be returned.");
+
+                // An ACDF could not be found for the specified algorithm.
+                // Return 404 to reflect this.
+                toReturn = new StatusCodeResult(statusCode);
             }
+
+            return toReturn;
+        }
+
+        private GetSquashedEntityRequest ParseRequest(HttpRequest httpRequest)
+        {
+            GetSquashedEntityRequest toReturn = null;
+
+            string getSquashedEntityRequestStr = null;
+            using (StreamReader streamReader = new StreamReader(httpRequest.Body))
+            {
+                getSquashedEntityRequestStr = streamReader.ReadToEnd();
+            }
+
+            this.loggerWrapper.Debug(
+                $"Body of request read, as a string value: " +
+                $"\"{getSquashedEntityRequestStr}\". Deserialising into a " +
+                $"{nameof(GetSquashedEntityRequest)} instance...");
+
+            toReturn =
+                JsonConvert.DeserializeObject<GetSquashedEntityRequest>(
+                    getSquashedEntityRequestStr);
 
             return toReturn;
         }

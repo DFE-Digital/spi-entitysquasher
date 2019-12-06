@@ -14,7 +14,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Build", "Build", "{08842A01
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dfe.Spi.EntitySquasher.Domain", "Dfe.Spi.EntitySquasher.Domain\Dfe.Spi.EntitySquasher.Domain.csproj", "{07772D26-4212-4699-8227-70A7823046E9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dfe.Spi.EntitySquasher.AzureStorage", "Dfe.Spi.EntitySquasher.AzureStorage\Dfe.Spi.EntitySquasher.AzureStorage.csproj", "{B0D0C05B-92FE-4F2E-9AB8-A0AB1BFECDEE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dfe.Spi.EntitySquasher.AzureStorage", "Dfe.Spi.EntitySquasher.AzureStorage\Dfe.Spi.EntitySquasher.AzureStorage.csproj", "{B0D0C05B-92FE-4F2E-9AB8-A0AB1BFECDEE}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{7049BA93-BB9C-4739-8013-F59455D83173}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dfe.Spi.EntitySquasher.FunctionApp.UnitTests", "Dfe.Spi.EntitySquasher.FunctionApp.UnitTests\Dfe.Spi.EntitySquasher.FunctionApp.UnitTests.csproj", "{6ADBFD54-51E8-40B2-854C-A3C0DE07E34C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -38,9 +42,16 @@ Global
 		{B0D0C05B-92FE-4F2E-9AB8-A0AB1BFECDEE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B0D0C05B-92FE-4F2E-9AB8-A0AB1BFECDEE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B0D0C05B-92FE-4F2E-9AB8-A0AB1BFECDEE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6ADBFD54-51E8-40B2-854C-A3C0DE07E34C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6ADBFD54-51E8-40B2-854C-A3C0DE07E34C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6ADBFD54-51E8-40B2-854C-A3C0DE07E34C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6ADBFD54-51E8-40B2-854C-A3C0DE07E34C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{6ADBFD54-51E8-40B2-854C-A3C0DE07E34C} = {7049BA93-BB9C-4739-8013-F59455D83173}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {356C00E0-904D-48D4-B07F-85915B12516D}

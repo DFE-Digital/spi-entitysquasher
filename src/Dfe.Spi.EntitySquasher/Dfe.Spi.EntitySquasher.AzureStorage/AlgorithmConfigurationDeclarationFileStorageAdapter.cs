@@ -125,7 +125,7 @@
             return toReturn;
         }
 
-        private bool FilterForEventConfigurationDeclarationFile(
+        private static bool FilterForEventConfigurationDeclarationFile(
             IListBlobItem listBlobItem,
             string filename)
         {
@@ -164,7 +164,7 @@
             this.loggerWrapper.Debug($"Searching for \"{filename}\"...");
 
             toReturn = listBlobItems.SingleOrDefault(
-                x => this.FilterForEventConfigurationDeclarationFile(x, filename));
+                x => FilterForEventConfigurationDeclarationFile(x, filename));
 
             return toReturn;
         }
