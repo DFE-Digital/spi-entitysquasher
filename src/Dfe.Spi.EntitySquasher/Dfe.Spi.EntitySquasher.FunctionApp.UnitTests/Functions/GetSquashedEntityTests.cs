@@ -1,8 +1,10 @@
 ﻿namespace Dfe.Spi.EntitySquasher.FunctionApp.UnitTests.Functions
 {
     using Dfe.Spi.EntitySquasher.Application.Definitions;
+    using Dfe.Spi.EntitySquasher.Application.Models;
     using Dfe.Spi.EntitySquasher.FunctionApp.Functions;
     using Dfe.Spi.EntitySquasher.FunctionApp.Infrastructure;
+    using Dfe.Spi.EntitySquasher.FunctionApp.UnitTests.Infrastructure;
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Http.Internal;
     using Microsoft.AspNetCore.Mvc;
@@ -18,11 +20,12 @@
     {
         private GetSquashedEntity getSquashedEntity;
         private LoggerWrapper loggerWrapper;
+        private Mock<IGetSquashedEntityProcessor> mockGetSquashedEntityProcessor;
 
         [SetUp]
         public void Arrange()
         {
-            Mock<IGetSquashedEntityProcessor> mockGetSquashedEntityProcessor =
+            this.mockGetSquashedEntityProcessor =
                 new Mock<IGetSquashedEntityProcessor>();
 
             IGetSquashedEntityProcessor getSquashedEntityProcessor =
@@ -55,8 +58,7 @@
         [Test]
         public async Task Run_PostWithoutBody_ReturnsBadRequestStatusCode()
         {
-            HttpRequest httpRequest = new DefaultHttpRequest(
-                new DefaultHttpContext());
+            HttpRequest httpRequest = this.CreateHttpRequest();
 
             await this.ReturnsBadRequestStatusCode(httpRequest);
         }
@@ -64,18 +66,62 @@
         [Test]
         public async Task Run_PostMalformedBody_ReturnsBadRequestStatusCode()
         {
-            HttpRequest httpRequest = new DefaultHttpRequest(
-                new DefaultHttpContext());
-
             string requestBodyStr = "some rubbish goes here";
 
-            byte[] buffer = Encoding.UTF8.GetBytes(requestBodyStr);
-
-            MemoryStream memoryStream = new MemoryStream(buffer);
-
-            httpRequest.Body = memoryStream;
+            HttpRequest httpRequest = this.CreateHttpRequest(requestBodyStr);
 
             await this.ReturnsBadRequestStatusCode(httpRequest);
+        }
+
+        [Test]
+        public async Task Run_PostWellFormedPayloadWithUnsupportedAlgorithm_ReturnsNotFoundStatusCode()
+        {
+            // Arrange
+            this.mockGetSquashedEntityProcessor
+                .Setup(x => x.GetSquashedEntityAsync(It.IsAny<GetSquashedEntityRequest>()))
+                .Throws<FileNotFoundException>();
+
+            IActionResult actionResult = null;
+            StatusCodeResult statusCodeResult = null;
+
+            string requestBodyStr = SamplesHelper.GetSample(
+                "empty-object.json");
+
+            HttpRequest httpRequest = this.CreateHttpRequest(requestBodyStr);
+
+            int expectedStatusCode = StatusCodes.Status404NotFound;
+            int actualStatusCode;
+
+            // Act
+            actionResult = await this.getSquashedEntity.Run(httpRequest);
+
+            // Assert
+            Assert.IsInstanceOf<StatusCodeResult>(actionResult);
+
+            statusCodeResult = (StatusCodeResult)actionResult;
+            actualStatusCode = statusCodeResult.StatusCode;
+
+            Assert.AreEqual(expectedStatusCode, actualStatusCode);
+
+            // Log output...
+            string logOutput = this.loggerWrapper.ReturnLog();
+        }
+
+        private HttpRequest CreateHttpRequest(string bodyStr = null)
+        {
+            HttpRequest toReturn = new DefaultHttpRequest(
+                new DefaultHttpContext());
+
+            if (!string.IsNullOrEmpty(bodyStr))
+            {
+                byte[] buffer = Encoding.UTF8.GetBytes(bodyStr);
+
+                MemoryStream memoryStream = new MemoryStream(buffer);
+
+                toReturn.Body = memoryStream;
+            }
+
+            return toReturn;
         }
 
         private async Task ReturnsBadRequestStatusCode(HttpRequest httpRequest)
