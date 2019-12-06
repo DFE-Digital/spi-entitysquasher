@@ -1,6 +1,7 @@
 ﻿namespace Dfe.Spi.EntitySquasher.Application
 {
     using System;
+    using System.Threading.Tasks;
     using Dfe.Spi.Common.Logging.Definitions;
     using Dfe.Spi.EntitySquasher.Application.Definitions;
     using Dfe.Spi.EntitySquasher.Application.Definitions.SettingsProviders;
@@ -43,7 +44,7 @@
         }
 
         /// <inheritdoc />
-        public GetSquashedEntityResponse GetSquashedEntity(
+        public async Task<GetSquashedEntityResponse> GetSquashedEntityAsync(
             GetSquashedEntityRequest getSquashedEntityRequest)
         {
             GetSquashedEntityResponse toReturn = null;
@@ -63,14 +64,18 @@
                 $"{nameof(AlgorithmDeclarationConfigurationFile)}...");
 
             AlgorithmDeclarationConfigurationFile algorithmDeclarationConfigurationFile =
-                this.algorithmDeclarationConfigurationFileManager.GetAlgorithmDeclarationConfigurationFile(
-                    algorithm);
+                await this.algorithmDeclarationConfigurationFileManager.GetAlgorithmDeclarationConfigurationFileAsync(
+                    algorithm)
+                    .ConfigureAwait(false);
 
             this.loggerWrapper.Info(
                 $"{nameof(algorithmDeclarationConfigurationFile)} = " +
                 $"{algorithmDeclarationConfigurationFile}");
 
-            // TODO...
+            // TODO:
+            // 1) Pull from the requested adapters and;
+            // 2) Squash the entities together according to the rules outlined
+            //    in the ADCF.
             return toReturn;
         }
 

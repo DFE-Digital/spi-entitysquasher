@@ -2,6 +2,7 @@ namespace Dfe.Spi.EntitySquasher.FunctionApp.Functions
 {
     using System;
     using System.IO;
+    using System.Threading.Tasks;
     using Dfe.Spi.Common.Logging.Definitions;
     using Dfe.Spi.EntitySquasher.Application.Definitions;
     using Dfe.Spi.EntitySquasher.Application.Models;
@@ -48,7 +49,7 @@ namespace Dfe.Spi.EntitySquasher.FunctionApp.Functions
         /// An instance of type <see cref="IActionResult" />.
         /// </returns>
         [FunctionName("get-squashed-entity")]
-        public IActionResult Run(
+        public async Task<IActionResult> Run(
             [HttpTrigger(AuthorizationLevel.Function, "POST", Route = null)]
             HttpRequest httpRequest)
         {
@@ -73,8 +74,9 @@ namespace Dfe.Spi.EntitySquasher.FunctionApp.Functions
                     getSquashedEntityRequestStr);
 
             GetSquashedEntityResponse getSquashedEntityResponse =
-                this.getSquashedEntityProcessor.GetSquashedEntity(
-                    getSquashedEntityRequest);
+                await this.getSquashedEntityProcessor.GetSquashedEntityAsync(
+                    getSquashedEntityRequest)
+                    .ConfigureAwait(false);
 
             ModelsBase modelsBase = getSquashedEntityResponse.ModelsBase;
 

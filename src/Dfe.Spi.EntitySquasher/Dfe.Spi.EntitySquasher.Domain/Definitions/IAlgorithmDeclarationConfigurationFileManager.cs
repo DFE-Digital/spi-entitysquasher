@@ -1,5 +1,6 @@
 ﻿namespace Dfe.Spi.EntitySquasher.Domain.Definitions
 {
+    using System.Threading.Tasks;
     using Dfe.Spi.EntitySquasher.Domain.Models.Adcf;
 
     /// <summary>
@@ -21,7 +22,7 @@
         /// found for the given <paramref name="algoritm" />, in which case
         /// null.
         /// </returns>
-        AlgorithmDeclarationConfigurationFile GetAlgorithmDeclarationConfigurationFile(
+        Task<AlgorithmDeclarationConfigurationFile> GetAlgorithmDeclarationConfigurationFileAsync(
             string algoritm);
     }
 }

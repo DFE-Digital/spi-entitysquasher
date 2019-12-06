@@ -6,7 +6,6 @@
     using Dfe.Spi.EntitySquasher.Application;
     using Dfe.Spi.EntitySquasher.Application.Definitions;
     using Dfe.Spi.EntitySquasher.Application.Definitions.SettingsProviders;
-    using Dfe.Spi.EntitySquasher.AzureStorage;
     using Dfe.Spi.EntitySquasher.Domain.Definitions;
     using Dfe.Spi.EntitySquasher.FunctionApp.SettingsProviders;
     using Microsoft.Azure.Functions.Extensions.DependencyInjection;

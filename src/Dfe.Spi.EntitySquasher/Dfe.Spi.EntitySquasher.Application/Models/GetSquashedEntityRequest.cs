@@ -5,7 +5,7 @@
 
     /// <summary>
     /// Request object for
-    /// <see cref="IGetSquashedEntityProcessor.GetSquashedEntity(GetSquashedEntityRequest)" />.
+    /// <see cref="IGetSquashedEntityProcessor.GetSquashedEntityAsync(GetSquashedEntityRequest)" />.
     /// </summary>
     public class GetSquashedEntityRequest : RequestResponseBase
     {
