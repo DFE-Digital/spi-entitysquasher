@@ -6,7 +6,9 @@
     using Dfe.Spi.EntitySquasher.Application;
     using Dfe.Spi.EntitySquasher.Application.Definitions;
     using Dfe.Spi.EntitySquasher.Application.Definitions.SettingsProviders;
+    using Dfe.Spi.EntitySquasher.AzureStorage;
     using Dfe.Spi.EntitySquasher.Domain.Definitions;
+    using Dfe.Spi.EntitySquasher.Domain.Definitions.SettingsProviders;
     using Dfe.Spi.EntitySquasher.FunctionApp.SettingsProviders;
     using Microsoft.Azure.Functions.Extensions.DependencyInjection;
     using Microsoft.Azure.WebJobs.Logging;
@@ -27,16 +29,35 @@
                 throw new ArgumentNullException(nameof(functionsHostBuilder));
             }
 
-            functionsHostBuilder
-                .Services
-                .AddScoped<ILogger>(this.CreateILogger)
-                .AddScoped<ILoggerWrapper, LoggerWrapper>()
-                .AddScoped<IGetSquashedEntityProcessorSettingsProvider, GetSquashedEntityProcessorSettingsProvider>()
+            IServiceCollection serviceCollection =
+                functionsHostBuilder.Services;
+
+            AddLogging(serviceCollection);
+
+            AddSettingsProviders(serviceCollection);
+
+            serviceCollection
                 .AddScoped<IGetSquashedEntityProcessor, GetSquashedEntityProcessor>()
+                .AddScoped<IAlgorithmDeclarationConfigurationFileStorageAdapter, AlgorithmDeclarationConfigurationFileStorageAdapter>()
                 .AddScoped<IAlgorithmDeclarationConfigurationFileManager, AlgorithmDeclarationConfigurationFileManager>();
         }
 
-        private ILogger CreateILogger(IServiceProvider serviceProvider)
+        private static void AddLogging(IServiceCollection serviceCollection)
+        {
+            serviceCollection
+                .AddScoped<ILogger>(CreateILogger)
+                .AddScoped<ILoggerWrapper, LoggerWrapper>();
+        }
+
+        private static void AddSettingsProviders(
+            IServiceCollection serviceCollection)
+        {
+            serviceCollection
+                .AddSingleton<IGetSquashedEntityProcessorSettingsProvider, GetSquashedEntityProcessorSettingsProvider>()
+                .AddSingleton<IAlgorithmDeclarationConfigurationFileStorageAdapterSettingsProvider, AlgorithmDeclarationConfigurationFileStorageAdapterSettingsProvider>();
+        }
+
+        private static ILogger CreateILogger(IServiceProvider serviceProvider)
         {
             ILogger toReturn = null;
 

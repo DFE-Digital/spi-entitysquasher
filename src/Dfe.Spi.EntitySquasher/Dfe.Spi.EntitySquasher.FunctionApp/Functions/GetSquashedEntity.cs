@@ -73,14 +73,23 @@ namespace Dfe.Spi.EntitySquasher.FunctionApp.Functions
                 JsonConvert.DeserializeObject<GetSquashedEntityRequest>(
                     getSquashedEntityRequestStr);
 
-            GetSquashedEntityResponse getSquashedEntityResponse =
-                await this.getSquashedEntityProcessor.GetSquashedEntityAsync(
-                    getSquashedEntityRequest)
-                    .ConfigureAwait(false);
+            try
+            {
+                GetSquashedEntityResponse getSquashedEntityResponse =
+                    await this.getSquashedEntityProcessor.GetSquashedEntityAsync(
+                        getSquashedEntityRequest)
+                        .ConfigureAwait(false);
 
-            ModelsBase modelsBase = getSquashedEntityResponse.ModelsBase;
+                ModelsBase modelsBase = getSquashedEntityResponse.ModelsBase;
 
-            toReturn = new JsonResult(modelsBase);
+                toReturn = new JsonResult(modelsBase);
+            }
+            catch (FileNotFoundException)
+            {
+                // TODO: Return a different response code to indicate that
+                //       the ACDF couldn't be found - 404?
+                throw;
+            }
 
             return toReturn;
         }

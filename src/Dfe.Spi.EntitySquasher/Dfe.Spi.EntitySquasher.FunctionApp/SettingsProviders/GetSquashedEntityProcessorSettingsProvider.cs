@@ -15,7 +15,7 @@
             get
             {
                 string toReturn = Environment.GetEnvironmentVariable(
-                    "DefaultAlgorithm");
+                    nameof(this.DefaultAlgorithm));
 
                 return toReturn;
             }
