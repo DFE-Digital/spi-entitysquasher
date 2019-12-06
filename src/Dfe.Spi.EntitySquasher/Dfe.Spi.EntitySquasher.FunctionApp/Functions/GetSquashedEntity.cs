@@ -63,8 +63,15 @@ namespace Dfe.Spi.EntitySquasher.FunctionApp.Functions
             // Set the context of the logger.
             this.loggerWrapper.SetContext(httpRequest.Headers);
 
-            GetSquashedEntityRequest getSquashedEntityRequest =
-                this.ParseRequest(httpRequest);
+            GetSquashedEntityRequest getSquashedEntityRequest = null;
+            try
+            {
+                getSquashedEntityRequest = this.ParseRequest(httpRequest);
+            }
+            catch (JsonReaderException)
+            {
+                // Do nothing - getSquashedEntityRequest will just end up null.
+            }
 
             if (getSquashedEntityRequest != null)
             {
@@ -80,7 +87,8 @@ namespace Dfe.Spi.EntitySquasher.FunctionApp.Functions
                 int statusCode = StatusCodes.Status400BadRequest;
 
                 this.loggerWrapper.Warning(
-                    $"The {nameof(HttpRequest)} made had no body. " +
+                    $"The {nameof(HttpRequest)} either had no body, or the " +
+                    $"body was not well-formed JSON. " +
                     $"{nameof(statusCode)} {statusCode} will be returned.");
 
                 // No body supplied - return 400 to reflect this.
