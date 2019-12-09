@@ -5,6 +5,7 @@
     using Dfe.Spi.EntitySquasher.FunctionApp.Functions;
     using Dfe.Spi.EntitySquasher.FunctionApp.Infrastructure;
     using Dfe.Spi.EntitySquasher.FunctionApp.UnitTests.Infrastructure;
+    using Dfe.Spi.Models;
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Http.Internal;
     using Microsoft.AspNetCore.Mvc;
@@ -102,6 +103,51 @@
             actualStatusCode = statusCodeResult.StatusCode;
 
             Assert.AreEqual(expectedStatusCode, actualStatusCode);
+
+            // Log output...
+            string logOutput = this.loggerWrapper.ReturnLog();
+        }
+
+        [Test]
+        public async Task Run_PostWellFormedPayloadWithSupportedAlgorithm_ReturnsWithLearningProviderBody()
+        {
+            // Arrange
+            LearningProvider expectedBody =
+                new LearningProvider()
+                {
+                    // Doesn't need anything. Just needs to exist.
+                };
+
+            LearningProvider actualBody = null;
+
+            IActionResult actionResult = null;
+            JsonResult jsonResult = null;
+
+            GetSquashedEntityResponse getSquashedEntityResponse =
+                new GetSquashedEntityResponse()
+                {
+                    ModelsBase = expectedBody,
+                };
+
+            this.mockGetSquashedEntityProcessor
+                .Setup(x => x.GetSquashedEntityAsync(It.IsAny<GetSquashedEntityRequest>()))
+                .Returns(Task.FromResult(getSquashedEntityResponse));
+
+            string requestBodyStr = SamplesHelper.GetSample(
+                "empty-object.json");
+
+            HttpRequest httpRequest = this.CreateHttpRequest(requestBodyStr);
+
+            // Act
+            actionResult = await this.getSquashedEntity.Run(httpRequest);
+
+            // Assert
+            Assert.IsInstanceOf<JsonResult>(actionResult);
+
+            jsonResult = (JsonResult)actionResult;
+            actualBody = (LearningProvider)jsonResult.Value;
+
+            Assert.AreEqual(expectedBody, actualBody);
 
             // Log output...
             string logOutput = this.loggerWrapper.ReturnLog();

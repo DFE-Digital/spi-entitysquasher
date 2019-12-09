@@ -17,10 +17,12 @@
     <!-- Dfe.Spi.* -->
     <PackageReference Include="Dfe.Spi.Common.Logging" Version="1.0.3" PrivateAssets="All" />
     <PackageReference Include="Dfe.Spi.Common.Models" Version="1.0.0" PrivateAssets="All" />
+    <PackageReference Include="Dfe.Spi.Models" Version="1.0.0" PrivateAssets="All" />
     
     <!-- Microsoft -->
     <PackageReference Include="Microsoft.AspNetCore.Http" Version="2.1.0" PrivateAssets="All" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Core" Version="2.1.0" PrivateAssets="All" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Formatters.Json" Version="2.1.0" PrivateAssets="All" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.9.0" PrivateAssets="All" />
     
     <!-- Other -->
