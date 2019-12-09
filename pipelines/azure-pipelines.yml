@@ -9,6 +9,7 @@ steps:
     displayName: 'Use NuGet 4.7.1'
     inputs:
       versionSpec: '4.7.1'
+
   - task: NuGetCommand@2
     displayName: 'Restore NuGet Packages'
     inputs:
@@ -16,9 +17,17 @@ steps:
       restoreSolution: '**/*.sln'
       feedsToUse: 'select'
       vstsFeed: 'c5095ddb-6433-4990-a3a5-1df8a78b1302/$(FeedSecret)'
+
   - task: DotNetCoreCLI@2
     displayName: 'Build Function App'
     inputs:
       command: 'build'
       projects: 'src/Dfe.Spi.EntitySquasher/Dfe.Spi.EntitySquasher.FunctionApp/Dfe.Spi.EntitySquasher.FunctionApp.csproj'
-      arguments: '--configuration Release --output $(Build.BinariesDirectory) --no-restore'
+      arguments: '--configuration $(BuildConfiguration) --output $(Build.BinariesDirectory) --no-restore'
+
+  - task: DotNetCoreCLI@2
+    displayName: 'Run Unit Tests'
+    inputs:
+      command: test
+      projects: 'src/**/*.UnitTests.csproj'
+      arguments: '--configuration $(BuildConfiguration) --no-build'
