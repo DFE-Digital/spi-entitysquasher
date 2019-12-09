@@ -30,4 +30,4 @@ steps:
     inputs:
       command: test
       projects: 'src/**/*.UnitTests.csproj'
-      arguments: '--configuration $(BuildConfiguration)'
+      arguments: '--configuration $(BuildConfiguration) --no-restore'
