@@ -1,6 +1,7 @@
 ﻿namespace Dfe.Spi.EntitySquasher.FunctionApp.SettingsProviders
 {
     using System;
+    using System.Diagnostics.CodeAnalysis;
     using Dfe.Spi.EntitySquasher.Domain.Definitions.SettingsProviders;
 
     /// <summary>
@@ -8,6 +9,7 @@
     /// <see cref="AlgorithmConfigurationDeclarationFileStorageAdapterSettingsProvider" />
     /// class.
     /// </summary>
+    [ExcludeFromCodeCoverage]
     public class AlgorithmConfigurationDeclarationFileStorageAdapterSettingsProvider
         : IAlgorithmConfigurationDeclarationFileStorageAdapterSettingsProvider
     {

@@ -1,6 +1,7 @@
 ﻿namespace Dfe.Spi.EntitySquasher.FunctionApp
 {
     using System;
+    using System.Diagnostics.CodeAnalysis;
     using Dfe.Spi.Common.Logging;
     using Dfe.Spi.Common.Logging.Definitions;
     using Dfe.Spi.EntitySquasher.Application;
@@ -18,6 +19,7 @@
     /// <summary>
     /// Functions startup class.
     /// </summary>
+    [ExcludeFromCodeCoverage]
     public class Startup : FunctionsStartup
     {
         /// <inheritdoc />
