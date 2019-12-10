@@ -10,9 +10,9 @@
     public class GetSquashedEntityRequest : RequestResponseBase
     {
         /// <summary>
-        /// Gets or sets the adapter record references to squash.
+        /// Gets or sets a set of <see cref="EntityReference" /> instances.
         /// </summary>
-        public IEnumerable<AdapterRecordReference> AdapterRecordReferences
+        public IEnumerable<EntityReference> EntityReferences
         {
             get;
             set;
