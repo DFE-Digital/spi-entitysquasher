@@ -6,35 +6,24 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="Samples\empty-object.json" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <EmbeddedResource Include="Samples\empty-object.json" />
-  </ItemGroup>
-
-  <ItemGroup>
     <!-- Dfe.Spi.* -->
     <PackageReference Include="Dfe.Spi.Common.Logging" Version="1.0.6" PrivateAssets="All" />
     <PackageReference Include="Dfe.Spi.Common.Models" Version="1.0.0" PrivateAssets="All" />
-    <PackageReference Include="Dfe.Spi.Models" Version="1.0.0" PrivateAssets="All" />
     <PackageReference Include="Dfe.Spi.Common.UnitTesting" Version="1.0.3" PrivateAssets="All" />
-    
+    <PackageReference Include="Dfe.Spi.Models" Version="1.0.0" PrivateAssets="All" />
+
     <!-- Microsoft -->
-    <PackageReference Include="Microsoft.AspNetCore.Http" Version="2.1.0" PrivateAssets="All" />
-    <PackageReference Include="Microsoft.AspNetCore.Mvc.Core" Version="2.1.0" PrivateAssets="All" />
-    <PackageReference Include="Microsoft.AspNetCore.Mvc.Formatters.Json" Version="2.1.0" PrivateAssets="All" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.9.0" PrivateAssets="All" />
     
     <!-- Other -->
     <PackageReference Include="Moq" Version="4.13.1" PrivateAssets="All" />
-    <PackageReference Include="Newtonsoft.Json" Version="11.0.2" PrivateAssets="All" />
     <PackageReference Include="nunit" Version="3.11.0" PrivateAssets="All" />
     <PackageReference Include="NUnit3TestAdapter" Version="3.11.0" PrivateAssets="All" />
+    <PackageReference Include="Meridian.MeaningfulToString" Version="1.0.4" PrivateAssets="All" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Dfe.Spi.EntitySquasher.FunctionApp\Dfe.Spi.EntitySquasher.FunctionApp.csproj" />
+    <ProjectReference Include="..\Dfe.Spi.EntitySquasher.Application\Dfe.Spi.EntitySquasher.Application.csproj" />
   </ItemGroup>
 
 </Project>

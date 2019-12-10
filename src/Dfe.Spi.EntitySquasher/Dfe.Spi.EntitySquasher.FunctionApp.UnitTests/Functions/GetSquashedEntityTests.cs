@@ -1,9 +1,9 @@
 ﻿namespace Dfe.Spi.EntitySquasher.FunctionApp.UnitTests.Functions
 {
+    using Dfe.Spi.Common.UnitTesting.Infrastructure;
     using Dfe.Spi.EntitySquasher.Application.Definitions;
     using Dfe.Spi.EntitySquasher.Application.Models;
     using Dfe.Spi.EntitySquasher.FunctionApp.Functions;
-    using Dfe.Spi.EntitySquasher.FunctionApp.Infrastructure;
     using Dfe.Spi.EntitySquasher.FunctionApp.UnitTests.Infrastructure;
     using Dfe.Spi.Models;
     using Microsoft.AspNetCore.Http;
