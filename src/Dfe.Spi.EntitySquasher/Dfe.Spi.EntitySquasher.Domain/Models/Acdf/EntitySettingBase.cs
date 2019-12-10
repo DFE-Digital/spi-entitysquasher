@@ -1,10 +1,12 @@
 ﻿namespace Dfe.Spi.EntitySquasher.Domain.Models.Acdf
 {
     using System.Collections.Generic;
+    using System.Diagnostics.CodeAnalysis;
 
     /// <summary>
     /// Abstract base class for all entity settings.
     /// </summary>
+    [ExcludeFromCodeCoverage]
     public abstract class EntitySettingBase : NamedSettingEntityBase
     {
         /// <summary>

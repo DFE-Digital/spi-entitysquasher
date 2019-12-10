@@ -1,5 +1,6 @@
 ﻿namespace Dfe.Spi.EntitySquasher.Application.Models
 {
+    using System.Diagnostics.CodeAnalysis;
     using Dfe.Spi.EntitySquasher.Application.Definitions;
     using Dfe.Spi.Models;
 
@@ -7,6 +8,7 @@
     /// Response object for
     /// <see cref="IGetSquashedEntityProcessor.GetSquashedEntityAsync(GetSquashedEntityRequest)" />.
     /// </summary>
+    [ExcludeFromCodeCoverage]
     public class GetSquashedEntityResponse : RequestResponseBase
     {
         /// <summary>

@@ -1,8 +1,11 @@
 ﻿namespace Dfe.Spi.EntitySquasher.Application.Models
 {
+    using System.Diagnostics.CodeAnalysis;
+
     /// <summary>
     /// Represents a reference to an adapter record.
     /// </summary>
+    [ExcludeFromCodeCoverage]
     public class AdapterRecordReference
     {
         /// <summary>

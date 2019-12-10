@@ -1,10 +1,12 @@
 ﻿namespace Dfe.Spi.EntitySquasher.Domain.Models.Acdf
 {
     using System.Collections.Generic;
+    using System.Diagnostics.CodeAnalysis;
 
     /// <summary>
     /// The serialised form of the Algorithm Configuration Declaration File.
     /// </summary>
+    [ExcludeFromCodeCoverage]
     public class AlgorithmConfigurationDeclarationFile : AcdfBase
     {
         /// <summary>

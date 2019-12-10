@@ -1,12 +1,14 @@
 ﻿namespace Dfe.Spi.EntitySquasher.Application.Models
 {
     using System.Collections.Generic;
+    using System.Diagnostics.CodeAnalysis;
     using Dfe.Spi.EntitySquasher.Application.Definitions;
 
     /// <summary>
     /// Request object for
     /// <see cref="IGetSquashedEntityProcessor.GetSquashedEntityAsync(GetSquashedEntityRequest)" />.
     /// </summary>
+    [ExcludeFromCodeCoverage]
     public class GetSquashedEntityRequest : RequestResponseBase
     {
         /// <summary>
