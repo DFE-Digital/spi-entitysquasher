@@ -68,9 +68,12 @@ namespace Dfe.Spi.EntitySquasher.FunctionApp.Functions
             {
                 getSquashedEntityRequest = this.ParseRequest(httpRequest);
             }
-            catch (JsonReaderException)
+            catch (JsonReaderException jsonReaderException)
             {
-                // Do nothing - getSquashedEntityRequest will just end up null.
+                this.loggerWrapper.Warning(
+                    $"A {nameof(JsonReaderException)} was thrown during the " +
+                    $"parsing of the request.",
+                    jsonReaderException);
             }
 
             if (getSquashedEntityRequest != null)
