@@ -1,18 +1,20 @@
 ﻿namespace Dfe.Spi.EntitySquasher.Application.Models
 {
     using System.Collections.Generic;
+    using System.Diagnostics.CodeAnalysis;
     using Dfe.Spi.EntitySquasher.Application.Definitions;
 
     /// <summary>
     /// Request object for
-    /// <see cref="IGetSquashedEntityProcessor.GetSquashedEntity(GetSquashedEntityRequest)" />.
+    /// <see cref="IGetSquashedEntityProcessor.GetSquashedEntityAsync(GetSquashedEntityRequest)" />.
     /// </summary>
+    [ExcludeFromCodeCoverage]
     public class GetSquashedEntityRequest : RequestResponseBase
     {
         /// <summary>
-        /// Gets or sets the adapter record references to squash.
+        /// Gets or sets a set of <see cref="EntityReference" /> instances.
         /// </summary>
-        public IEnumerable<AdapterRecordReference> AdapterRecordReferences
+        public IEnumerable<EntityReference> EntityReferences
         {
             get;
             set;

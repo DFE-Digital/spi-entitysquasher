@@ -1,10 +1,16 @@
 ﻿namespace Dfe.Spi.EntitySquasher.FunctionApp
 {
     using System;
-    using Dfe.Spi.Common.Logging.Definitions.Factories;
-    using Dfe.Spi.Common.Logging.Factories;
-    using Dfe.Spi.EntitySquasher.Application.Definitions.Factories;
-    using Dfe.Spi.EntitySquasher.Application.Factories;
+    using System.Diagnostics.CodeAnalysis;
+    using Dfe.Spi.Common.Logging;
+    using Dfe.Spi.Common.Logging.Definitions;
+    using Dfe.Spi.EntitySquasher.Application;
+    using Dfe.Spi.EntitySquasher.Application.Definitions;
+    using Dfe.Spi.EntitySquasher.Application.Definitions.SettingsProviders;
+    using Dfe.Spi.EntitySquasher.AzureStorage;
+    using Dfe.Spi.EntitySquasher.Domain.Definitions;
+    using Dfe.Spi.EntitySquasher.Domain.Definitions.SettingsProviders;
+    using Dfe.Spi.EntitySquasher.FunctionApp.SettingsProviders;
     using Microsoft.Azure.Functions.Extensions.DependencyInjection;
     using Microsoft.Azure.WebJobs.Logging;
     using Microsoft.Extensions.DependencyInjection;
@@ -13,6 +19,7 @@
     /// <summary>
     /// Functions startup class.
     /// </summary>
+    [ExcludeFromCodeCoverage]
     public class Startup : FunctionsStartup
     {
         /// <inheritdoc />
@@ -24,14 +31,36 @@
                 throw new ArgumentNullException(nameof(functionsHostBuilder));
             }
 
-            functionsHostBuilder
-                .Services
-                .AddScoped<ILogger>(this.CreateILogger)
-                .AddScoped<ILoggerWrapperFactory, LoggerWrapperFactory>()
-                .AddSingleton<IGetSquashedEntityProcessorFactory, GetSquashedEntityProcessorFactory>();
+            IServiceCollection serviceCollection =
+                functionsHostBuilder.Services;
+
+            AddLogging(serviceCollection);
+
+            AddSettingsProviders(serviceCollection);
+
+            serviceCollection
+                .AddScoped<IGetSquashedEntityProcessor, GetSquashedEntityProcessor>()
+                .AddScoped<IAlgorithmConfigurationDeclarationFileStorageAdapter, AlgorithmConfigurationDeclarationFileStorageAdapter>()
+                .AddScoped<IAlgorithmConfigurationDeclarationFileManager, AlgorithmConfigurationDeclarationFileManager>()
+                .AddSingleton<IAlgorithmConfigurationDeclarationFileCache, AlgorithmConfigurationDeclarationFileCache>();
         }
 
-        private ILogger CreateILogger(IServiceProvider serviceProvider)
+        private static void AddLogging(IServiceCollection serviceCollection)
+        {
+            serviceCollection
+                .AddScoped<ILogger>(CreateILogger)
+                .AddScoped<ILoggerWrapper, LoggerWrapper>();
+        }
+
+        private static void AddSettingsProviders(
+            IServiceCollection serviceCollection)
+        {
+            serviceCollection
+                .AddSingleton<IGetSquashedEntityProcessorSettingsProvider, GetSquashedEntityProcessorSettingsProvider>()
+                .AddSingleton<IAlgorithmConfigurationDeclarationFileStorageAdapterSettingsProvider, AlgorithmConfigurationDeclarationFileStorageAdapterSettingsProvider>();
+        }
+
+        private static ILogger CreateILogger(IServiceProvider serviceProvider)
         {
             ILogger toReturn = null;
 

@@ -5,14 +5,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <!-- Microsoft -->
+    <PackageReference Include="WindowsAzure.Storage" Version="9.3.1" PrivateAssets="All" />
+
     <!-- Dfe.Spi.* -->
     <PackageReference Include="Dfe.Spi.Common.Logging" Version="1.0.7" PrivateAssets="All" />
-    <PackageReference Include="Dfe.Spi.Common.Models" Version="1.0.0" PrivateAssets="All" />
-    <PackageReference Include="Dfe.Spi.Models" Version="1.0.0" PrivateAssets="All" />
-
-    <!-- Other -->
-    <PackageReference Include="Meridian.MeaningfulToString" Version="1.0.4" PrivateAssets="All" />
-
+    
     <!-- Development/Non-Runtime -->
     <PackageReference Include="StyleCop.Analyzers" Version="1.1.118" PrivateAssets="All" />
     <PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="2.9.8" PrivateAssets="All" />
@@ -31,7 +29,7 @@
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <DocumentationFile>Dfe.Spi.EntitySquasher.Application.xml</DocumentationFile>
+    <DocumentationFile>Dfe.Spi.EntitySquasher.AzureStorage.xml</DocumentationFile>
   </PropertyGroup>
 
 </Project>

@@ -1,5 +1,6 @@
 ﻿namespace Dfe.Spi.EntitySquasher.Application.Definitions
 {
+    using System.Threading.Tasks;
     using Dfe.Spi.EntitySquasher.Application.Models;
 
     /// <summary>
@@ -16,7 +17,7 @@
         /// <returns>
         /// An instance of <see cref="GetSquashedEntityResponse" />.
         /// </returns>
-        GetSquashedEntityResponse GetSquashedEntity(
+        Task<GetSquashedEntityResponse> GetSquashedEntityAsync(
             GetSquashedEntityRequest getSquashedEntityRequest);
     }
 }

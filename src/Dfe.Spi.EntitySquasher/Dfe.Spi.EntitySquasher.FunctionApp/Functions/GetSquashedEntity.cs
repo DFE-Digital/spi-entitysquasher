@@ -2,17 +2,15 @@ namespace Dfe.Spi.EntitySquasher.FunctionApp.Functions
 {
     using System;
     using System.IO;
+    using System.Threading.Tasks;
     using Dfe.Spi.Common.Logging.Definitions;
-    using Dfe.Spi.Common.Logging.Definitions.Factories;
     using Dfe.Spi.EntitySquasher.Application.Definitions;
-    using Dfe.Spi.EntitySquasher.Application.Definitions.Factories;
     using Dfe.Spi.EntitySquasher.Application.Models;
     using Dfe.Spi.Models;
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.Azure.WebJobs;
     using Microsoft.Azure.WebJobs.Extensions.Http;
-    using Microsoft.Extensions.Logging;
     using Newtonsoft.Json;
 
     /// <summary>
@@ -20,26 +18,25 @@ namespace Dfe.Spi.EntitySquasher.FunctionApp.Functions
     /// </summary>
     public class GetSquashedEntity
     {
-        private readonly IGetSquashedEntityProcessorFactory getSquashedEntityProcessorFactory;
-        private readonly ILoggerWrapperFactory loggerWrapperFactory;
+        private readonly IGetSquashedEntityProcessor getSquashedEntityProcessor;
+        private readonly ILoggerWrapper loggerWrapper;
 
         /// <summary>
         /// Initialises a new instance of the <see cref="GetSquashedEntity" />
         /// class.
         /// </summary>
-        /// <param name="getSquashedEntityProcessorFactory">
-        /// An instance of type
-        /// <see cref="IGetSquashedEntityProcessorFactory" />.
+        /// <param name="getSquashedEntityProcessor">
+        /// An instance of type <see cref="IGetSquashedEntityProcessor" />.
         /// </param>
-        /// <param name="loggerWrapperFactory">
-        /// An instance of type <see cref="ILoggerWrapperFactory" />.
+        /// <param name="loggerWrapper">
+        /// An instance of type <see cref="ILoggerWrapper" />.
         /// </param>
         public GetSquashedEntity(
-            IGetSquashedEntityProcessorFactory getSquashedEntityProcessorFactory,
-            ILoggerWrapperFactory loggerWrapperFactory)
+            IGetSquashedEntityProcessor getSquashedEntityProcessor,
+            ILoggerWrapper loggerWrapper)
         {
-            this.getSquashedEntityProcessorFactory = getSquashedEntityProcessorFactory;
-            this.loggerWrapperFactory = loggerWrapperFactory;
+            this.getSquashedEntityProcessor = getSquashedEntityProcessor;
+            this.loggerWrapper = loggerWrapper;
         }
 
         /// <summary>
@@ -52,7 +49,7 @@ namespace Dfe.Spi.EntitySquasher.FunctionApp.Functions
         /// An instance of type <see cref="IActionResult" />.
         /// </returns>
         [FunctionName("get-squashed-entity")]
-        public IActionResult Run(
+        public async Task<IActionResult> Run(
             [HttpTrigger(AuthorizationLevel.Function, "POST", Route = null)]
             HttpRequest httpRequest)
         {
@@ -63,30 +60,105 @@ namespace Dfe.Spi.EntitySquasher.FunctionApp.Functions
                 throw new ArgumentNullException(nameof(httpRequest));
             }
 
+            // Set the context of the logger.
+            this.loggerWrapper.SetContext(httpRequest.Headers);
+
+            GetSquashedEntityRequest getSquashedEntityRequest = null;
+            try
+            {
+                getSquashedEntityRequest = this.ParseRequest(httpRequest);
+            }
+            catch (JsonReaderException jsonReaderException)
+            {
+                this.loggerWrapper.Info(
+                    $"A {nameof(JsonReaderException)} was thrown during the " +
+                    $"parsing of the body of the request.",
+                    jsonReaderException);
+            }
+
+            if (getSquashedEntityRequest != null)
+            {
+                this.loggerWrapper.Debug(
+                    $"Invoking {nameof(IGetSquashedEntityProcessor)}...");
+
+                toReturn = await this.ProcessWellFormedRequestAsync(
+                    getSquashedEntityRequest)
+                    .ConfigureAwait(false);
+            }
+            else
+            {
+                int statusCode = StatusCodes.Status400BadRequest;
+
+                this.loggerWrapper.Info(
+                    $"The {nameof(HttpRequest)} either had no body, or the " +
+                    $"body was not well-formed JSON. " +
+                    $"{nameof(statusCode)} {statusCode} will be returned.");
+
+                // No body supplied - return 400 to reflect this.
+                toReturn = new StatusCodeResult(statusCode);
+            }
+
+            return toReturn;
+        }
+
+        private async Task<IActionResult> ProcessWellFormedRequestAsync(
+            GetSquashedEntityRequest getSquashedEntityRequest)
+        {
+            IActionResult toReturn = null;
+
+            try
+            {
+                GetSquashedEntityResponse getSquashedEntityResponse =
+                    await this.getSquashedEntityProcessor.GetSquashedEntityAsync(
+                        getSquashedEntityRequest)
+                        .ConfigureAwait(false);
+
+                this.loggerWrapper.Info(
+                    $"{nameof(IGetSquashedEntityProcessor)} invoked with " +
+                    $"success.");
+
+                ModelsBase modelsBase = getSquashedEntityResponse.ModelsBase;
+
+                this.loggerWrapper.Info(
+                    $"Returning {nameof(modelsBase)}: {modelsBase}.");
+
+                toReturn = new JsonResult(modelsBase);
+            }
+            catch (FileNotFoundException)
+            {
+                int statusCode = StatusCodes.Status404NotFound;
+
+                this.loggerWrapper.Warning(
+                    $"The processor threw a " +
+                    $"{nameof(FileNotFoundException)}. {nameof(statusCode)} " +
+                    $"{statusCode} will be returned.");
+
+                // An ACDF could not be found for the specified algorithm.
+                // Return 404 to reflect this.
+                toReturn = new StatusCodeResult(statusCode);
+            }
+
+            return toReturn;
+        }
+
+        private GetSquashedEntityRequest ParseRequest(HttpRequest httpRequest)
+        {
+            GetSquashedEntityRequest toReturn = null;
+
             string getSquashedEntityRequestStr = null;
             using (StreamReader streamReader = new StreamReader(httpRequest.Body))
             {
                 getSquashedEntityRequestStr = streamReader.ReadToEnd();
             }
 
-            GetSquashedEntityRequest getSquashedEntityRequest =
+            this.loggerWrapper.Debug(
+                $"Body of request read, as a string value: " +
+                $"\"{getSquashedEntityRequestStr}\". Deserialising into a " +
+                $"{nameof(GetSquashedEntityRequest)} instance...");
+
+            toReturn =
                 JsonConvert.DeserializeObject<GetSquashedEntityRequest>(
                     getSquashedEntityRequestStr);
-
-            ILoggerWrapper loggerWrapper = this.loggerWrapperFactory.Create(
-                getSquashedEntityRequest);
-
-            IGetSquashedEntityProcessor getSquashedEntityProcessor =
-                this.getSquashedEntityProcessorFactory.Create(
-                    loggerWrapper);
-
-            GetSquashedEntityResponse getSquashedEntityResponse =
-                getSquashedEntityProcessor.GetSquashedEntity(
-                    getSquashedEntityRequest);
-
-            ModelsBase modelsBase = getSquashedEntityResponse.ModelsBase;
-
-            toReturn = new JsonResult(modelsBase);
 
             return toReturn;
         }

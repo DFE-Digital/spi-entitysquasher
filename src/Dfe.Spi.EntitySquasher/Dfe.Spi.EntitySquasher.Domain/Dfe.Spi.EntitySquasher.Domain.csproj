@@ -7,8 +7,6 @@
   <ItemGroup>
     <!-- Dfe.Spi.* -->
     <PackageReference Include="Dfe.Spi.Common.Logging" Version="1.0.7" PrivateAssets="All" />
-    <PackageReference Include="Dfe.Spi.Common.Models" Version="1.0.0" PrivateAssets="All" />
-    <PackageReference Include="Dfe.Spi.Models" Version="1.0.0" PrivateAssets="All" />
 
     <!-- Other -->
     <PackageReference Include="Meridian.MeaningfulToString" Version="1.0.4" PrivateAssets="All" />
@@ -22,16 +20,12 @@
     <AdditionalFiles Include="..\stylecop.json" />
   </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\Dfe.Spi.EntitySquasher.Domain\Dfe.Spi.EntitySquasher.Domain.csproj" />
-  </ItemGroup>
-
   <PropertyGroup>
     <CodeAnalysisRuleSet>..\ca.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <DocumentationFile>Dfe.Spi.EntitySquasher.Application.xml</DocumentationFile>
+    <DocumentationFile>Dfe.Spi.EntitySquasher.Domain.xml</DocumentationFile>
   </PropertyGroup>
 
 </Project>
