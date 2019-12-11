@@ -9,7 +9,7 @@
     <!-- Dfe.Spi.* -->
     <PackageReference Include="Dfe.Spi.Common.Logging" Version="1.0.7" PrivateAssets="All" />
     <PackageReference Include="Dfe.Spi.Common.Models" Version="1.0.0" PrivateAssets="All" />
-    <PackageReference Include="Dfe.Spi.Common.UnitTesting" Version="1.0.3" PrivateAssets="All" />
+    <PackageReference Include="Dfe.Spi.Common.UnitTesting" Version="1.0.4" PrivateAssets="All" />
     <PackageReference Include="Dfe.Spi.Models" Version="1.0.0" PrivateAssets="All" />
 
     <!-- Microsoft -->
