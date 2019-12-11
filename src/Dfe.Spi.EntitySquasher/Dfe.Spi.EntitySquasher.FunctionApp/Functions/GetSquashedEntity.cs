@@ -70,9 +70,9 @@ namespace Dfe.Spi.EntitySquasher.FunctionApp.Functions
             }
             catch (JsonReaderException jsonReaderException)
             {
-                this.loggerWrapper.Warning(
+                this.loggerWrapper.Info(
                     $"A {nameof(JsonReaderException)} was thrown during the " +
-                    $"parsing of the request.",
+                    $"parsing of the body of the request.",
                     jsonReaderException);
             }
 
@@ -89,7 +89,7 @@ namespace Dfe.Spi.EntitySquasher.FunctionApp.Functions
             {
                 int statusCode = StatusCodes.Status400BadRequest;
 
-                this.loggerWrapper.Warning(
+                this.loggerWrapper.Info(
                     $"The {nameof(HttpRequest)} either had no body, or the " +
                     $"body was not well-formed JSON. " +
                     $"{nameof(statusCode)} {statusCode} will be returned.");
