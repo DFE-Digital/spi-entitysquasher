@@ -8,7 +8,7 @@
     /// <see cref="Dfe.Spi.EntitySquasher.Domain.Models.Acdf" /> namespace.
     /// </summary>
     [ExcludeFromCodeCoverage]
-    public abstract class AcdfBase : MeaningfulBase
+    public abstract class ModelsBase : MeaningfulBase
     {
         // Just acting as a grouping for now.
     }

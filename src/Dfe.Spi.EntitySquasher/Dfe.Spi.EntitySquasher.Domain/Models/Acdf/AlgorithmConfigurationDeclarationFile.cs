@@ -7,7 +7,7 @@
     /// The serialised form of the Algorithm Configuration Declaration File.
     /// </summary>
     [ExcludeFromCodeCoverage]
-    public class AlgorithmConfigurationDeclarationFile : AcdfBase
+    public class AlgorithmConfigurationDeclarationFile : ModelsBase
     {
         /// <summary>
         /// Gets or sets a set of <see cref="Entity" /> instances.

@@ -6,7 +6,7 @@
     /// Abstract base class for all named settings.
     /// </summary>
     [ExcludeFromCodeCoverage]
-    public abstract class NamedSettingEntityBase : AcdfBase
+    public abstract class NamedSettingEntityBase : ModelsBase
     {
         /// <summary>
         /// Gets or sets the name of the setting entry.
