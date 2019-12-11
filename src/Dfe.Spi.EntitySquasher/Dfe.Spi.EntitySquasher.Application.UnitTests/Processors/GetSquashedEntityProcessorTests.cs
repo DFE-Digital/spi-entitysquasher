@@ -1,10 +1,11 @@
-﻿namespace Dfe.Spi.EntitySquasher.Application.UnitTests
+﻿namespace Dfe.Spi.EntitySquasher.Application.UnitTests.Processors
 {
     using System;
     using Dfe.Spi.Common.UnitTesting.Infrastructure;
     using Dfe.Spi.EntitySquasher.Application.Definitions;
     using Dfe.Spi.EntitySquasher.Application.Definitions.SettingsProviders;
     using Dfe.Spi.EntitySquasher.Application.Models;
+    using Dfe.Spi.EntitySquasher.Application.Processors;
     using Moq;
     using NUnit.Framework;
 

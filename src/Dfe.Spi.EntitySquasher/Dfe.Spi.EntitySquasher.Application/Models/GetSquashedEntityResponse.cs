@@ -1,7 +1,7 @@
 ﻿namespace Dfe.Spi.EntitySquasher.Application.Models
 {
     using System.Diagnostics.CodeAnalysis;
-    using Dfe.Spi.EntitySquasher.Application.Definitions;
+    using Dfe.Spi.EntitySquasher.Application.Processors.Definitions;
     using Dfe.Spi.Models;
 
     /// <summary>

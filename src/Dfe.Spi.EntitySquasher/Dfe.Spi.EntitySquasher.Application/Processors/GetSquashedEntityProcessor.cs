@@ -1,4 +1,4 @@
-﻿namespace Dfe.Spi.EntitySquasher.Application
+﻿namespace Dfe.Spi.EntitySquasher.Application.Processors
 {
     using System;
     using System.Threading.Tasks;
@@ -6,6 +6,7 @@
     using Dfe.Spi.EntitySquasher.Application.Definitions;
     using Dfe.Spi.EntitySquasher.Application.Definitions.SettingsProviders;
     using Dfe.Spi.EntitySquasher.Application.Models;
+    using Dfe.Spi.EntitySquasher.Application.Processors.Definitions;
     using Dfe.Spi.EntitySquasher.Domain.Models.Acdf;
 
     /// <summary>

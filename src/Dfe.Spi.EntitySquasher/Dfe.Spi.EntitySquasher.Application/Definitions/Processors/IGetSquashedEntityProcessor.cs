@@ -1,4 +1,4 @@
-﻿namespace Dfe.Spi.EntitySquasher.Application.Definitions
+﻿namespace Dfe.Spi.EntitySquasher.Application.Processors.Definitions
 {
     using System.Threading.Tasks;
     using Dfe.Spi.EntitySquasher.Application.Models;
