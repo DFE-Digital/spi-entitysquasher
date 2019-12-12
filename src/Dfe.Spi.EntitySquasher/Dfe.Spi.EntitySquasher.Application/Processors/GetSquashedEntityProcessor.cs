@@ -83,8 +83,25 @@
             IEnumerable<EntityReference> entityReferences =
                 getSquashedEntityRequest.EntityReferences;
 
-            IEnumerable<Spi.Models.ModelsBase> entities = entityReferences
-                .Select(x => this.ProcessSingleEntityReference(entityName, x));
+            List<Spi.Models.ModelsBase> entities =
+                new List<Spi.Models.ModelsBase>();
+
+            // It would probably be sensible to populate each entity in turn,
+            // rather than in parallel.
+            // We can call the adapters in parallel, if we have lots in this
+            // array, we don't want to bombard the adapters too much.
+            Spi.Models.ModelsBase modelsBase = null;
+            foreach (EntityReference entityReference in entityReferences)
+            {
+                // This can be done with LINQ, but looks messy AF with the
+                // async stuff going on.
+                modelsBase = await this.ProcessSingleEntityReferenceAsync(
+                    entityName,
+                    entityReference)
+                    .ConfigureAwait(false);
+
+                entities.Add(modelsBase);
+            }
 
             toReturn = new GetSquashedEntityResponse()
             {
@@ -94,16 +111,42 @@
             return toReturn;
         }
 
-        private Spi.Models.ModelsBase ProcessSingleEntityReference(
+        private async Task<Spi.Models.ModelsBase> ProcessSingleEntityReferenceAsync(
             string entityName,
             EntityReference entityReference)
         {
             Spi.Models.ModelsBase toReturn = null;
 
-            // TODO:
             // 1) Call all adapters specified in the entity reference
-            //    at the same time. Pull back the requested ModelBase.
+            //    at the same time. First, get the tasks to pull back the
+            //    ModelsBases.
+            List<Task<Spi.Models.ModelsBase>> fetchTasks =
+                entityReference.AdapterRecordReferences
+                    .Select(this.GetEntityAsyncTasks)
+                    .ToList();
+
+            // Then, execute them all and wait for the pulling back of all
+            // tasks to complete, in parallel (so basically, yeild).
+            await Task.WhenAll(fetchTasks).ConfigureAwait(false);
+
+            // We should have the results now.
+            IEnumerable<Spi.Models.ModelsBase> models = fetchTasks
+                .Select(x => x.Result);
+
+            // TODO:
             // 2) Perform the squashing.
+            return toReturn;
+        }
+
+        private Task<Spi.Models.ModelsBase> GetEntityAsyncTasks(
+            AdapterRecordReference adapterRecordReference)
+        {
+            Task<Spi.Models.ModelsBase> toReturn = null;
+
+            // TODO:
+            // 1) Check a cache for entity adapter clients. If the cache
+            //    exists, use it. Otherwise, create it, and use it.
+            // 2) Return the task on the adapter.
             return toReturn;
         }
 

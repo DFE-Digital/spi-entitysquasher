@@ -6,12 +6,8 @@
 
   <ItemGroup>
     <!-- Dfe.Spi.* -->
-    <PackageReference Include="Dfe.Spi.Common.Logging" Version="1.0.7" PrivateAssets="All" />
     <PackageReference Include="Dfe.Spi.Models" Version="1.0.1" PrivateAssets="All" />
-
-    <!-- Other -->
-    <PackageReference Include="Meridian.MeaningfulToString" Version="1.0.4" PrivateAssets="All" />
-
+    
     <!-- Development/Non-Runtime -->
     <PackageReference Include="StyleCop.Analyzers" Version="1.1.118" PrivateAssets="All" />
     <PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="2.9.8" PrivateAssets="All" />
@@ -21,12 +17,16 @@
     <AdditionalFiles Include="..\stylecop.json" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Dfe.Spi.EntitySquasher.Domain\Dfe.Spi.EntitySquasher.Domain.csproj" />
+  </ItemGroup>
+
   <PropertyGroup>
     <CodeAnalysisRuleSet>..\ca.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <DocumentationFile>Dfe.Spi.EntitySquasher.Domain.xml</DocumentationFile>
+    <DocumentationFile>C:\Users\Matt\source\repos\spi-entitysquasher\src\Dfe.Spi.EntitySquasher\Dfe.Spi.EntitySquasher.Infrastructure.EntityAdapter\Dfe.Spi.EntitySquasher.Infrastructure.EntityAdapter.xml</DocumentationFile>
   </PropertyGroup>
 
 </Project>
