@@ -1,0 +1,39 @@
+{
+  "entities": [
+    {
+      "name": "LearningProvider",
+      "sources": [
+        "some-adapter"
+      ],
+      "fields": [
+        {
+          "name": "Name",
+          "sources": [
+            "someother-adapter",
+            "some-adapter"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Governor",
+      "sources": [
+        "someother-adapter"
+      ]
+    }
+  ],
+  "entityAdapters": [
+    {
+      "name": "some-adapter",
+      "baseUrl": "https://some-adapter.somecorp.local/api"
+    },
+    {
+      "name": "someother-adapter",
+      "baseUrl": "https://someother-adapter.somecorp.local/api/v2"
+    },
+    {
+      "name": "another-example-adapter",
+      "baseUrl": "https://another-example-adapter.somecorp.local/"
+    }
+  ]
+}

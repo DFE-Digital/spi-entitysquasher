@@ -6,11 +6,19 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Samples\acdf-example.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Samples\acdf-example.json" />
+  </ItemGroup>
+
+  <ItemGroup>
     <!-- Dfe.Spi.* -->
     <PackageReference Include="Dfe.Spi.Common.Logging" Version="1.0.7" PrivateAssets="All" />
     <PackageReference Include="Dfe.Spi.Common.Models" Version="1.0.0" PrivateAssets="All" />
-    <PackageReference Include="Dfe.Spi.Common.UnitTesting" Version="1.0.4" PrivateAssets="All" />
-    <PackageReference Include="Dfe.Spi.Models" Version="1.0.0" PrivateAssets="All" />
+    <PackageReference Include="Dfe.Spi.Common.UnitTesting" Version="1.0.6" PrivateAssets="All" />
+    <PackageReference Include="Dfe.Spi.Models" Version="1.0.1" PrivateAssets="All" />
 
     <!-- Microsoft -->
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.9.0" PrivateAssets="All" />

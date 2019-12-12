@@ -1,0 +1,57 @@
+{
+  "properties": {
+    "algorithm": {
+      "type": "string"
+    },
+    "entityName": {
+      "type": "string"
+    },
+    "entityReferences": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "adapterRecordReferences": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "source": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id",
+                "source"
+              ]
+            }
+          }
+        },
+        "required": [
+          "adapterRecordReferences"
+        ]
+      }
+    },
+    "externalRequestId": {
+      "type": "string"
+    },
+    "fields": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "internalRequestId": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "entityName",
+    "entityReferences",
+    "fields",
+    "internalRequestId"
+  ]
+}

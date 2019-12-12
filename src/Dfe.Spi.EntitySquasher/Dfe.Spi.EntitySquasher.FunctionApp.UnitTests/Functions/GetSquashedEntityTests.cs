@@ -1,10 +1,10 @@
 ﻿namespace Dfe.Spi.EntitySquasher.FunctionApp.UnitTests.Functions
 {
+    using Dfe.Spi.Common.UnitTesting;
     using Dfe.Spi.Common.UnitTesting.Infrastructure;
     using Dfe.Spi.EntitySquasher.Application.Models;
     using Dfe.Spi.EntitySquasher.Application.Processors.Definitions;
     using Dfe.Spi.EntitySquasher.FunctionApp.Functions;
-    using Dfe.Spi.EntitySquasher.FunctionApp.UnitTests.Infrastructure;
     using Dfe.Spi.Models;
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Http.Internal;
@@ -13,12 +13,14 @@
     using NUnit.Framework;
     using System;
     using System.IO;
+    using System.Reflection;
     using System.Text;
     using System.Threading.Tasks;
 
     [TestFixture]
     public class GetSquashedEntityTests
     {
+        private Assembly assembly;
         private GetSquashedEntity getSquashedEntity;
         private LoggerWrapper loggerWrapper;
         private Mock<IGetSquashedEntityProcessor> mockGetSquashedEntityProcessor;
@@ -26,6 +28,9 @@
         [SetUp]
         public void Arrange()
         {
+            Type type = typeof(GetSquashedEntityTests);
+            this.assembly = type.Assembly;
+
             this.mockGetSquashedEntityProcessor =
                 new Mock<IGetSquashedEntityProcessor>();
 
@@ -75,6 +80,17 @@
         }
 
         [Test]
+        public async Task Run_PostWellFormedPayloadNotConformingToSchema_ReturnsBadRequestStatusCode()
+        {
+            string requestBodyStr = this.assembly.GetSample(
+                "empty-object.json");
+
+            HttpRequest httpRequest = this.CreateHttpRequest(requestBodyStr);
+
+            await this.ReturnsBadRequestStatusCode(httpRequest);
+        }
+
+        [Test]
         public async Task Run_PostWellFormedPayloadWithUnsupportedAlgorithm_ReturnsNotFoundStatusCode()
         {
             // Arrange
@@ -85,8 +101,8 @@
             IActionResult actionResult = null;
             StatusCodeResult statusCodeResult = null;
 
-            string requestBodyStr = SamplesHelper.GetSample(
-                "empty-object.json");
+            string requestBodyStr = this.assembly.GetSample(
+                "get-squashed-entity-request-1.json");
 
             HttpRequest httpRequest = this.CreateHttpRequest(requestBodyStr);
 
@@ -133,8 +149,8 @@
                 .Setup(x => x.GetSquashedEntityAsync(It.IsAny<GetSquashedEntityRequest>()))
                 .Returns(Task.FromResult(getSquashedEntityResponse));
 
-            string requestBodyStr = SamplesHelper.GetSample(
-                "empty-object.json");
+            string requestBodyStr = this.assembly.GetSample(
+                "get-squashed-entity-request-1.json");
 
             HttpRequest httpRequest = this.CreateHttpRequest(requestBodyStr);
 

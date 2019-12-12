@@ -5,11 +5,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <!-- Microsoft -->
-    <PackageReference Include="WindowsAzure.Storage" Version="9.3.1" PrivateAssets="All" />
-
     <!-- Dfe.Spi.* -->
     <PackageReference Include="Dfe.Spi.Common.Logging" Version="1.0.7" PrivateAssets="All" />
+
+    <!-- Microsoft -->
+    <PackageReference Include="WindowsAzure.Storage" Version="9.3.1" PrivateAssets="All" />
     
     <!-- Development/Non-Runtime -->
     <PackageReference Include="StyleCop.Analyzers" Version="1.1.118" PrivateAssets="All" />

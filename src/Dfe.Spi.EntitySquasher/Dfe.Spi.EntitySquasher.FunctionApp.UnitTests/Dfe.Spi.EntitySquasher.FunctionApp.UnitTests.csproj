@@ -7,18 +7,20 @@
 
   <ItemGroup>
     <None Remove="Samples\empty-object.json" />
+    <None Remove="Samples\get-squashed-entity-request-1.json" />
   </ItemGroup>
 
   <ItemGroup>
     <EmbeddedResource Include="Samples\empty-object.json" />
+    <EmbeddedResource Include="Samples\get-squashed-entity-request-1.json" />
   </ItemGroup>
 
   <ItemGroup>
     <!-- Dfe.Spi.* -->
     <PackageReference Include="Dfe.Spi.Common.Logging" Version="1.0.7" PrivateAssets="All" />
     <PackageReference Include="Dfe.Spi.Common.Models" Version="1.0.0" PrivateAssets="All" />
-    <PackageReference Include="Dfe.Spi.Models" Version="1.0.0" PrivateAssets="All" />
-    <PackageReference Include="Dfe.Spi.Common.UnitTesting" Version="1.0.4" PrivateAssets="All" />
+    <PackageReference Include="Dfe.Spi.Models" Version="1.0.1" PrivateAssets="All" />
+    <PackageReference Include="Dfe.Spi.Common.UnitTesting" Version="1.0.6" PrivateAssets="All" />
     
     <!-- Microsoft -->
     <PackageReference Include="Microsoft.AspNetCore.Http" Version="2.1.0" PrivateAssets="All" />
@@ -27,6 +29,7 @@
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.9.0" PrivateAssets="All" />
     
     <!-- Other -->
+    <PackageReference Include="Meridian.MeaningfulToString" Version="1.0.4" PrivateAssets="All" />
     <PackageReference Include="Moq" Version="4.13.1" PrivateAssets="All" />
     <PackageReference Include="Newtonsoft.Json" Version="11.0.2" PrivateAssets="All" />
     <PackageReference Include="nunit" Version="3.11.0" PrivateAssets="All" />

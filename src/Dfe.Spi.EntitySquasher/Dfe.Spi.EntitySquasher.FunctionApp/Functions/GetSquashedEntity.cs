@@ -1,7 +1,10 @@
 namespace Dfe.Spi.EntitySquasher.FunctionApp.Functions
 {
     using System;
+    using System.Collections.Generic;
     using System.IO;
+    using System.Linq;
+    using System.Reflection;
     using System.Threading.Tasks;
     using Dfe.Spi.Common.Logging.Definitions;
     using Dfe.Spi.EntitySquasher.Application.Models;
@@ -12,14 +15,20 @@ namespace Dfe.Spi.EntitySquasher.FunctionApp.Functions
     using Microsoft.Azure.WebJobs;
     using Microsoft.Azure.WebJobs.Extensions.Http;
     using Newtonsoft.Json;
+    using NJsonSchema;
+    using NJsonSchema.Validation;
 
     /// <summary>
     /// Entry class for the <c>get-squashed-entity</c> function.
     /// </summary>
     public class GetSquashedEntity
     {
+        private const string SchemaFilename = "get-squashed-entity-body.json";
+
         private readonly IGetSquashedEntityProcessor getSquashedEntityProcessor;
         private readonly ILoggerWrapper loggerWrapper;
+
+        private JsonSchema jsonSchema;
 
         /// <summary>
         /// Initialises a new instance of the <see cref="GetSquashedEntity" />
@@ -66,7 +75,9 @@ namespace Dfe.Spi.EntitySquasher.FunctionApp.Functions
             GetSquashedEntityRequest getSquashedEntityRequest = null;
             try
             {
-                getSquashedEntityRequest = this.ParseRequest(httpRequest);
+                getSquashedEntityRequest = await this.ParseAndValidateRequest(
+                    httpRequest)
+                    .ConfigureAwait(false);
             }
             catch (JsonReaderException jsonReaderException)
             {
@@ -75,12 +86,18 @@ namespace Dfe.Spi.EntitySquasher.FunctionApp.Functions
                     $"parsing of the body of the request.",
                     jsonReaderException);
             }
+            catch (JsonSchemaValidationException jsonSchemaValidationException)
+            {
+                this.loggerWrapper.Info(
+                    $"A {nameof(JsonSchemaValidationException)} was thrown " +
+                    $"during the parsing of the body of the request.",
+                    jsonSchemaValidationException);
+            }
 
             if (getSquashedEntityRequest != null)
             {
-                this.loggerWrapper.Debug(
-                    $"Invoking {nameof(IGetSquashedEntityProcessor)}...");
-
+                // The JSON is valid and not null, but at this point, it's
+                // unknown if its valid according to the *schema*.
                 toReturn = await this.ProcessWellFormedRequestAsync(
                     getSquashedEntityRequest)
                     .ConfigureAwait(false);
@@ -90,13 +107,65 @@ namespace Dfe.Spi.EntitySquasher.FunctionApp.Functions
                 int statusCode = StatusCodes.Status400BadRequest;
 
                 this.loggerWrapper.Info(
-                    $"The {nameof(HttpRequest)} either had no body, or the " +
-                    $"body was not well-formed JSON. " +
-                    $"{nameof(statusCode)} {statusCode} will be returned.");
+                    $"The {nameof(HttpRequest)} either had no body, the " +
+                    $"body was not well-formed JSON, or the body was " +
+                    $"well-formed, but did not match the requirements as " +
+                    $"stated by the schema. {nameof(statusCode)} " +
+                    $"{statusCode} will be returned.");
 
                 // No body supplied - return 400 to reflect this.
                 toReturn = new StatusCodeResult(statusCode);
             }
+
+            return toReturn;
+        }
+
+        private async Task<JsonSchema> LoadJsonSchema()
+        {
+            JsonSchema toReturn = null;
+
+            if (this.jsonSchema == null)
+            {
+                this.loggerWrapper.Debug(
+                    $"The {nameof(JsonSchema)} for this function hasn't " +
+                    $"been loaded yet. Getting the embedded schema as a " +
+                    $"string...");
+
+                Type type = typeof(GetSquashedEntity);
+                Assembly assembly = type.Assembly;
+
+                string[] embeddedResources =
+                    assembly.GetManifestResourceNames();
+
+                string fullPath = embeddedResources
+                    .Single(x => x.EndsWith(
+                        SchemaFilename,
+                        StringComparison.InvariantCulture));
+
+                string dataStr = null;
+                using (Stream stream = assembly.GetManifestResourceStream(fullPath))
+                {
+                    using (StreamReader streamReader = new StreamReader(stream))
+                    {
+                        dataStr = await streamReader.ReadToEndAsync()
+                            .ConfigureAwait(false);
+                    }
+                }
+
+                this.loggerWrapper.Info(
+                    $"{nameof(dataStr)} loaded. Creating " +
+                    $"{nameof(JsonSchema)}...");
+
+                // Then load it.
+                this.jsonSchema = await JsonSchema.FromJsonAsync(dataStr)
+                    .ConfigureAwait(false);
+            }
+
+            toReturn = this.jsonSchema;
+
+            this.loggerWrapper.Info(
+                $"Returning {nameof(JsonSchema)} stored in memory: " +
+                $"{toReturn}.");
 
             return toReturn;
         }
@@ -108,6 +177,9 @@ namespace Dfe.Spi.EntitySquasher.FunctionApp.Functions
 
             try
             {
+                this.loggerWrapper.Debug(
+                    $"Invoking {nameof(IGetSquashedEntityProcessor)}...");
+
                 GetSquashedEntityResponse getSquashedEntityResponse =
                     await this.getSquashedEntityProcessor.GetSquashedEntityAsync(
                         getSquashedEntityRequest)
@@ -141,10 +213,12 @@ namespace Dfe.Spi.EntitySquasher.FunctionApp.Functions
             return toReturn;
         }
 
-        private GetSquashedEntityRequest ParseRequest(HttpRequest httpRequest)
+        private async Task<GetSquashedEntityRequest> ParseAndValidateRequest(
+            HttpRequest httpRequest)
         {
             GetSquashedEntityRequest toReturn = null;
 
+            // Read the body as a string...
             string getSquashedEntityRequestStr = null;
             using (StreamReader streamReader = new StreamReader(httpRequest.Body))
             {
@@ -153,7 +227,26 @@ namespace Dfe.Spi.EntitySquasher.FunctionApp.Functions
 
             this.loggerWrapper.Debug(
                 $"Body of request read, as a string value: " +
-                $"\"{getSquashedEntityRequestStr}\". Deserialising into a " +
+                $"\"{getSquashedEntityRequestStr}\".");
+
+            // Validate against the schema.
+            JsonSchema jsonSchema = await this.LoadJsonSchema()
+                .ConfigureAwait(false);
+
+            this.loggerWrapper.Debug(
+                $"Performing validation of body against " +
+                $"{nameof(JsonSchema)}...");
+
+            ICollection<ValidationError> validationErrors =
+                jsonSchema.Validate(getSquashedEntityRequestStr);
+
+            if (validationErrors.Count > 0)
+            {
+                throw new JsonSchemaValidationException(validationErrors);
+            }
+
+            this.loggerWrapper.Debug(
+                $"Deserialising body into a " +
                 $"{nameof(GetSquashedEntityRequest)} instance...");
 
             toReturn =

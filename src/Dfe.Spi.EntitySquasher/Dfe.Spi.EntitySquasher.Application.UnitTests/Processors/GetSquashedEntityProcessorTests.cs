@@ -1,23 +1,32 @@
 ﻿namespace Dfe.Spi.EntitySquasher.Application.UnitTests.Processors
 {
     using System;
+    using System.Reflection;
+    using System.Threading.Tasks;
+    using Dfe.Spi.Common.UnitTesting;
     using Dfe.Spi.Common.UnitTesting.Infrastructure;
     using Dfe.Spi.EntitySquasher.Application.Definitions;
     using Dfe.Spi.EntitySquasher.Application.Definitions.SettingsProviders;
     using Dfe.Spi.EntitySquasher.Application.Models;
     using Dfe.Spi.EntitySquasher.Application.Processors;
+    using Dfe.Spi.Models;
     using Moq;
+    using Newtonsoft.Json;
     using NUnit.Framework;
 
     [TestFixture]
     public class GetSquashedEntityProcessorTests
     {
+        private Assembly assembly;
         private GetSquashedEntityProcessor getSquashedEntityProcessor;
         private LoggerWrapper loggerWrapper;
 
         [SetUp]
         public void Arrange()
         {
+            Type type = typeof(GetSquashedEntityProcessorTests);
+            this.assembly = type.Assembly;
+
             Mock<IAlgorithmConfigurationDeclarationFileManager> mockAlgorithmConfigurationDeclarationFileManager =
                 new Mock<IAlgorithmConfigurationDeclarationFileManager>();
             Mock<IGetSquashedEntityProcessorSettingsProvider> mockGetSquashedEntityProcessorSettingsProvider =
@@ -52,6 +61,26 @@
 
             // Assert
             Assert.ThrowsAsync<ArgumentNullException>(asyncTestDelegate);
+        }
+
+        public async Task UnnamedTest()
+        {
+            // Arrange
+            string getSquashedEntityRequestStr =
+                this.assembly.GetSample("get-squashed-entity-request-1.json");
+
+            GetSquashedEntityRequest getSquashedEntityRequest =
+                JsonConvert.DeserializeObject<GetSquashedEntityRequest>(getSquashedEntityRequestStr);
+
+            GetSquashedEntityResponse actualGetSquashedEntityResponse = null;
+
+            // Act
+            actualGetSquashedEntityResponse =
+                await this.getSquashedEntityProcessor.GetSquashedEntityAsync(
+                    getSquashedEntityRequest);
+
+            // Assert
+
         }
     }
 }

@@ -8,7 +8,7 @@
     <!-- Dfe.Spi.* -->
     <PackageReference Include="Dfe.Spi.Common.Logging" Version="1.0.7" PrivateAssets="All" />
     <PackageReference Include="Dfe.Spi.Common.Models" Version="1.0.0" PrivateAssets="All" />
-    <PackageReference Include="Dfe.Spi.Models" Version="1.0.0" PrivateAssets="All" />
+    <PackageReference Include="Dfe.Spi.Models" Version="1.0.1" PrivateAssets="All" />
 
     <!-- Other -->
     <PackageReference Include="Meridian.MeaningfulToString" Version="1.0.4" PrivateAssets="All" />

@@ -10,9 +10,9 @@
     public class EntityAdapter : NamedSettingEntityBase
     {
         /// <summary>
-        /// Gets or sets the URL of the entity adapter.
+        /// Gets or sets the base URL of the entity adapter.
         /// </summary>
-        public Uri Url
+        public Uri BaseUrl
         {
             get;
             set;
