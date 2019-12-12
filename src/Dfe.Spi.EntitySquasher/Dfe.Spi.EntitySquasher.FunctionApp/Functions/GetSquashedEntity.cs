@@ -189,12 +189,11 @@ namespace Dfe.Spi.EntitySquasher.FunctionApp.Functions
                     $"{nameof(IGetSquashedEntityProcessor)} invoked with " +
                     $"success.");
 
-                ModelsBase modelsBase = getSquashedEntityResponse.ModelsBase;
-
                 this.loggerWrapper.Info(
-                    $"Returning {nameof(modelsBase)}: {modelsBase}.");
+                    $"Returning {nameof(getSquashedEntityResponse)}: " +
+                    $"{getSquashedEntityResponse}.");
 
-                toReturn = new JsonResult(modelsBase);
+                toReturn = new JsonResult(getSquashedEntityResponse);
             }
             catch (FileNotFoundException)
             {

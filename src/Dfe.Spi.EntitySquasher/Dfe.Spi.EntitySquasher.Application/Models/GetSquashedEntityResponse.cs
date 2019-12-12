@@ -1,5 +1,6 @@
 ﻿namespace Dfe.Spi.EntitySquasher.Application.Models
 {
+    using System.Collections.Generic;
     using System.Diagnostics.CodeAnalysis;
     using Dfe.Spi.EntitySquasher.Application.Processors.Definitions;
     using Dfe.Spi.Models;
@@ -12,9 +13,9 @@
     public class GetSquashedEntityResponse : RequestResponseBase
     {
         /// <summary>
-        /// Gets or sets the requested, squashed entity.
+        /// Gets or sets the requested, squashed entities.
         /// </summary>
-        public ModelsBase ModelsBase
+        public IEnumerable<ModelsBase> Entities
         {
             get;
             set;

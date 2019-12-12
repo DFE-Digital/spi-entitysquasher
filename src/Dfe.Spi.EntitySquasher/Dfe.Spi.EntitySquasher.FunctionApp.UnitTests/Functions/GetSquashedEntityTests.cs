@@ -128,26 +128,26 @@
         public async Task Run_PostWellFormedPayloadWithSupportedAlgorithm_ReturnsWithLearningProviderBody()
         {
             // Arrange
-            LearningProvider expectedBody =
-                new LearningProvider()
-                {
-                    // Doesn't need anything. Just needs to exist.
-                };
-
-            LearningProvider actualBody = null;
-
             IActionResult actionResult = null;
             JsonResult jsonResult = null;
 
-            GetSquashedEntityResponse getSquashedEntityResponse =
+            GetSquashedEntityResponse expectedGetSquashedEntityResponse =
                 new GetSquashedEntityResponse()
                 {
-                    ModelsBase = expectedBody,
+                    Entities = new ModelsBase[]
+                    {
+                        new ModelsBase()
+                        {
+                            // Doesn't really even need an empty object,
+                            // to be honest.
+                        },
+                    }
                 };
+            GetSquashedEntityResponse actualGetSquashedEntityResponse = null;
 
             this.mockGetSquashedEntityProcessor
                 .Setup(x => x.GetSquashedEntityAsync(It.IsAny<GetSquashedEntityRequest>()))
-                .Returns(Task.FromResult(getSquashedEntityResponse));
+                .Returns(Task.FromResult(expectedGetSquashedEntityResponse));
 
             string requestBodyStr = this.assembly.GetSample(
                 "get-squashed-entity-request-1.json");
@@ -161,9 +161,11 @@
             Assert.IsInstanceOf<JsonResult>(actionResult);
 
             jsonResult = (JsonResult)actionResult;
-            actualBody = (LearningProvider)jsonResult.Value;
+            actualGetSquashedEntityResponse = (GetSquashedEntityResponse)jsonResult.Value;
 
-            Assert.AreEqual(expectedBody, actualBody);
+            Assert.AreEqual(
+                expectedGetSquashedEntityResponse,
+                actualGetSquashedEntityResponse);
 
             // Log output...
             string logOutput = this.loggerWrapper.ReturnLog();
