@@ -1,6 +1,8 @@
 ﻿namespace Dfe.Spi.EntitySquasher.Application.Processors
 {
     using System;
+    using System.Collections.Generic;
+    using System.Linq;
     using System.Threading.Tasks;
     using Dfe.Spi.Common.Logging.Definitions;
     using Dfe.Spi.EntitySquasher.Application.Definitions;
@@ -76,6 +78,32 @@
             // 1) Pull from the requested adapters and;
             // 2) Squash the entities together according to the rules outlined
             //    in the ACDF.
+            string entityName = getSquashedEntityRequest.EntityName;
+
+            IEnumerable<EntityReference> entityReferences =
+                getSquashedEntityRequest.EntityReferences;
+
+            IEnumerable<Spi.Models.ModelsBase> entities = entityReferences
+                .Select(x => this.ProcessSingleEntityReference(entityName, x));
+
+            toReturn = new GetSquashedEntityResponse()
+            {
+                Entities = entities,
+            };
+
+            return toReturn;
+        }
+
+        private Spi.Models.ModelsBase ProcessSingleEntityReference(
+            string entityName,
+            EntityReference entityReference)
+        {
+            Spi.Models.ModelsBase toReturn = null;
+
+            // TODO:
+            // 1) Call all adapters specified in the entity reference
+            //    at the same time. Pull back the requested ModelBase.
+            // 2) Perform the squashing.
             return toReturn;
         }
 

@@ -46,7 +46,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Dfe.Spi.EntitySquasher.Application\Dfe.Spi.EntitySquasher.Application.csproj" />
-    <ProjectReference Include="..\Dfe.Spi.EntitySquasher.AzureStorage\Dfe.Spi.EntitySquasher.AzureStorage.csproj" />
+    <ProjectReference Include="..\Dfe.Spi.EntitySquasher.Infrastructure.AzureStorage\Dfe.Spi.EntitySquasher.Infrastructure.AzureStorage.csproj" />
   </ItemGroup>
   
   <ItemGroup>

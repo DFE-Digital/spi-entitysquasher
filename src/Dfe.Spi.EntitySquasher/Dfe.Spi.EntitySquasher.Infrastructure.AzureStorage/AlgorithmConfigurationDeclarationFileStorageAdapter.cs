@@ -1,4 +1,4 @@
-﻿namespace Dfe.Spi.EntitySquasher.AzureStorage
+﻿namespace Dfe.Spi.EntitySquasher.Infrastructure.AzureStorage
 {
     using System;
     using System.Collections.Generic;

@@ -4,7 +4,11 @@
       "type": "string"
     },
     "entityName": {
-      "type": "string"
+      "type": "string",
+      "enum": [
+        "LearningProvider",
+        "Governor"
+      ]
     },
     "entityReferences": {
       "type": "array",

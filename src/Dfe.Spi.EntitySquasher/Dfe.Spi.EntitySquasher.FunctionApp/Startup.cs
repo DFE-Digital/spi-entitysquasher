@@ -9,10 +9,10 @@
     using Dfe.Spi.EntitySquasher.Application.Definitions.SettingsProviders;
     using Dfe.Spi.EntitySquasher.Application.Processors;
     using Dfe.Spi.EntitySquasher.Application.Processors.Definitions;
-    using Dfe.Spi.EntitySquasher.AzureStorage;
     using Dfe.Spi.EntitySquasher.Domain.Definitions;
     using Dfe.Spi.EntitySquasher.Domain.Definitions.SettingsProviders;
     using Dfe.Spi.EntitySquasher.FunctionApp.SettingsProviders;
+    using Dfe.Spi.EntitySquasher.Infrastructure.AzureStorage;
     using Microsoft.Azure.Functions.Extensions.DependencyInjection;
     using Microsoft.Azure.WebJobs.Logging;
     using Microsoft.Extensions.DependencyInjection;
