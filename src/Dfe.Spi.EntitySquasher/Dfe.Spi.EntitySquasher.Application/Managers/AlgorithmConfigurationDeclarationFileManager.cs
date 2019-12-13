@@ -2,7 +2,6 @@
 {
     using System.Threading.Tasks;
     using Dfe.Spi.Common.Logging.Definitions;
-    using Dfe.Spi.EntitySquasher.Application.Definitions;
     using Dfe.Spi.EntitySquasher.Application.Definitions.Caches;
     using Dfe.Spi.EntitySquasher.Application.Definitions.Managers;
     using Dfe.Spi.EntitySquasher.Domain.Definitions;
@@ -51,19 +50,26 @@
         {
             AlgorithmConfigurationDeclarationFile toReturn = null;
 
-            this.loggerWrapper.Info(
-                    $"No {nameof(AlgorithmConfigurationDeclarationFile)} " +
-                    $"found in the cache for algorithm \"{key}\". " +
-                    $"Fetching from storage...");
+            this.loggerWrapper.Debug($"Fetching from storage...");
 
             toReturn = await this.algorithmConfigurationDeclarationFileStorageAdapter.GetAlgorithmConfigurationDeclarationFileAsync(
                 key)
                 .ConfigureAwait(false);
 
-            this.loggerWrapper.Info(
-                $"{nameof(AlgorithmConfigurationDeclarationFile)} " +
-                $"pulled from storage, for algorithm \"{key}\": " +
-                $"{toReturn}.");
+            if (toReturn != null)
+            {
+                this.loggerWrapper.Info(
+                    $"{nameof(AlgorithmConfigurationDeclarationFile)} " +
+                    $"pulled from storage, for algorithm \"{key}\": " +
+                    $"{toReturn}.");
+            }
+            else
+            {
+                this.loggerWrapper.Warning(
+                    $"Could not find " +
+                    $"{nameof(AlgorithmConfigurationDeclarationFile)} in " +
+                    $"storage for key \"{key}\"!");
+            }
 
             return toReturn;
         }

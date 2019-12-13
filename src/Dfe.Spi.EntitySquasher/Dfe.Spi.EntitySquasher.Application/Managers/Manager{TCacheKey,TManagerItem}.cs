@@ -44,7 +44,7 @@
         {
             TManagerItem toReturn = null;
 
-            string typeName = typeof(TCacheKey).Name;
+            string typeName = typeof(TManagerItem).Name;
 
             this.loggerWrapper.Debug(
                 $"Checking the cache for an instance of {typeName} for " +
@@ -54,16 +54,29 @@
 
             if (toReturn == null)
             {
+                this.loggerWrapper.Debug(
+                    $"No {typeName} found in cache with key \"{key}\". " +
+                    $"Attempting to initialise a value for this key...");
+
                 toReturn = await this.InitialiseCacheItem(key)
                     .ConfigureAwait(false);
 
-                this.loggerWrapper.Debug(
-                    $"Storing {toReturn} in cache with key \"{key}\"...");
+                if (toReturn != null)
+                {
+                    this.loggerWrapper.Debug(
+                        $"Storing {toReturn} in cache with key \"{key}\"...");
 
-                this.cache.AddCacheItem(key, toReturn);
+                    this.cache.AddCacheItem(key, toReturn);
 
-                this.loggerWrapper.Info(
-                    $"{toReturn} stored in cache with key \"{key}\".");
+                    this.loggerWrapper.Info(
+                        $"{toReturn} stored in cache with key \"{key}\".");
+                }
+                else
+                {
+                    this.loggerWrapper.Warning(
+                        $"The manager could not initialise a value for key " +
+                        $"\"{key}\"!");
+                }
             }
             else
             {

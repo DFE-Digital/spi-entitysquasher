@@ -19,6 +19,7 @@
     {
         private readonly IAlgorithmConfigurationDeclarationFileManager algorithmConfigurationDeclarationFileManager;
         private readonly IEntityAdapterClientFactory entityAdapterClientFactory;
+        private readonly ILoggerWrapper loggerWrapper;
 
         /// <summary>
         /// Initialises a new instance of the
@@ -48,6 +49,7 @@
         {
             this.algorithmConfigurationDeclarationFileManager = algorithmConfigurationDeclarationFileManager;
             this.entityAdapterClientFactory = entityAdapterClientFactory;
+            this.loggerWrapper = loggerWrapper;
         }
 
         /// <inheritdoc />
@@ -66,6 +68,12 @@
             string name = key.Name;
 
             // 1) Pull back the ACDF from the manager and;
+            this.loggerWrapper.Debug(
+                $"Pulling back " +
+                $"{nameof(AlgorithmConfigurationDeclarationFile)} for " +
+                $"algorithm \"{algorithm}\" from the " +
+                $"{nameof(IAlgorithmConfigurationDeclarationFileManager)}...");
+
             AlgorithmConfigurationDeclarationFile algorithmConfigurationDeclarationFile =
                 await this.algorithmConfigurationDeclarationFileManager.GetAsync(
                     algorithm)
@@ -75,6 +83,12 @@
             //    adapter using the name and;
             if (algorithmConfigurationDeclarationFile != null)
             {
+                this.loggerWrapper.Info(
+                    $"Pulled back " +
+                    $"{algorithmConfigurationDeclarationFile}. " +
+                    $"Searching for {nameof(EntityAdapter)} with " +
+                    $"{nameof(name)} \"{name}\"...");
+
                 EntityAdapter entityAdapter =
                     algorithmConfigurationDeclarationFile.EntityAdapters
                         .SingleOrDefault(x => x.Name == name);
@@ -83,11 +97,30 @@
                 //    factory and return it.
                 if (entityAdapter != null)
                 {
+                    this.loggerWrapper.Info(
+                        $"Found matching {nameof(EntityAdapter)}: " +
+                        $"{entityAdapter}.");
+
                     Uri baseUrl = entityAdapter.BaseUrl;
+
+                    this.loggerWrapper.Debug($"{nameof(baseUrl)} = {baseUrl}");
 
                     toReturn = this.entityAdapterClientFactory.Create(
                         baseUrl);
+
+                    this.loggerWrapper.Info(
+                        $"Created {nameof(IEntityAdapterClient)} with " +
+                        $"{nameof(baseUrl)} = {baseUrl}.");
                 }
+            }
+            else
+            {
+                this.loggerWrapper.Warning(
+                    $"The " +
+                    $"{nameof(IAlgorithmConfigurationDeclarationFileManager)} " +
+                    $"did not return a " +
+                    $"{nameof(AlgorithmConfigurationDeclarationFile)} for " +
+                    $"{nameof(algorithm)} \"{algorithm}\".");
             }
 
             return toReturn;

@@ -13,6 +13,7 @@
     public class AlgorithmConfigurationDeclarationFileManagerTests
     {
         private Mock<IAlgorithmConfigurationDeclarationFileCache> mockAlgorithmConfigurationDeclarationFileCache;
+        private Mock<IAlgorithmConfigurationDeclarationFileStorageAdapter> mockAlgorithmConfigurationDeclarationFileStorageAdapter;
 
         private AlgorithmConfigurationDeclarationFileManager algorithmConfigurationDeclarationFileManager;
         private LoggerWrapper loggerWrapper;
@@ -22,7 +23,7 @@
         {
             this.mockAlgorithmConfigurationDeclarationFileCache =
                 new Mock<IAlgorithmConfigurationDeclarationFileCache>();
-            Mock<IAlgorithmConfigurationDeclarationFileStorageAdapter> mockAlgorithmConfigurationDeclarationFileStorageAdapter =
+            this.mockAlgorithmConfigurationDeclarationFileStorageAdapter =
                 new Mock<IAlgorithmConfigurationDeclarationFileStorageAdapter>();
 
             IAlgorithmConfigurationDeclarationFileCache algorithmConfigurationDeclarationFileCache =
@@ -40,7 +41,7 @@
         }
 
         [Test]
-        public async Task GetAlgorithmConfigurationDeclarationFileAsync_AcdfDoesNotExistForAlgorithm_ReturnsNull()
+        public async Task GetAsync_AcdfDoesNotExistForAlgorithm_ReturnsNull()
         {
             // Arrange
             string algorithm = "algorithm-that-doesnt-exist";
@@ -55,10 +56,10 @@
             Assert.IsNull(algorithmConfigurationDeclarationFile);
 
             string logOutput = this.loggerWrapper.ReturnLog();
-        }
+       }
 
         [Test]
-        public async Task GetAlgorithmConfigurationDeclarationFileAsync_AcdfExistsForAlgorithm_ReturnsAcdf()
+        public async Task GetAsync_AcdfExistsInCacheForAlgorithm_ReturnsAcdf()
         {
             // Arrange
             AlgorithmConfigurationDeclarationFile expectedAlgorithmConfigurationDeclarationFile =
@@ -72,6 +73,37 @@
             this.mockAlgorithmConfigurationDeclarationFileCache
                 .Setup(x => x.GetCacheItem(It.IsAny<string>()))
                 .Returns(expectedAlgorithmConfigurationDeclarationFile);
+
+            string algorithm = "algorithm-that-does-exist";
+
+            // Act
+            actualAlgorithmConfigurationDeclarationFile =
+                await this.algorithmConfigurationDeclarationFileManager.GetAsync(
+                    algorithm);
+
+            // Assert
+            Assert.AreEqual(
+                expectedAlgorithmConfigurationDeclarationFile,
+                actualAlgorithmConfigurationDeclarationFile);
+
+            string logOutput = this.loggerWrapper.ReturnLog();
+        }
+
+        [Test]
+        public async Task GetAsync_AcdfExistsInStorageForAlgorithm_ReturnsAcdf()
+        {
+            // Arrange
+            AlgorithmConfigurationDeclarationFile expectedAlgorithmConfigurationDeclarationFile =
+                new AlgorithmConfigurationDeclarationFile()
+                {
+                    // Doesn't need any configuration.. just needs to be
+                    // returned...
+                };
+            AlgorithmConfigurationDeclarationFile actualAlgorithmConfigurationDeclarationFile = null;
+
+            this.mockAlgorithmConfigurationDeclarationFileStorageAdapter
+                .Setup(x => x.GetAlgorithmConfigurationDeclarationFileAsync(It.IsAny<string>()))
+                .Returns(Task.FromResult(expectedAlgorithmConfigurationDeclarationFile));
 
             string algorithm = "algorithm-that-does-exist";
 

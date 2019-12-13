@@ -72,6 +72,8 @@
                 $"Fetching " +
                 $"{nameof(AlgorithmConfigurationDeclarationFile)}...");
 
+            // TODO: Are we even using this? Remove at some point? Can leave
+            //       in for now, I guess.
             AlgorithmConfigurationDeclarationFile algorithmConfigurationDeclarationFile =
                 await this.algorithmConfigurationDeclarationFileManager.GetAsync(
                     algorithm)
