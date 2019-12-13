@@ -112,6 +112,13 @@
                         $"Created {nameof(IEntityAdapterClient)} with " +
                         $"{nameof(baseUrl)} = {baseUrl}.");
                 }
+                else
+                {
+                    this.loggerWrapper.Warning(
+                        $"Found {algorithmConfigurationDeclarationFile}, " +
+                        $"but could not find {nameof(EntityAdapter)} with " +
+                        $"{nameof(name)} = \"{name}\"!");
+                }
             }
             else
             {
