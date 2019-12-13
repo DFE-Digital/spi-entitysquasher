@@ -7,7 +7,7 @@
     /// <see cref="AlgorithmConfigurationDeclarationFile" /> manager.
     /// </summary>
     public interface IAlgorithmConfigurationDeclarationFileManager
-        : IManager<AlgorithmConfigurationDeclarationFile>
+        : IManager<string, AlgorithmConfigurationDeclarationFile>
     {
         // Nothing - just inherits what it needs.
     }

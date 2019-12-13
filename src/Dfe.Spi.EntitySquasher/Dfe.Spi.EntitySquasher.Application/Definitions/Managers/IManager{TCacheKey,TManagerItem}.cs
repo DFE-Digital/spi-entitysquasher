@@ -5,10 +5,13 @@
     /// <summary>
     /// Describes the operations of a manager.
     /// </summary>
+    /// <typeparam name="TCacheKey">
+    /// The type of key used in the underlying storage.
+    /// </typeparam>
     /// <typeparam name="TManagerItem">
     /// The type of item being managed.
     /// </typeparam>
-    public interface IManager<TManagerItem>
+    public interface IManager<TCacheKey, TManagerItem>
         where TManagerItem : class
     {
         /// <summary>
@@ -18,8 +21,9 @@
         /// The key.
         /// </param>
         /// <returns>
-        /// An instance of type <typeparamref name="TManagerItem" />.
+        /// An instance of type
+        /// <typeparamref name="TManagerItem" />.
         /// </returns>
-        Task<TManagerItem> GetAsync(string key);
+        Task<TManagerItem> GetAsync(TCacheKey key);
     }
 }

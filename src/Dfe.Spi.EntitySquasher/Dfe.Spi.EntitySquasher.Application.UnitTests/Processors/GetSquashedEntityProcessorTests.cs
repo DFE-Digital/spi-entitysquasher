@@ -28,11 +28,15 @@
 
             Mock<IAlgorithmConfigurationDeclarationFileManager> mockAlgorithmConfigurationDeclarationFileManager =
                 new Mock<IAlgorithmConfigurationDeclarationFileManager>();
+            Mock<IEntityAdapterClientManager> mockEntityAdapterClientManager =
+                new Mock<IEntityAdapterClientManager>();
             Mock<IGetSquashedEntityProcessorSettingsProvider> mockGetSquashedEntityProcessorSettingsProvider =
                 new Mock<IGetSquashedEntityProcessorSettingsProvider>();
 
             IAlgorithmConfigurationDeclarationFileManager algorithmConfigurationDeclarationFileManager =
                 mockAlgorithmConfigurationDeclarationFileManager.Object;
+            IEntityAdapterClientManager entityAdapterClientManager =
+                mockEntityAdapterClientManager.Object;
             IGetSquashedEntityProcessorSettingsProvider getSquashedEntityProcessorSettingsProvider =
                 mockGetSquashedEntityProcessorSettingsProvider.Object;
 
@@ -40,6 +44,7 @@
 
             this.getSquashedEntityProcessor = new GetSquashedEntityProcessor(
                 algorithmConfigurationDeclarationFileManager,
+                entityAdapterClientManager,
                 getSquashedEntityProcessorSettingsProvider,
                 this.loggerWrapper);
         }

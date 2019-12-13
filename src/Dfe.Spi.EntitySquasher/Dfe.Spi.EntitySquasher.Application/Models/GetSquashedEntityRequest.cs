@@ -9,7 +9,8 @@
     /// <see cref="IGetSquashedEntityProcessor.GetSquashedEntityAsync(GetSquashedEntityRequest)" />.
     /// </summary>
     [ExcludeFromCodeCoverage]
-    public class GetSquashedEntityRequest : RequestResponseBase
+    public class GetSquashedEntityRequest
+        : RequestResponseBase
     {
         /// <summary>
         /// Gets or sets a set of <see cref="EntityReference" /> instances.

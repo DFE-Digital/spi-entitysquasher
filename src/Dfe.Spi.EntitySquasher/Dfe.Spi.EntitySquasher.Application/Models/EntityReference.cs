@@ -7,7 +7,7 @@
     /// Represents an individual entity reference.
     /// </summary>
     [ExcludeFromCodeCoverage]
-    public class EntityReference
+    public class EntityReference : ModelsBase
     {
         /// <summary>
         /// Gets or sets the adapter record references to squash.

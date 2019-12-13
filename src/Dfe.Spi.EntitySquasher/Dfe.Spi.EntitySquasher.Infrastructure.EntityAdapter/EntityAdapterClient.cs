@@ -26,7 +26,10 @@
         }
 
         /// <inheritdoc />
-        public Task<ModelsBase> GetEntityAsync(string id, IEnumerable<string> fields)
+        public Task<ModelsBase> GetEntityAsync(
+            string entityName,
+            string id,
+            IEnumerable<string> fields)
         {
             // TODO: Maybe later. This is going to be tricky to do with no
             //       actual API to call.

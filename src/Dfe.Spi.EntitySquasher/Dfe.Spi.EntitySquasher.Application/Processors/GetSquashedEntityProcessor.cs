@@ -9,6 +9,7 @@
     using Dfe.Spi.EntitySquasher.Application.Definitions.SettingsProviders;
     using Dfe.Spi.EntitySquasher.Application.Models;
     using Dfe.Spi.EntitySquasher.Application.Processors.Definitions;
+    using Dfe.Spi.EntitySquasher.Domain.Definitions;
     using Dfe.Spi.EntitySquasher.Domain.Models.Acdf;
 
     /// <summary>
@@ -17,6 +18,7 @@
     public class GetSquashedEntityProcessor : IGetSquashedEntityProcessor
     {
         private readonly IAlgorithmConfigurationDeclarationFileManager algorithmConfigurationDeclarationFileManager;
+        private readonly IEntityAdapterClientManager entityAdapterClientManager;
         private readonly IGetSquashedEntityProcessorSettingsProvider getSquashedEntityProcessorSettingsProvider;
         private readonly ILoggerWrapper loggerWrapper;
 
@@ -28,6 +30,9 @@
         /// An instance of type
         /// <see cref="IAlgorithmConfigurationDeclarationFileManager" />.
         /// </param>
+        /// <param name="entityAdapterClientManager">
+        /// An instance of type <see cref="IEntityAdapterClientManager" />.
+        /// </param>
         /// <param name="getSquashedEntityProcessorSettingsProvider">
         /// An instance of type
         /// <see cref="IGetSquashedEntityProcessorSettingsProvider" />.
@@ -37,10 +42,12 @@
         /// </param>
         public GetSquashedEntityProcessor(
             IAlgorithmConfigurationDeclarationFileManager algorithmConfigurationDeclarationFileManager,
+            IEntityAdapterClientManager entityAdapterClientManager,
             IGetSquashedEntityProcessorSettingsProvider getSquashedEntityProcessorSettingsProvider,
             ILoggerWrapper loggerWrapper)
         {
             this.algorithmConfigurationDeclarationFileManager = algorithmConfigurationDeclarationFileManager;
+            this.entityAdapterClientManager = entityAdapterClientManager;
             this.getSquashedEntityProcessorSettingsProvider = getSquashedEntityProcessorSettingsProvider;
             this.loggerWrapper = loggerWrapper;
         }
@@ -79,6 +86,7 @@
             // 2) Squash the entities together according to the rules outlined
             //    in the ACDF.
             string entityName = getSquashedEntityRequest.EntityName;
+            IEnumerable<string> fields = getSquashedEntityRequest.Fields;
 
             IEnumerable<EntityReference> entityReferences =
                 getSquashedEntityRequest.EntityReferences;
@@ -96,7 +104,9 @@
                 // This can be done with LINQ, but looks messy AF with the
                 // async stuff going on.
                 modelsBase = await this.ProcessSingleEntityReferenceAsync(
+                    algorithm,
                     entityName,
+                    fields,
                     entityReference)
                     .ConfigureAwait(false);
 
@@ -112,7 +122,9 @@
         }
 
         private async Task<Spi.Models.ModelsBase> ProcessSingleEntityReferenceAsync(
+            string algorithm,
             string entityName,
+            IEnumerable<string> fields,
             EntityReference entityReference)
         {
             Spi.Models.ModelsBase toReturn = null;
@@ -120,10 +132,22 @@
             // 1) Call all adapters specified in the entity reference
             //    at the same time. First, get the tasks to pull back the
             //    ModelsBases.
+            IEnumerable<AdapterRecordReference> adapterRecordReferences =
+                entityReference.AdapterRecordReferences;
+
             List<Task<Spi.Models.ModelsBase>> fetchTasks =
-                entityReference.AdapterRecordReferences
-                    .Select(this.GetEntityAsyncTasks)
-                    .ToList();
+                new List<Task<Spi.Models.ModelsBase>>();
+
+            Task<Spi.Models.ModelsBase> task = null;
+            foreach (AdapterRecordReference adapterRecordReference in adapterRecordReferences)
+            {
+                task = await this.GetEntityAsyncTaskAsync(
+                    algorithm,
+                    entityName,
+                    fields,
+                    adapterRecordReference)
+                    .ConfigureAwait(false);
+            }
 
             // Then, execute them all and wait for the pulling back of all
             // tasks to complete, in parallel (so basically, yeild).
@@ -138,15 +162,37 @@
             return toReturn;
         }
 
-        private Task<Spi.Models.ModelsBase> GetEntityAsyncTasks(
+        private async Task<Task<Spi.Models.ModelsBase>> GetEntityAsyncTaskAsync(
+            string algorithm,
+            string entityName,
+            IEnumerable<string> fields,
             AdapterRecordReference adapterRecordReference)
         {
             Task<Spi.Models.ModelsBase> toReturn = null;
 
-            // TODO:
-            // 1) Check a cache for entity adapter clients. If the cache
-            //    exists, use it. Otherwise, create it, and use it.
-            // 2) Return the task on the adapter.
+            string source = adapterRecordReference.Source;
+
+            EntityAdapterClientKey entityAdapterClientKey =
+                new EntityAdapterClientKey()
+                {
+                    Algorithm = algorithm,
+                    Name = source,
+                };
+
+            // Get the entity adapter client from the manager and...
+            IEntityAdapterClient entityAdapterClient =
+                await this.entityAdapterClientManager.GetAsync(
+                    entityAdapterClientKey)
+                    .ConfigureAwait(false);
+
+            // Get the task, and return it.
+            string id = adapterRecordReference.Id;
+
+            toReturn = entityAdapterClient.GetEntityAsync(
+                entityName,
+                id,
+                fields);
+
             return toReturn;
         }
 

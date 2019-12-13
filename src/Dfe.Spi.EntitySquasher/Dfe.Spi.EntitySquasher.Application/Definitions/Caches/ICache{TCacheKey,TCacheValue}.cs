@@ -3,11 +3,14 @@
     /// <summary>
     /// Describes the operations of a cache.
     /// </summary>
-    /// <typeparam name="TCacheItem">
+    /// <typeparam name="TCacheKey">
+    /// The type of key used in the underlying storage.
+    /// </typeparam>
+    /// <typeparam name="TCacheValue">
     /// The type of item to store in the cache.
     /// </typeparam>
-    public interface ICache<TCacheItem>
-        where TCacheItem : class
+    public interface ICache<TCacheKey, TCacheValue>
+        where TCacheValue : class
     {
         /// <summary>
         /// Adds an item to the cache.
@@ -16,9 +19,9 @@
         /// The key.
         /// </param>
         /// <param name="cacheItem">
-        /// An instance of type <typeparamref name="TCacheItem" />.
+        /// An instance of type <typeparamref name="TCacheValue" />.
         /// </param>
-        void AddCacheItem(string key, TCacheItem cacheItem);
+        void AddCacheItem(TCacheKey key, TCacheValue cacheItem);
 
         /// <summary>
         /// Gets an item from the cache, unless not found, in which case null.
@@ -27,9 +30,9 @@
         /// The key.
         /// </param>
         /// <returns>
-        /// An instance of type <typeparamref name="TCacheItem" />, unless not
+        /// An instance of type <typeparamref name="TCacheValue" />, unless not
         /// found, then null.
         /// </returns>
-        TCacheItem GetCacheItem(string key);
+        TCacheValue GetCacheItem(TCacheKey key);
     }
 }
