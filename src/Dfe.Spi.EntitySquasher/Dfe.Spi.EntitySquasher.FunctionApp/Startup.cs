@@ -4,11 +4,11 @@
     using System.Diagnostics.CodeAnalysis;
     using Dfe.Spi.Common.Logging;
     using Dfe.Spi.Common.Logging.Definitions;
-    using Dfe.Spi.EntitySquasher.Application;
     using Dfe.Spi.EntitySquasher.Application.Caches;
-    using Dfe.Spi.EntitySquasher.Application.Definitions;
     using Dfe.Spi.EntitySquasher.Application.Definitions.Caches;
+    using Dfe.Spi.EntitySquasher.Application.Definitions.Managers;
     using Dfe.Spi.EntitySquasher.Application.Definitions.SettingsProviders;
+    using Dfe.Spi.EntitySquasher.Application.Managers;
     using Dfe.Spi.EntitySquasher.Application.Processors;
     using Dfe.Spi.EntitySquasher.Application.Processors.Definitions;
     using Dfe.Spi.EntitySquasher.Domain.Definitions;
@@ -42,10 +42,13 @@
 
             AddSettingsProviders(serviceCollection);
 
+            AddCaches(serviceCollection);
+
+            AddManagers(serviceCollection);
+
             serviceCollection
                 .AddScoped<IGetSquashedEntityProcessor, GetSquashedEntityProcessor>()
-                .AddScoped<IAlgorithmConfigurationDeclarationFileStorageAdapter, AlgorithmConfigurationDeclarationFileStorageAdapter>()
-                .AddScoped<IAlgorithmConfigurationDeclarationFileManager, AlgorithmConfigurationDeclarationFileManager>();
+                .AddScoped<IAlgorithmConfigurationDeclarationFileStorageAdapter, AlgorithmConfigurationDeclarationFileStorageAdapter>();
         }
 
         private static void AddLogging(IServiceCollection serviceCollection)
@@ -68,6 +71,12 @@
             serviceCollection
                 .AddSingleton<IAlgorithmConfigurationDeclarationFileCache, AlgorithmConfigurationDeclarationFileCache>()
                 .AddSingleton<IEntityAdapterClientCache, EntityAdapterClientCache>();
+        }
+
+        private static void AddManagers(IServiceCollection serviceCollection)
+        {
+            serviceCollection
+                .AddScoped<IAlgorithmConfigurationDeclarationFileManager, AlgorithmConfigurationDeclarationFileManager>();
         }
 
         private static ILogger CreateILogger(IServiceProvider serviceProvider)

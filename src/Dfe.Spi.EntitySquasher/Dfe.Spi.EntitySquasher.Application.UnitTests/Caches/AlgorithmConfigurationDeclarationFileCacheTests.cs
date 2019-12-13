@@ -1,4 +1,4 @@
-﻿namespace Dfe.Spi.EntitySquasher.Application.UnitTests
+﻿namespace Dfe.Spi.EntitySquasher.Application.UnitTests.Caches
 {
     using Dfe.Spi.EntitySquasher.Application.Caches;
     using Dfe.Spi.EntitySquasher.Domain.Models.Acdf;

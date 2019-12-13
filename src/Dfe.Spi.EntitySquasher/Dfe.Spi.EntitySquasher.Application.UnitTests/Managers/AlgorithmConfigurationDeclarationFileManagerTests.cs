@@ -1,7 +1,8 @@
-﻿namespace Dfe.Spi.EntitySquasher.Application.UnitTests
+﻿namespace Dfe.Spi.EntitySquasher.Application.UnitTests.Managers
 {
     using Dfe.Spi.Common.UnitTesting.Infrastructure;
     using Dfe.Spi.EntitySquasher.Application.Definitions.Caches;
+    using Dfe.Spi.EntitySquasher.Application.Managers;
     using Dfe.Spi.EntitySquasher.Domain.Definitions;
     using Dfe.Spi.EntitySquasher.Domain.Models.Acdf;
     using Moq;
@@ -47,7 +48,7 @@
 
             // Act
             algorithmConfigurationDeclarationFile =
-                await this.algorithmConfigurationDeclarationFileManager.GetAlgorithmConfigurationDeclarationFileAsync(
+                await this.algorithmConfigurationDeclarationFileManager.GetAsync(
                     algorithm);
 
             // Assert
@@ -76,7 +77,7 @@
 
             // Act
             actualAlgorithmConfigurationDeclarationFile =
-                await this.algorithmConfigurationDeclarationFileManager.GetAlgorithmConfigurationDeclarationFileAsync(
+                await this.algorithmConfigurationDeclarationFileManager.GetAsync(
                     algorithm);
 
             // Assert

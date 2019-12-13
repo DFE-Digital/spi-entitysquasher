@@ -4,7 +4,7 @@
     /// Describes the operations of a cache.
     /// </summary>
     /// <typeparam name="TCacheItem">
-    /// The item to store in the cache.
+    /// The type of item to store in the cache.
     /// </typeparam>
     public interface ICache<TCacheItem>
         where TCacheItem : class

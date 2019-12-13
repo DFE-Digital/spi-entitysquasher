@@ -7,7 +7,7 @@
     /// Implements <see cref="ICache{TCacheItem}" />.
     /// </summary>
     /// <typeparam name="TCacheItem">
-    /// The item to store in the cache.
+    /// The type of item to store in the cache.
     /// </typeparam>
     public abstract class Cache<TCacheItem> : ICache<TCacheItem>
         where TCacheItem : class
