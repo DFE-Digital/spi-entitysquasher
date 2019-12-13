@@ -3,6 +3,7 @@
     using System.Threading.Tasks;
     using Dfe.Spi.Common.Logging.Definitions;
     using Dfe.Spi.EntitySquasher.Application.Definitions;
+    using Dfe.Spi.EntitySquasher.Application.Definitions.Caches;
     using Dfe.Spi.EntitySquasher.Domain.Definitions;
     using Dfe.Spi.EntitySquasher.Domain.Models.Acdf;
 
@@ -53,7 +54,7 @@
                 $"{nameof(AlgorithmConfigurationDeclarationFile)} for " +
                 $"algorithm \"{algorithm}\"...");
 
-            toReturn = this.algorithmConfigurationDeclarationFileCache.GetAlgorithmConfigurationDeclarationFile(
+            toReturn = this.algorithmConfigurationDeclarationFileCache.GetCacheItem(
                 algorithm);
 
             if (toReturn == null)
@@ -74,7 +75,7 @@
                     $"pulled from storage, for algorithm \"{algorithm}\": " +
                     $"{toReturn}. Storing in cache...");
 
-                this.algorithmConfigurationDeclarationFileCache.AddAlgorithmConfigurationDeclarationFile(
+                this.algorithmConfigurationDeclarationFileCache.AddCacheItem(
                     algorithm,
                     toReturn);
 

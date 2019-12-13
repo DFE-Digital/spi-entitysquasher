@@ -1,7 +1,7 @@
 ﻿namespace Dfe.Spi.EntitySquasher.Application.UnitTests
 {
     using Dfe.Spi.Common.UnitTesting.Infrastructure;
-    using Dfe.Spi.EntitySquasher.Application.Definitions;
+    using Dfe.Spi.EntitySquasher.Application.Definitions.Caches;
     using Dfe.Spi.EntitySquasher.Domain.Definitions;
     using Dfe.Spi.EntitySquasher.Domain.Models.Acdf;
     using Moq;
@@ -69,7 +69,7 @@
             AlgorithmConfigurationDeclarationFile actualAlgorithmConfigurationDeclarationFile = null;
 
             this.mockAlgorithmConfigurationDeclarationFileCache
-                .Setup(x => x.GetAlgorithmConfigurationDeclarationFile(It.IsAny<string>()))
+                .Setup(x => x.GetCacheItem(It.IsAny<string>()))
                 .Returns(expectedAlgorithmConfigurationDeclarationFile);
 
             string algorithm = "algorithm-that-does-exist";

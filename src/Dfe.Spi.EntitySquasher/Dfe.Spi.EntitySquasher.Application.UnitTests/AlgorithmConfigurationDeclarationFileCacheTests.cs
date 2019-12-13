@@ -1,5 +1,6 @@
 ﻿namespace Dfe.Spi.EntitySquasher.Application.UnitTests
 {
+    using Dfe.Spi.EntitySquasher.Application.Caches;
     using Dfe.Spi.EntitySquasher.Domain.Models.Acdf;
     using NUnit.Framework;
 
@@ -30,13 +31,14 @@
 
             // Act
             // 1) Store the ACDF...
-            this.algorithmConfigurationDeclarationFileCache.AddAlgorithmConfigurationDeclarationFile(
+            this.algorithmConfigurationDeclarationFileCache.AddCacheItem(
                 algorithm,
                 expectedAlgorithmConfigurationDeclarationFile);
 
             // 2) Then get what we put in...
-            actualAlgorithmConfigurationDeclarationFile = this.algorithmConfigurationDeclarationFileCache.GetAlgorithmConfigurationDeclarationFile(
-                algorithm);
+            actualAlgorithmConfigurationDeclarationFile =
+                this.algorithmConfigurationDeclarationFileCache.GetCacheItem(
+                    algorithm);
 
             // Assert
             Assert.AreEqual(
