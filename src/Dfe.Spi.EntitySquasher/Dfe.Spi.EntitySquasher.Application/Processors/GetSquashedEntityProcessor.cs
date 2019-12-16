@@ -149,6 +149,8 @@
                     fields,
                     adapterRecordReference)
                     .ConfigureAwait(false);
+
+                fetchTasks.Add(task);
             }
 
             // Then, execute them all and wait for the pulling back of all

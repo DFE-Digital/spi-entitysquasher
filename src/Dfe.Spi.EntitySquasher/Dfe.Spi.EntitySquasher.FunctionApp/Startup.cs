@@ -74,7 +74,7 @@
             IServiceCollection serviceCollection)
         {
             serviceCollection
-                .AddSingleton<IEntityAdapterClientFactory, EntityAdapterClientFactory>();
+                .AddScoped<IEntityAdapterClientFactory, EntityAdapterClientFactory>();
         }
 
         private static void AddCaches(IServiceCollection serviceCollection)
