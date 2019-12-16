@@ -12,9 +12,11 @@
     using Dfe.Spi.EntitySquasher.Application.Processors;
     using Dfe.Spi.EntitySquasher.Application.Processors.Definitions;
     using Dfe.Spi.EntitySquasher.Domain.Definitions;
+    using Dfe.Spi.EntitySquasher.Domain.Definitions.Factories;
     using Dfe.Spi.EntitySquasher.Domain.Definitions.SettingsProviders;
     using Dfe.Spi.EntitySquasher.FunctionApp.SettingsProviders;
     using Dfe.Spi.EntitySquasher.Infrastructure.AzureStorage;
+    using Dfe.Spi.EntitySquasher.Infrastructure.EntityAdapter.Factories;
     using Microsoft.Azure.Functions.Extensions.DependencyInjection;
     using Microsoft.Azure.WebJobs.Logging;
     using Microsoft.Extensions.DependencyInjection;
@@ -42,6 +44,8 @@
 
             AddSettingsProviders(serviceCollection);
 
+            AddFactories(serviceCollection);
+
             AddCaches(serviceCollection);
 
             AddManagers(serviceCollection);
@@ -66,6 +70,13 @@
                 .AddSingleton<IAlgorithmConfigurationDeclarationFileStorageAdapterSettingsProvider, AlgorithmConfigurationDeclarationFileStorageAdapterSettingsProvider>();
         }
 
+        private static void AddFactories(
+            IServiceCollection serviceCollection)
+        {
+            serviceCollection
+                .AddSingleton<IEntityAdapterClientFactory, EntityAdapterClientFactory>();
+        }
+
         private static void AddCaches(IServiceCollection serviceCollection)
         {
             serviceCollection
@@ -76,7 +87,8 @@
         private static void AddManagers(IServiceCollection serviceCollection)
         {
             serviceCollection
-                .AddScoped<IAlgorithmConfigurationDeclarationFileManager, AlgorithmConfigurationDeclarationFileManager>();
+                .AddScoped<IAlgorithmConfigurationDeclarationFileManager, AlgorithmConfigurationDeclarationFileManager>()
+                .AddScoped<IEntityAdapterClientManager, EntityAdapterClientManager>();
         }
 
         private static ILogger CreateILogger(IServiceProvider serviceProvider)
