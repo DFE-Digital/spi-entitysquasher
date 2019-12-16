@@ -5,8 +5,6 @@
     using Dfe.Spi.EntitySquasher.Domain.Definitions;
     using Moq;
     using NUnit.Framework;
-    using System;
-    using System.Collections.Generic;
 
     [TestFixture]
     public class EntityAdapterClientCacheTests
