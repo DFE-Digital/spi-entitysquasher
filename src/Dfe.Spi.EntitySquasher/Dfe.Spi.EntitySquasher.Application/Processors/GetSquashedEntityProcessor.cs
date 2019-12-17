@@ -4,6 +4,7 @@
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
+    using Dfe.Spi.Common.Http.Client;
     using Dfe.Spi.Common.Logging.Definitions;
     using Dfe.Spi.EntitySquasher.Application.Definitions.Managers;
     using Dfe.Spi.EntitySquasher.Application.Definitions.SettingsProviders;
@@ -134,6 +135,27 @@
             // 1) Call all adapters specified in the entity reference
             //    at the same time. First, get the tasks to pull back the
             //    ModelsBases.
+            IEnumerable<Spi.Models.ModelsBase> modelsBases =
+                await this.FetchModelsFromAdapters(
+                    algorithm,
+                    entityName,
+                    fields,
+                    entityReference)
+                    .ConfigureAwait(false);
+
+            // TODO:
+            // 2) Perform the squashing.
+            return toReturn;
+        }
+
+        private async Task<IEnumerable<Spi.Models.ModelsBase>> FetchModelsFromAdapters(
+            string algorithm,
+            string entityName,
+            IEnumerable<string> fields,
+            EntityReference entityReference)
+        {
+            IEnumerable<Spi.Models.ModelsBase> toReturn = null;
+
             IEnumerable<AdapterRecordReference> adapterRecordReferences =
                 entityReference.AdapterRecordReferences;
 
@@ -153,16 +175,67 @@
                 fetchTasks.Add(task);
             }
 
-            // Then, execute them all and wait for the pulling back of all
-            // tasks to complete, in parallel (so basically, yeild).
-            await Task.WhenAll(fetchTasks).ConfigureAwait(false);
+            try
+            {
+                // Then, execute them all and wait for the pulling back of all
+                // tasks to complete, in parallel (so basically, yeild).
+                await Task.WhenAll(fetchTasks).ConfigureAwait(false);
+            }
+            catch (SpiWebServiceException spiWebServiceException)
+            {
+                // Note: This try-catch will only throw back the *first*
+                //       exception that occurrs on the pool of tasks.
+                this.loggerWrapper.Warning(
+                    $"An adapter threw a {nameof(SpiWebServiceException)}. " +
+                    $"Note that this is only the first exception thrown - " +
+                    $"the underlying tasks will be checked for thrown " +
+                    $"exceptions.",
+                    spiWebServiceException);
+            }
 
             // We should have the results now.
-            IEnumerable<Spi.Models.ModelsBase> models = fetchTasks
+            toReturn = fetchTasks
+                .Where(x => x.Status == TaskStatus.RanToCompletion)
                 .Select(x => x.Result);
 
-            // TODO:
-            // 2) Perform the squashing.
+            this.loggerWrapper.Debug(
+                $"Number of models (successfully) returned: " +
+                $"{toReturn.Count()}.");
+
+            // Check for exceptions, too.
+            // Now, all exceptions *should* be SpiWebServiceExceptions, if
+            // it's running in an *handled* way. If there are exceptions
+            // that are not SpiWebServiceExceptions, we need to re-throw them,
+            // as this shouldn't be happening.
+            IEnumerable<Exception> taskExceptions = fetchTasks
+                .Where(x => x.Status == TaskStatus.Faulted)
+                .SelectMany(x => x.Exception.InnerExceptions);
+
+            IEnumerable<SpiWebServiceException> spiWebServiceExceptions =
+                taskExceptions
+                    .Where(x => x is SpiWebServiceException)
+                    .Cast<SpiWebServiceException>();
+
+            if (taskExceptions.Count() != spiWebServiceExceptions.Count())
+            {
+                throw new AggregateException(
+                    $"Some exceptions thrown by one or more of the adapters " +
+                    $"were not {nameof(SpiWebServiceException)}s! These " +
+                    $"are currently not handled. Please investigate.",
+                    taskExceptions);
+            }
+
+            this.loggerWrapper.Debug(
+                $"Number of faulted/handled tasks: " +
+                $"{spiWebServiceExceptions.Count()}.");
+
+            if (!toReturn.Any())
+            {
+                // We've got nowt to squash!
+                throw new AllAdaptersUnavailableException(
+                    spiWebServiceExceptions);
+            }
+
             return toReturn;
         }
 

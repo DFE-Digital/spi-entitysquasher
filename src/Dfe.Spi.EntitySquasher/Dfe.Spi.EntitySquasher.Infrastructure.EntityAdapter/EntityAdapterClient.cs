@@ -4,10 +4,13 @@
     using System.Collections.Generic;
     using System.Globalization;
     using System.Threading.Tasks;
+    using Dfe.Spi.Common.Http.Client;
     using Dfe.Spi.Common.Logging.Definitions;
+    using Dfe.Spi.Common.Models;
     using Dfe.Spi.EntitySquasher.Domain.Definitions;
-    using Dfe.Spi.Models;
+    using Newtonsoft.Json;
     using RestSharp;
+    using ModelsBase = Dfe.Spi.Models.ModelsBase;
 
     /// <summary>
     /// Implements <see cref="IEntityAdapterClient" />.
@@ -62,15 +65,35 @@
 
             if (restResponse.IsSuccessful)
             {
+                toReturn = restResponse.Data;
+
                 this.loggerWrapper.Info(
                     $"Request executed with success: {restResponse}.");
             }
             else
             {
-                // TODO: Wrap up errors in the response object.
-            }
+                this.loggerWrapper.Warning(
+                    $"A non-successful status code was returned " +
+                    $"({restResponse.StatusCode}).");
 
-            toReturn = restResponse.Data;
+                // Deserialise the data as the standard error model.
+                string content = restResponse.Content;
+
+                this.loggerWrapper.Debug($"content = \"{content}\"");
+                this.loggerWrapper.Debug(
+                    $"Attempting to de-serialise the body (\"{content}\") " +
+                    $"as a {nameof(HttpErrorBody)} instance...");
+
+                // TODO: Cater for null/dodgy bodies.
+                HttpErrorBody httpErrorBody =
+                    JsonConvert.DeserializeObject<HttpErrorBody>(content);
+
+                this.loggerWrapper.Warning(
+                    $"{nameof(httpErrorBody)} = {httpErrorBody}");
+
+                // Throw exception.
+                throw new SpiWebServiceException(httpErrorBody);
+            }
 
             return toReturn;
         }
