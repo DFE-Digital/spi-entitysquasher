@@ -11,8 +11,9 @@
   
   <ItemGroup>
     <!-- Dfe.Spi.* -->
+    <PackageReference Include="Dfe.Spi.Common.Http.Server" Version="1.0.1" PrivateAssets="All" />
     <PackageReference Include="Dfe.Spi.Common.Logging" Version="1.0.7" PrivateAssets="All" />
-    <PackageReference Include="Dfe.Spi.Common.Models" Version="1.0.0" PrivateAssets="All" />
+    <PackageReference Include="Dfe.Spi.Common.Models" Version="1.0.1" PrivateAssets="All" />
     <PackageReference Include="Dfe.Spi.Models" Version="1.0.1" PrivateAssets="All" />
 
     <!-- Other -->
@@ -49,6 +50,21 @@
     <ProjectReference Include="..\Dfe.Spi.EntitySquasher.Application\Dfe.Spi.EntitySquasher.Application.csproj" />
     <ProjectReference Include="..\Dfe.Spi.EntitySquasher.Infrastructure.AzureStorage\Dfe.Spi.EntitySquasher.Infrastructure.AzureStorage.csproj" />
     <ProjectReference Include="..\Dfe.Spi.EntitySquasher.Infrastructure.EntityAdapter\Dfe.Spi.EntitySquasher.Infrastructure.EntityAdapter.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="HttpErrorMessages.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>HttpErrorMessages.resx</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Update="HttpErrorMessages.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>HttpErrorMessages.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
   </ItemGroup>
   
   <ItemGroup>

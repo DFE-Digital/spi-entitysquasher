@@ -1,11 +1,11 @@
 ﻿namespace Dfe.Spi.EntitySquasher.FunctionApp.UnitTests.Functions
 {
+    using Dfe.Spi.Common.Http.Server;
     using Dfe.Spi.Common.UnitTesting;
     using Dfe.Spi.Common.UnitTesting.Infrastructure;
     using Dfe.Spi.EntitySquasher.Application.Models;
     using Dfe.Spi.EntitySquasher.Application.Processors.Definitions;
     using Dfe.Spi.EntitySquasher.FunctionApp.Functions;
-    using Dfe.Spi.Models;
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Http.Internal;
     using Microsoft.AspNetCore.Mvc;
@@ -13,6 +13,7 @@
     using NUnit.Framework;
     using System;
     using System.IO;
+    using System.Net;
     using System.Reflection;
     using System.Text;
     using System.Threading.Tasks;
@@ -99,24 +100,24 @@
                 .Throws<FileNotFoundException>();
 
             IActionResult actionResult = null;
-            StatusCodeResult statusCodeResult = null;
+            HttpErrorBodyResult httpErrorBodyResult = null;
 
             string requestBodyStr = this.assembly.GetSample(
                 "get-squashed-entity-request-1.json");
 
             HttpRequest httpRequest = this.CreateHttpRequest(requestBodyStr);
 
-            int expectedStatusCode = StatusCodes.Status404NotFound;
-            int actualStatusCode;
+            int? expectedStatusCode = (int)HttpStatusCode.NotFound;
+            int? actualStatusCode;
 
             // Act
             actionResult = await this.getSquashedEntity.Run(httpRequest);
 
             // Assert
-            Assert.IsInstanceOf<StatusCodeResult>(actionResult);
+            Assert.IsInstanceOf<HttpErrorBodyResult>(actionResult);
 
-            statusCodeResult = (StatusCodeResult)actionResult;
-            actualStatusCode = statusCodeResult.StatusCode;
+            httpErrorBodyResult = (HttpErrorBodyResult)actionResult;
+            actualStatusCode = httpErrorBodyResult.StatusCode;
 
             Assert.AreEqual(expectedStatusCode, actualStatusCode);
 
@@ -188,23 +189,24 @@
             return toReturn;
         }
 
-        private async Task ReturnsBadRequestStatusCode(HttpRequest httpRequest)
+        private async Task ReturnsBadRequestStatusCode(
+            HttpRequest httpRequest)
         {
             // Arrange
             IActionResult actionResult = null;
-            StatusCodeResult statusCodeResult = null;
+            HttpErrorBodyResult httpErrorBodyResult = null;
 
-            int expectedStatusCode = StatusCodes.Status400BadRequest;
-            int actualStatusCode;
+            int? expectedStatusCode = (int)HttpStatusCode.BadRequest;
+            int? actualStatusCode;
 
             // Act
             actionResult = await this.getSquashedEntity.Run(httpRequest);
 
             // Assert
-            Assert.IsInstanceOf<StatusCodeResult>(actionResult);
+            Assert.IsInstanceOf<HttpErrorBodyResult>(actionResult);
 
-            statusCodeResult = (StatusCodeResult)actionResult;
-            actualStatusCode = statusCodeResult.StatusCode;
+            httpErrorBodyResult = (HttpErrorBodyResult)actionResult;
+            actualStatusCode = httpErrorBodyResult.StatusCode;
 
             Assert.AreEqual(expectedStatusCode, actualStatusCode);
 

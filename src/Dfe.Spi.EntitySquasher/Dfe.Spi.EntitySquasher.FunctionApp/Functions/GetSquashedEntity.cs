@@ -4,12 +4,13 @@ namespace Dfe.Spi.EntitySquasher.FunctionApp.Functions
     using System.Collections.Generic;
     using System.IO;
     using System.Linq;
+    using System.Net;
     using System.Reflection;
     using System.Threading.Tasks;
+    using Dfe.Spi.Common.Http.Server;
     using Dfe.Spi.Common.Logging.Definitions;
     using Dfe.Spi.EntitySquasher.Application.Models;
     using Dfe.Spi.EntitySquasher.Application.Processors.Definitions;
-    using Dfe.Spi.Models;
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.Azure.WebJobs;
@@ -85,6 +86,10 @@ namespace Dfe.Spi.EntitySquasher.FunctionApp.Functions
                     $"A {nameof(JsonReaderException)} was thrown during the " +
                     $"parsing of the body of the request.",
                     jsonReaderException);
+
+                toReturn = HttpErrorMessagesHelper.GetHttpErrorBodyResult(
+                    HttpStatusCode.BadRequest,
+                    1);
             }
             catch (JsonSchemaValidationException jsonSchemaValidationException)
             {
@@ -92,6 +97,13 @@ namespace Dfe.Spi.EntitySquasher.FunctionApp.Functions
                     $"A {nameof(JsonSchemaValidationException)} was thrown " +
                     $"during the parsing of the body of the request.",
                     jsonSchemaValidationException);
+
+                string message = jsonSchemaValidationException.Message;
+
+                toReturn = HttpErrorMessagesHelper.GetHttpErrorBodyResult(
+                    HttpStatusCode.BadRequest,
+                    2,
+                    message);
             }
 
             if (getSquashedEntityRequest != null)
@@ -102,19 +114,16 @@ namespace Dfe.Spi.EntitySquasher.FunctionApp.Functions
                     getSquashedEntityRequest)
                     .ConfigureAwait(false);
             }
-            else
+
+            if (toReturn is HttpErrorBodyResult)
             {
-                int statusCode = StatusCodes.Status400BadRequest;
+                HttpErrorBodyResult httpErrorBodyResult =
+                    (HttpErrorBodyResult)toReturn;
+
+                object value = httpErrorBodyResult.Value;
 
                 this.loggerWrapper.Info(
-                    $"The {nameof(HttpRequest)} either had no body, the " +
-                    $"body was not well-formed JSON, or the body was " +
-                    $"well-formed, but did not match the requirements as " +
-                    $"stated by the schema. {nameof(statusCode)} " +
-                    $"{statusCode} will be returned.");
-
-                // No body supplied - return 400 to reflect this.
-                toReturn = new StatusCodeResult(statusCode);
+                    $"This HTTP request failed. Returning: {value}.");
             }
 
             return toReturn;
@@ -197,16 +206,17 @@ namespace Dfe.Spi.EntitySquasher.FunctionApp.Functions
             }
             catch (FileNotFoundException)
             {
-                int statusCode = StatusCodes.Status404NotFound;
-
                 this.loggerWrapper.Warning(
-                    $"The processor threw a " +
-                    $"{nameof(FileNotFoundException)}. {nameof(statusCode)} " +
-                    $"{statusCode} will be returned.");
+                    $"The processor threw a {nameof(FileNotFoundException)}.");
 
                 // An ACDF could not be found for the specified algorithm.
                 // Return 404 to reflect this.
-                toReturn = new StatusCodeResult(statusCode);
+                string algorithm = getSquashedEntityRequest.Algorithm;
+
+                toReturn = HttpErrorMessagesHelper.GetHttpErrorBodyResult(
+                    HttpStatusCode.NotFound,
+                    3,
+                    algorithm);
             }
 
             return toReturn;

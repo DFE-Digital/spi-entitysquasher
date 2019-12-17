@@ -21,6 +21,8 @@
     using Microsoft.Azure.WebJobs.Logging;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Logging;
+    using Newtonsoft.Json;
+    using Newtonsoft.Json.Serialization;
 
     /// <summary>
     /// Functions startup class.
@@ -37,17 +39,20 @@
                 throw new ArgumentNullException(nameof(functionsHostBuilder));
             }
 
+            // camelCase, if you please.
+            JsonConvert.DefaultSettings =
+                () => new JsonSerializerSettings()
+                {
+                    ContractResolver = new CamelCasePropertyNamesContractResolver(),
+                };
+
             IServiceCollection serviceCollection =
                 functionsHostBuilder.Services;
 
             AddLogging(serviceCollection);
-
             AddSettingsProviders(serviceCollection);
-
             AddFactories(serviceCollection);
-
             AddCaches(serviceCollection);
-
             AddManagers(serviceCollection);
 
             serviceCollection
