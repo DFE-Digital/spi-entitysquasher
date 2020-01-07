@@ -10,6 +10,7 @@
     using Dfe.Spi.EntitySquasher.Application.Definitions.SettingsProviders;
     using Dfe.Spi.EntitySquasher.Application.Models;
     using Dfe.Spi.EntitySquasher.Application.Processors.Definitions;
+    using Dfe.Spi.EntitySquasher.Domain;
     using Dfe.Spi.EntitySquasher.Domain.Definitions;
     using Dfe.Spi.EntitySquasher.Domain.Models.Acdf;
 
@@ -181,16 +182,16 @@
                 // tasks to complete, in parallel (so basically, yeild).
                 await Task.WhenAll(fetchTasks).ConfigureAwait(false);
             }
-            catch (SpiWebServiceException spiWebServiceException)
+            catch (EntityAdapterException entityAdapterException)
             {
                 // Note: This try-catch will only throw back the *first*
                 //       exception that occurrs on the pool of tasks.
                 this.loggerWrapper.Warning(
-                    $"An adapter threw a {nameof(SpiWebServiceException)}. " +
+                    $"An adapter threw a {nameof(EntityAdapterException)}. " +
                     $"Note that this is only the first exception thrown - " +
                     $"the underlying tasks will be checked for thrown " +
                     $"exceptions.",
-                    spiWebServiceException);
+                    entityAdapterException);
             }
 
             // We should have the results now.
@@ -211,12 +212,12 @@
                 .Where(x => x.Status == TaskStatus.Faulted)
                 .SelectMany(x => x.Exception.InnerExceptions);
 
-            IEnumerable<SpiWebServiceException> spiWebServiceExceptions =
+            IEnumerable<EntityAdapterException> entityAdapterExceptions =
                 taskExceptions
-                    .Where(x => x is SpiWebServiceException)
-                    .Cast<SpiWebServiceException>();
+                    .Where(x => x is EntityAdapterException)
+                    .Cast<EntityAdapterException>();
 
-            if (taskExceptions.Count() != spiWebServiceExceptions.Count())
+            if (taskExceptions.Count() != entityAdapterExceptions.Count())
             {
                 throw new AggregateException(
                     $"Some exceptions thrown by one or more of the adapters " +
@@ -227,13 +228,13 @@
 
             this.loggerWrapper.Debug(
                 $"Number of faulted/handled tasks: " +
-                $"{spiWebServiceExceptions.Count()}.");
+                $"{entityAdapterExceptions.Count()}.");
 
             if (!toReturn.Any())
             {
                 // We've got nowt to squash!
                 throw new AllAdaptersUnavailableException(
-                    spiWebServiceExceptions);
+                    entityAdapterExceptions);
             }
 
             return toReturn;

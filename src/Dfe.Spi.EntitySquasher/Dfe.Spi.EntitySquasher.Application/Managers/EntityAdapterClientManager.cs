@@ -112,6 +112,7 @@
                         $"{nameof(headers)} = {headers.Count} item(s)");
 
                     toReturn = this.entityAdapterClientFactory.Create(
+                        name,
                         baseUrl,
                         headers);
 

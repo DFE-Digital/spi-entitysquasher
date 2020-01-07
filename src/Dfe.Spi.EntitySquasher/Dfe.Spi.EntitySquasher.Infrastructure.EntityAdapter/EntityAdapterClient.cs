@@ -5,9 +5,9 @@
     using System.Globalization;
     using System.Net;
     using System.Threading.Tasks;
-    using Dfe.Spi.Common.Http.Client;
     using Dfe.Spi.Common.Logging.Definitions;
     using Dfe.Spi.Common.Models;
+    using Dfe.Spi.EntitySquasher.Domain;
     using Dfe.Spi.EntitySquasher.Domain.Definitions;
     using Newtonsoft.Json;
     using RestSharp;
@@ -24,6 +24,8 @@
         private readonly ILoggerWrapper loggerWrapper;
         private readonly IRestClient restClient;
 
+        private readonly string entityAdapterName;
+
         /// <summary>
         /// Initialises a new instance of the
         /// <see cref="EntityAdapterClient" /> class.
@@ -34,12 +36,17 @@
         /// <param name="restClient">
         /// An instance of type <see cref="IRestClient" />.
         /// </param>
+        /// <param name="entityAdapterName">
+        /// The name of the entity adapter.
+        /// </param>
         public EntityAdapterClient(
             ILoggerWrapper loggerWrapper,
-            IRestClient restClient)
+            IRestClient restClient,
+            string entityAdapterName)
         {
             this.loggerWrapper = loggerWrapper;
             this.restClient = restClient;
+            this.entityAdapterName = entityAdapterName;
         }
 
         /// <inheritdoc />
@@ -105,7 +112,13 @@
                 HttpStatusCode statusCode = restResponse.StatusCode;
 
                 // Throw exception.
-                throw new SpiWebServiceException(statusCode, httpErrorBody);
+                throw new EntityAdapterException(
+                    this.entityAdapterName,
+                    entityName,
+                    id,
+                    fields,
+                    statusCode,
+                    httpErrorBody);
             }
 
             return toReturn;

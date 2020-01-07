@@ -30,6 +30,7 @@
 
         /// <inheritdoc />
         public IEntityAdapterClient Create(
+            string entityAdapterName,
             Uri baseUrl,
             Dictionary<string, string> headers)
         {
@@ -47,7 +48,8 @@
 
             toReturn = new EntityAdapterClient(
                 this.loggerWrapper,
-                restClient);
+                restClient,
+                entityAdapterName);
 
             return toReturn;
         }

@@ -6,7 +6,6 @@
 
   <ItemGroup>
     <!-- Dfe.Spi.* -->
-    <PackageReference Include="Dfe.Spi.Common.Http.Client" Version="1.0.1" />
     <PackageReference Include="Dfe.Spi.Common.Logging" Version="1.0.7" PrivateAssets="All" />
     <PackageReference Include="Dfe.Spi.Common.Models" Version="1.0.1" PrivateAssets="All" />
     <PackageReference Include="Dfe.Spi.Models" Version="1.0.1" PrivateAssets="All" />

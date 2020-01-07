@@ -6,6 +6,7 @@
     using System.Linq;
     using System.Net;
     using Dfe.Spi.Common.Http.Client;
+    using Dfe.Spi.EntitySquasher.Domain;
 
     /// <summary>
     /// Represents an error raised upon being unable to serve a request due to
@@ -19,27 +20,27 @@
     {
         private new const string Message =
             "All {0} request(s) sent to the adapters returned " +
-            "non-successful status codes. See the SpiWebServiceExceptions " +
+            "non-successful status codes. See the EntityAdapterExceptions " +
             "property for more information.";
 
         /// <summary>
         /// Initialises a new instance of the
         /// <see cref="AllAdaptersUnavailableException" /> class.
         /// </summary>
-        /// <param name="spiWebServiceExceptions">
-        /// A set of <see cref="SpiWebServiceException" /> instances.
+        /// <param name="entityAdapterExceptions">
+        /// A set of <see cref="EntityAdapterException" /> instances.
         /// </param>
         public AllAdaptersUnavailableException(
-            IEnumerable<SpiWebServiceException> spiWebServiceExceptions)
-            : base(BuildExceptionMessage(spiWebServiceExceptions))
+            IEnumerable<EntityAdapterException> entityAdapterExceptions)
+            : base(BuildExceptionMessage(entityAdapterExceptions))
         {
-            this.SpiWebServiceExceptions = spiWebServiceExceptions;
+            this.EntityAdapterExceptions = entityAdapterExceptions;
         }
 
         /// <summary>
         /// Gets a set of <see cref="SpiWebServiceException" /> instances.
         /// </summary>
-        public IEnumerable<SpiWebServiceException> SpiWebServiceExceptions
+        public IEnumerable<EntityAdapterException> EntityAdapterExceptions
         {
             get;
             private set;

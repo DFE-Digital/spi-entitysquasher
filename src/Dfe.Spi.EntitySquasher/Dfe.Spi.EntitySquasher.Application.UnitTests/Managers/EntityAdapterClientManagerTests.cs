@@ -173,7 +173,7 @@
                 .Setup(x => x.GetAsync(It.IsAny<string>()))
                 .Returns(Task.FromResult(algorithmConfigurationDeclarationFile));
             this.mockEntityAdapterClientFactory
-                .Setup(x => x.Create(It.Is<Uri>(y => y == baseUrl), It.Is<Dictionary<string, string>>(y => y == headers)))
+                .Setup(x => x.Create(It.Is<string>(y => y == name), It.Is<Uri>(y => y == baseUrl), It.Is<Dictionary<string, string>>(y => y == headers)))
                 .Returns(expectedEntityAdapterClient);
 
             IEntityAdapterClient actualEntityAdapterClient = null;

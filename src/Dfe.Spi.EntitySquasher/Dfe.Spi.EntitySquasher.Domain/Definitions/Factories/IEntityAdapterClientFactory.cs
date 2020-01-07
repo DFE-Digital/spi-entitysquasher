@@ -12,6 +12,9 @@
         /// <summary>
         /// Creates an instance of type <see cref="IEntityAdapterClient" />.
         /// </summary>
+        /// <param name="entityAdapterName">
+        /// The name of the entity adapter.
+        /// </param>
         /// <param name="baseUrl">
         /// The base URL of the entity adapter.
         /// </param>
@@ -23,6 +26,7 @@
         /// An instance of type <see cref="IEntityAdapterClient" />.
         /// </returns>
         IEntityAdapterClient Create(
+            string entityAdapterName,
             Uri baseUrl,
             Dictionary<string, string> headers);
     }
