@@ -2,13 +2,14 @@
 {
     using System.Collections.Generic;
     using System.Diagnostics.CodeAnalysis;
+    using Dfe.Spi.EntitySquasher.Application.Definitions;
 
     /// <summary>
-    /// Represents the outcome of looking up a particular
-    /// <see cref="EntityReference" /> against a set of entity adapters.
+    /// Result object for
+    /// <see cref="IEntityAdapterInvoker.InvokeEntityAdapters(string, string, IEnumerable{string}, EntityReference)" />.
     /// </summary>
     [ExcludeFromCodeCoverage]
-    public class AdaptersLookupResult : EntityAdapterResult
+    public class InvokeEntityAdaptersResult : EntityAdapterResult
     {
         /// <summary>
         /// Gets or sets the looked up <see cref="Spi.Models.ModelsBase" />

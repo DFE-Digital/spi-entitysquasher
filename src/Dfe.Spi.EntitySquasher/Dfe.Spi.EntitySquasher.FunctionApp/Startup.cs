@@ -4,7 +4,9 @@
     using System.Diagnostics.CodeAnalysis;
     using Dfe.Spi.Common.Logging;
     using Dfe.Spi.Common.Logging.Definitions;
+    using Dfe.Spi.EntitySquasher.Application;
     using Dfe.Spi.EntitySquasher.Application.Caches;
+    using Dfe.Spi.EntitySquasher.Application.Definitions;
     using Dfe.Spi.EntitySquasher.Application.Definitions.Caches;
     using Dfe.Spi.EntitySquasher.Application.Definitions.Managers;
     using Dfe.Spi.EntitySquasher.Application.Definitions.SettingsProviders;
@@ -56,6 +58,7 @@
             AddManagers(serviceCollection);
 
             serviceCollection
+                .AddScoped<IEntityAdapterInvoker, EntityAdapterInvoker>();
                 .AddScoped<IGetSquashedEntityProcessor, GetSquashedEntityProcessor>()
                 .AddScoped<IAlgorithmConfigurationDeclarationFileStorageAdapter, AlgorithmConfigurationDeclarationFileStorageAdapter>();
         }
