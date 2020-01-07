@@ -57,6 +57,10 @@
             List<Task<Spi.Models.ModelsBase>> fetchTasks =
                 new List<Task<Spi.Models.ModelsBase>>();
 
+            this.loggerWrapper.Debug(
+                $"Fetching from the appropriate adapters the " +
+                $"{nameof(Task)}s to fetch the {nameof(ModelsBase)}s...");
+
             Task<Spi.Models.ModelsBase> task = null;
             foreach (AdapterRecordReference adapterRecordReference in adapterRecordReferences)
             {
@@ -69,6 +73,9 @@
 
                 fetchTasks.Add(task);
             }
+
+            this.loggerWrapper.Info($"{fetchTasks.Count} task(s) returned. " +
+                $"Waiting for them to come to an end...");
 
             try
             {
@@ -88,13 +95,17 @@
                     entityAdapterException);
             }
 
+            this.loggerWrapper.Debug(
+                $"All {nameof(Task)}s have finished. Checking " +
+                $"{nameof(Task)} collection for results...");
+
             // We should have the results now.
             IEnumerable<Spi.Models.ModelsBase> modelsBases = fetchTasks
                 .Where(x => x.Status == TaskStatus.RanToCompletion)
                 .Select(x => x.Result);
 
             this.loggerWrapper.Debug(
-                $"Number of models (successfully) returned: " +
+                $"Number of {nameof(ModelsBase)}s (successfully) returned: " +
                 $"{modelsBases.Count()}.");
 
             // Check for exceptions, too.
@@ -121,7 +132,7 @@
             }
 
             this.loggerWrapper.Debug(
-                $"Number of faulted/handled tasks: " +
+                $"Number of faulted (yet, handled) {nameof(Task)}s: " +
                 $"{entityAdapterExceptions.Count()}.");
 
             if (!modelsBases.Any())
@@ -157,19 +168,33 @@
                     Name = source,
                 };
 
+            this.loggerWrapper.Debug(
+                $"Fetching {nameof(IEntityAdapterClient)} for " +
+                $"{entityAdapterClientKey}...");
+
             // Get the entity adapter client from the manager and...
             IEntityAdapterClient entityAdapterClient =
                 await this.entityAdapterClientManager.GetAsync(
                     entityAdapterClientKey)
                     .ConfigureAwait(false);
 
+            this.loggerWrapper.Info(
+                $"{nameof(IEntityAdapterClient)} returned for " +
+                $"{entityAdapterClientKey}.");
+
             // Get the task, and return it.
             string id = adapterRecordReference.Id;
+
+            this.loggerWrapper.Debug(
+                $"Getting {nameof(Task)} for " +
+                $"{nameof(IEntityAdapterClient.GetEntityAsync)} call...");
 
             toReturn = entityAdapterClient.GetEntityAsync(
                 entityName,
                 id,
                 fields);
+
+            this.loggerWrapper.Info($"{nameof(Task)} obtained. Returning...");
 
             return toReturn;
         }
