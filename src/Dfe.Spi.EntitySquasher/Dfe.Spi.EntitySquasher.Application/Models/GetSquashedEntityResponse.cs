@@ -9,13 +9,13 @@
     /// <see cref="IGetSquashedEntityProcessor.GetSquashedEntityAsync(GetSquashedEntityRequest)" />.
     /// </summary>
     [ExcludeFromCodeCoverage]
-    public class GetSquashedEntityResponse
-        : RequestResponseBase
+    public class GetSquashedEntityResponse : RequestResponseBase
     {
         /// <summary>
-        /// Gets or sets the requested, squashed entities.
+        /// Gets or sets a set of <see cref="SquashedEntityResult" />
+        /// instances.
         /// </summary>
-        public IEnumerable<Spi.Models.ModelsBase> Entities
+        public IEnumerable<SquashedEntityResult> SquashedEntityResults
         {
             get;
             set;

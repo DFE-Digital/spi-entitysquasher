@@ -60,6 +60,8 @@
         {
             GetSquashedEntityResponse toReturn = null;
 
+            // TODO: This class is getting rather large.
+            //       Look at refactoring it.
             if (getSquashedEntityRequest == null)
             {
                 throw new ArgumentNullException(
@@ -95,49 +97,50 @@
             IEnumerable<EntityReference> entityReferences =
                 getSquashedEntityRequest.EntityReferences;
 
-            List<Spi.Models.ModelsBase> entities =
-                new List<Spi.Models.ModelsBase>();
+            List<SquashedEntityResult> squashedEntityResults =
+                new List<SquashedEntityResult>();
 
             // It would probably be sensible to populate each entity in turn,
             // rather than in parallel.
             // We can call the adapters in parallel, if we have lots in this
             // array, we don't want to bombard the adapters too much.
-            Spi.Models.ModelsBase modelsBase = null;
+            SquashedEntityResult squashedEntityResult = null;
             foreach (EntityReference entityReference in entityReferences)
             {
                 // This can be done with LINQ, but looks messy AF with the
                 // async stuff going on.
-                modelsBase = await this.ProcessSingleEntityReferenceAsync(
-                    algorithm,
-                    entityName,
-                    fields,
-                    entityReference)
-                    .ConfigureAwait(false);
+                squashedEntityResult =
+                    await this.GetSquashedEntityResultAsync(
+                        algorithm,
+                        entityName,
+                        fields,
+                        entityReference)
+                        .ConfigureAwait(false);
 
-                entities.Add(modelsBase);
+                squashedEntityResults.Add(squashedEntityResult);
             }
 
             toReturn = new GetSquashedEntityResponse()
             {
-                Entities = entities,
+                SquashedEntityResults = squashedEntityResults,
             };
 
             return toReturn;
         }
 
-        private async Task<Spi.Models.ModelsBase> ProcessSingleEntityReferenceAsync(
+        private async Task<SquashedEntityResult> GetSquashedEntityResultAsync(
             string algorithm,
             string entityName,
             IEnumerable<string> fields,
             EntityReference entityReference)
         {
-            Spi.Models.ModelsBase toReturn = null;
+            SquashedEntityResult toReturn = null;
 
             // 1) Call all adapters specified in the entity reference
             //    at the same time. First, get the tasks to pull back the
             //    ModelsBases.
-            IEnumerable<Spi.Models.ModelsBase> modelsBases =
-                await this.FetchModelsFromAdapters(
+            AdaptersLookupResult adaptersLookupResult =
+                await this.GetAdaptersLookupResultAsync(
                     algorithm,
                     entityName,
                     fields,
@@ -145,17 +148,26 @@
                     .ConfigureAwait(false);
 
             // TODO:
-            // 2) Perform the squashing.
+            // 2) Perform the squashing and append to the result.
+            Spi.Models.ModelsBase squashedEntity = null;
+
+            toReturn = new SquashedEntityResult()
+            {
+                EntityReference = entityReference,
+                EntityAdapterExceptions = adaptersLookupResult.EntityAdapterExceptions,
+                SquashedEntity = squashedEntity,
+            };
+
             return toReturn;
         }
 
-        private async Task<IEnumerable<Spi.Models.ModelsBase>> FetchModelsFromAdapters(
+        private async Task<AdaptersLookupResult> GetAdaptersLookupResultAsync(
             string algorithm,
             string entityName,
             IEnumerable<string> fields,
             EntityReference entityReference)
         {
-            IEnumerable<Spi.Models.ModelsBase> toReturn = null;
+            AdaptersLookupResult toReturn = null;
 
             IEnumerable<AdapterRecordReference> adapterRecordReferences =
                 entityReference.AdapterRecordReferences;
@@ -195,13 +207,13 @@
             }
 
             // We should have the results now.
-            toReturn = fetchTasks
+            IEnumerable<Spi.Models.ModelsBase> modelsBases = fetchTasks
                 .Where(x => x.Status == TaskStatus.RanToCompletion)
                 .Select(x => x.Result);
 
             this.loggerWrapper.Debug(
                 $"Number of models (successfully) returned: " +
-                $"{toReturn.Count()}.");
+                $"{modelsBases.Count()}.");
 
             // Check for exceptions, too.
             // Now, all exceptions *should* be SpiWebServiceExceptions, if
@@ -230,12 +242,18 @@
                 $"Number of faulted/handled tasks: " +
                 $"{entityAdapterExceptions.Count()}.");
 
-            if (!toReturn.Any())
+            if (!modelsBases.Any())
             {
                 // We've got nowt to squash!
                 throw new AllAdaptersUnavailableException(
                     entityAdapterExceptions);
             }
+
+            toReturn = new AdaptersLookupResult()
+            {
+                ModelsBases = modelsBases,
+                EntityAdapterExceptions = entityAdapterExceptions,
+            };
 
             return toReturn;
         }

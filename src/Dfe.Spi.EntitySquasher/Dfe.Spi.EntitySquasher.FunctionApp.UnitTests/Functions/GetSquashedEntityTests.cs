@@ -135,9 +135,9 @@
             GetSquashedEntityResponse expectedGetSquashedEntityResponse =
                 new GetSquashedEntityResponse()
                 {
-                    Entities = new Models.ModelsBase[]
+                    SquashedEntityResults = new SquashedEntityResult[]
                     {
-                        new Models.ModelsBase()
+                        new SquashedEntityResult()
                         {
                             // Doesn't really even need an empty object,
                             // to be honest.
