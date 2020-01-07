@@ -1,6 +1,7 @@
 ﻿namespace Dfe.Spi.EntitySquasher.Infrastructure.EntityAdapter.Factories
 {
     using System;
+    using System.Collections.Generic;
     using System.Diagnostics.CodeAnalysis;
     using Dfe.Spi.Common.Logging.Definitions;
     using Dfe.Spi.EntitySquasher.Domain.Definitions;
@@ -28,11 +29,21 @@
         }
 
         /// <inheritdoc />
-        public IEntityAdapterClient Create(Uri baseUrl)
+        public IEntityAdapterClient Create(
+            Uri baseUrl,
+            Dictionary<string, string> headers)
         {
             EntityAdapterClient toReturn = null;
 
             RestClient restClient = new RestClient(baseUrl);
+
+            if (headers != null)
+            {
+                foreach (KeyValuePair<string, string> header in headers)
+                {
+                    restClient.AddDefaultHeader(header.Key, header.Value);
+                }
+            }
 
             toReturn = new EntityAdapterClient(
                 this.loggerWrapper,

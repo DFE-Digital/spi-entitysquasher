@@ -1,6 +1,7 @@
 ﻿namespace Dfe.Spi.EntitySquasher.Application.Managers
 {
     using System;
+    using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
     using Dfe.Spi.Common.Logging.Definitions;
@@ -105,8 +106,14 @@
 
                     this.loggerWrapper.Debug($"{nameof(baseUrl)} = {baseUrl}");
 
+                    Dictionary<string, string> headers = entityAdapter.Headers;
+
+                    this.loggerWrapper.Debug(
+                        $"{nameof(headers)} = {headers.Count} item(s)");
+
                     toReturn = this.entityAdapterClientFactory.Create(
-                        baseUrl);
+                        baseUrl,
+                        headers);
 
                     this.loggerWrapper.Info(
                         $"Created {nameof(IEntityAdapterClient)} with " +

@@ -3,6 +3,7 @@
     using System;
     using System.Collections.Generic;
     using System.Globalization;
+    using System.Net;
     using System.Threading.Tasks;
     using Dfe.Spi.Common.Http.Client;
     using Dfe.Spi.Common.Logging.Definitions;
@@ -84,15 +85,27 @@
                     $"Attempting to de-serialise the body (\"{content}\") " +
                     $"as a {nameof(HttpErrorBody)} instance...");
 
-                // TODO: Cater for null/dodgy bodies.
-                HttpErrorBody httpErrorBody =
-                    JsonConvert.DeserializeObject<HttpErrorBody>(content);
+                HttpErrorBody httpErrorBody = null;
+                try
+                {
+                    httpErrorBody =
+                        JsonConvert.DeserializeObject<HttpErrorBody>(content);
 
-                this.loggerWrapper.Warning(
-                    $"{nameof(httpErrorBody)} = {httpErrorBody}");
+                    this.loggerWrapper.Warning(
+                        $"{nameof(httpErrorBody)} = {httpErrorBody}");
+                }
+                catch (JsonReaderException jsonReaderException)
+                {
+                    this.loggerWrapper.Warning(
+                        $"Could not de-serialise error body to an instance " +
+                        $"of {nameof(HttpErrorBody)}.",
+                        jsonReaderException);
+                }
+
+                HttpStatusCode statusCode = restResponse.StatusCode;
 
                 // Throw exception.
-                throw new SpiWebServiceException(httpErrorBody);
+                throw new SpiWebServiceException(statusCode, httpErrorBody);
             }
 
             return toReturn;
@@ -106,6 +119,9 @@
             Uri toReturn = null;
 
             entityName = entityName.PascalToKebabCase();
+
+            // Don't forget to plural-ise.
+            entityName = $"{entityName}s";
 
             this.loggerWrapper.Debug(
                 $"{nameof(entityName)} converted: \"{entityName}\".");

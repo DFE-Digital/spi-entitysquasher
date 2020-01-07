@@ -11,6 +11,7 @@
     using Moq;
     using NUnit.Framework;
     using System;
+    using System.Collections.Generic;
     using System.Threading.Tasks;
 
     [TestFixture]
@@ -143,6 +144,12 @@
             Uri baseUrl = new Uri(
                 "https://somecorp.local/api/adapter",
                 UriKind.Absolute);
+            Dictionary<string, string> headers =
+                new Dictionary<string, string>()
+                {
+                    { "X-Some-Header", "some content" },
+                };
+
             AlgorithmConfigurationDeclarationFile algorithmConfigurationDeclarationFile =
                 new AlgorithmConfigurationDeclarationFile()
                 {
@@ -152,6 +159,7 @@
                         {
                             Name = name,
                             BaseUrl = baseUrl,
+                            Headers = headers,
                         },
                     },
                 };
@@ -165,7 +173,7 @@
                 .Setup(x => x.GetAsync(It.IsAny<string>()))
                 .Returns(Task.FromResult(algorithmConfigurationDeclarationFile));
             this.mockEntityAdapterClientFactory
-                .Setup(x => x.Create(It.Is<Uri>(y => y == baseUrl)))
+                .Setup(x => x.Create(It.Is<Uri>(y => y == baseUrl), It.Is<Dictionary<string, string>>(y => y == headers)))
                 .Returns(expectedEntityAdapterClient);
 
             IEntityAdapterClient actualEntityAdapterClient = null;
