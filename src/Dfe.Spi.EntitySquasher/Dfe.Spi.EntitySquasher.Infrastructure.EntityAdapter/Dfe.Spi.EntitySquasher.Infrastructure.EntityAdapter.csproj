@@ -5,14 +5,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <!-- Dfe.Spi.* -->
-    <PackageReference Include="Dfe.Spi.Common.Logging" Version="1.0.7" PrivateAssets="All" />
-    <PackageReference Include="Dfe.Spi.Common.Models" Version="1.0.1" PrivateAssets="All" />
-    <PackageReference Include="Dfe.Spi.Models" Version="1.0.1" PrivateAssets="All" />
-    
     <!-- Other -->
-    <PackageReference Include="Newtonsoft.Json" Version="11.0.2" PrivateAssets="All" />
-    <PackageReference Include="RestSharp" Version="106.6.10" PrivateAssets="All" />
+    <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
+    <PackageReference Include="RestSharp" Version="106.6.10" />
 
     <!-- Development/Non-Runtime -->
     <PackageReference Include="StyleCop.Analyzers" Version="1.1.118" PrivateAssets="All" />

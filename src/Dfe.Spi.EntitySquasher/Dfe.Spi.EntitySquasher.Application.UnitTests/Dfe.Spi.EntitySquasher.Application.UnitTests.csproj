@@ -15,11 +15,8 @@
 
   <ItemGroup>
     <!-- Dfe.Spi.* -->
-    <PackageReference Include="Dfe.Spi.Common.Logging" Version="1.0.7" PrivateAssets="All" />
-    <PackageReference Include="Dfe.Spi.Common.Models" Version="1.0.0" PrivateAssets="All" />
     <PackageReference Include="Dfe.Spi.Common.UnitTesting" Version="1.0.6" PrivateAssets="All" />
-    <PackageReference Include="Dfe.Spi.Models" Version="1.0.1" PrivateAssets="All" />
-
+    
     <!-- Microsoft -->
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.9.0" PrivateAssets="All" />
     
@@ -27,7 +24,6 @@
     <PackageReference Include="Moq" Version="4.13.1" PrivateAssets="All" />
     <PackageReference Include="nunit" Version="3.11.0" PrivateAssets="All" />
     <PackageReference Include="NUnit3TestAdapter" Version="3.11.0" PrivateAssets="All" />
-    <PackageReference Include="Meridian.MeaningfulToString" Version="1.0.4" PrivateAssets="All" />
   </ItemGroup>
 
   <ItemGroup>
