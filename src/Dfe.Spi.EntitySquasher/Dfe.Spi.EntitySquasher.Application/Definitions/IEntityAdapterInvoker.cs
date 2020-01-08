@@ -3,6 +3,7 @@
     using System.Collections.Generic;
     using System.Threading.Tasks;
     using Dfe.Spi.EntitySquasher.Application.Models;
+    using Dfe.Spi.EntitySquasher.Application.Models.Result;
 
     /// <summary>
     /// Describes the operations of the entity adapter invoker.

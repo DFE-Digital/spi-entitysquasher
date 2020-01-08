@@ -1,4 +1,4 @@
-﻿namespace Dfe.Spi.EntitySquasher.Application.Models
+﻿namespace Dfe.Spi.EntitySquasher.Application.Models.Result
 {
     using System.Collections.Generic;
     using System.Diagnostics.CodeAnalysis;
