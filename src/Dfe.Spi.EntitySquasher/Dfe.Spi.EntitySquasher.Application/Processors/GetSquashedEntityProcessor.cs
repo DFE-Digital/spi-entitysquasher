@@ -21,6 +21,7 @@
         private readonly IEntityAdapterInvoker entityAdapterInvoker;
         private readonly IGetSquashedEntityProcessorSettingsProvider getSquashedEntityProcessorSettingsProvider;
         private readonly ILoggerWrapper loggerWrapper;
+        private readonly IResultSquasher resultSquasher;
 
         /// <summary>
         /// Initialises a new instance of the
@@ -36,14 +37,19 @@
         /// <param name="loggerWrapper">
         /// An instance of type <see cref="ILoggerWrapper" />.
         /// </param>
+        /// <param name="resultSquasher">
+        /// An instance of type <see cref="IResultSquasher" />.
+        /// </param>
         public GetSquashedEntityProcessor(
             IEntityAdapterInvoker entityAdapterInvoker,
             IGetSquashedEntityProcessorSettingsProvider getSquashedEntityProcessorSettingsProvider,
-            ILoggerWrapper loggerWrapper)
+            ILoggerWrapper loggerWrapper,
+            IResultSquasher resultSquasher)
         {
             this.entityAdapterInvoker = entityAdapterInvoker;
             this.getSquashedEntityProcessorSettingsProvider = getSquashedEntityProcessorSettingsProvider;
             this.loggerWrapper = loggerWrapper;
+            this.resultSquasher = resultSquasher;
         }
 
         /// <inheritdoc />
@@ -120,19 +126,23 @@
             IEnumerable<GetEntityAsyncResult> getEntityAsyncResults =
                 adaptersLookupResult.GetEntityAsyncResults;
 
-            Spi.Models.ModelsBase squashedEntity = null;
-
             IEnumerable<EntityAdapterException> entityAdapterExceptions =
                 getEntityAsyncResults
                     .Where(x => x.EntityAdapterException != null)
                     .Select(x => x.EntityAdapterException);
 
-            // TODO:
             // 2) Perform the squashing and append to the result - with
             //    *these* guys.
             IEnumerable<GetEntityAsyncResult> toSquash =
                 getEntityAsyncResults
                     .Where(x => x.ModelsBase != null);
+
+            Spi.Models.ModelsBase squashedEntity =
+                await this.resultSquasher.SquashAsync(
+                    algorithm,
+                    entityName,
+                    toSquash)
+                    .ConfigureAwait(false);
 
             toReturn = new SquashedEntityResult()
             {

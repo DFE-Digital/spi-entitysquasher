@@ -58,6 +58,7 @@
             AddManagers(serviceCollection);
 
             serviceCollection
+                .AddScoped<IResultSquasher, ResultSquasher>()
                 .AddScoped<IEntityAdapterInvoker, EntityAdapterInvoker>()
                 .AddScoped<IGetSquashedEntityProcessor, GetSquashedEntityProcessor>()
                 .AddScoped<IAlgorithmConfigurationDeclarationFileStorageAdapter, AlgorithmConfigurationDeclarationFileStorageAdapter>();
