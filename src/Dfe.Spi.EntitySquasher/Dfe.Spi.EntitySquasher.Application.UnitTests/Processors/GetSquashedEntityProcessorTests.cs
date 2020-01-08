@@ -5,6 +5,7 @@
     using System.Threading.Tasks;
     using Dfe.Spi.Common.UnitTesting;
     using Dfe.Spi.Common.UnitTesting.Infrastructure;
+    using Dfe.Spi.EntitySquasher.Application.Definitions;
     using Dfe.Spi.EntitySquasher.Application.Definitions.Managers;
     using Dfe.Spi.EntitySquasher.Application.Definitions.SettingsProviders;
     using Dfe.Spi.EntitySquasher.Application.Models;
@@ -26,25 +27,20 @@
             Type type = typeof(GetSquashedEntityProcessorTests);
             this.assembly = type.Assembly;
 
-            Mock<IAlgorithmConfigurationDeclarationFileManager> mockAlgorithmConfigurationDeclarationFileManager =
-                new Mock<IAlgorithmConfigurationDeclarationFileManager>();
-            Mock<IEntityAdapterClientManager> mockEntityAdapterClientManager =
-                new Mock<IEntityAdapterClientManager>();
+            Mock<IEntityAdapterInvoker> mockEntityAdapterInvoker =
+                new Mock<IEntityAdapterInvoker>();
             Mock<IGetSquashedEntityProcessorSettingsProvider> mockGetSquashedEntityProcessorSettingsProvider =
                 new Mock<IGetSquashedEntityProcessorSettingsProvider>();
 
-            IAlgorithmConfigurationDeclarationFileManager algorithmConfigurationDeclarationFileManager =
-                mockAlgorithmConfigurationDeclarationFileManager.Object;
-            IEntityAdapterClientManager entityAdapterClientManager =
-                mockEntityAdapterClientManager.Object;
+            IEntityAdapterInvoker entityAdapterInvoker =
+                mockEntityAdapterInvoker.Object;
             IGetSquashedEntityProcessorSettingsProvider getSquashedEntityProcessorSettingsProvider =
                 mockGetSquashedEntityProcessorSettingsProvider.Object;
 
             this.loggerWrapper = new LoggerWrapper();
 
             this.getSquashedEntityProcessor = new GetSquashedEntityProcessor(
-                algorithmConfigurationDeclarationFileManager,
-                entityAdapterClientManager,
+                entityAdapterInvoker,
                 getSquashedEntityProcessorSettingsProvider,
                 this.loggerWrapper);
         }

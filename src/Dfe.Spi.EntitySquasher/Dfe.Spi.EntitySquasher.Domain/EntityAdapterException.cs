@@ -17,6 +17,7 @@
         "Microsoft.Design",
         "CA1032",
         Justification = "Additional overloads, except for the paramterless one for serialisation, not required, as exception will not be inherited from.")]
+    [ExcludeFromCodeCoverage]
     public class EntityAdapterException : SpiWebServiceException
     {
         private new const string Message =

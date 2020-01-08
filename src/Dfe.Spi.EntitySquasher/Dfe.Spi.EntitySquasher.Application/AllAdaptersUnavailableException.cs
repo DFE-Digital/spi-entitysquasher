@@ -16,6 +16,7 @@
         "Microsoft.Design",
         "CA1032",
         Justification = "This is internally used, and will not be serialised.")]
+    [ExcludeFromCodeCoverage]
     public class AllAdaptersUnavailableException : WebException
     {
         private new const string Message =
