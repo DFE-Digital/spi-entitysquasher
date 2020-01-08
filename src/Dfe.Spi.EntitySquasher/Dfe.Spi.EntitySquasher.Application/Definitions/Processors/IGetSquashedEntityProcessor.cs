@@ -1,7 +1,7 @@
 ﻿namespace Dfe.Spi.EntitySquasher.Application.Processors.Definitions
 {
     using System.Threading.Tasks;
-    using Dfe.Spi.EntitySquasher.Application.Models;
+    using Dfe.Spi.EntitySquasher.Application.Models.Processors;
 
     /// <summary>
     /// Describes the operations of the get squashed entity processor.
