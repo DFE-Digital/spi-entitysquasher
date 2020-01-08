@@ -9,13 +9,13 @@
     /// <see cref="IEntityAdapterInvoker.InvokeEntityAdapters(string, string, IEnumerable{string}, EntityReference)" />.
     /// </summary>
     [ExcludeFromCodeCoverage]
-    public class InvokeEntityAdaptersResult : EntityAdapterResult
+    public class InvokeEntityAdaptersResult : ModelsBase
     {
         /// <summary>
-        /// Gets or sets the looked up <see cref="Spi.Models.ModelsBase" />
+        /// Gets or sets the looked up <see cref="GetEntityAsyncResult" />
         /// instances.
         /// </summary>
-        public IEnumerable<Spi.Models.ModelsBase> ModelsBases
+        public IEnumerable<GetEntityAsyncResult> GetEntityAsyncResults
         {
             get;
             set;

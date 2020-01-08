@@ -54,14 +54,15 @@
             IEnumerable<AdapterRecordReference> adapterRecordReferences =
                 entityReference.AdapterRecordReferences;
 
-            List<Task<Spi.Models.ModelsBase>> fetchTasks =
-                new List<Task<Spi.Models.ModelsBase>>();
+            List<GetEntityAsyncTaskContainer> fetchTasks =
+                new List<GetEntityAsyncTaskContainer>();
 
             this.loggerWrapper.Debug(
                 $"Fetching from the appropriate adapters the " +
                 $"{nameof(Task)}s to fetch the {nameof(ModelsBase)}s...");
 
             Task<Spi.Models.ModelsBase> task = null;
+            GetEntityAsyncTaskContainer getEntityTaskContainer = null;
             foreach (AdapterRecordReference adapterRecordReference in adapterRecordReferences)
             {
                 task = await this.GetEntityAsyncTaskAsync(
@@ -71,17 +72,25 @@
                     adapterRecordReference)
                     .ConfigureAwait(false);
 
-                fetchTasks.Add(task);
+                getEntityTaskContainer = new GetEntityAsyncTaskContainer()
+                {
+                    AdapterRecordReference = adapterRecordReference,
+                    Task = task,
+                };
+
+                fetchTasks.Add(getEntityTaskContainer);
             }
 
-            this.loggerWrapper.Info($"{fetchTasks.Count} task(s) returned. " +
-                $"Waiting for them to come to an end...");
+            this.loggerWrapper.Info(
+                $"{fetchTasks.Count} {nameof(Task)}(s) returned. Waiting " +
+                $"for them to come to an end...");
 
             try
             {
                 // Then, execute them all and wait for the pulling back of all
                 // tasks to complete, in parallel (so basically, yeild).
-                await Task.WhenAll(fetchTasks).ConfigureAwait(false);
+                await Task.WhenAll(fetchTasks.Select(x => x.Task))
+                    .ConfigureAwait(false);
             }
             catch (EntityAdapterException entityAdapterException)
             {
@@ -100,22 +109,65 @@
                 $"{nameof(Task)} collection for results...");
 
             // We should have the results now.
-            IEnumerable<Spi.Models.ModelsBase> modelsBases = fetchTasks
-                .Where(x => x.Status == TaskStatus.RanToCompletion)
-                .Select(x => x.Result);
+            IEnumerable<GetEntityAsyncResult> successfulTasks = fetchTasks
+                .Where(x => x.Task.Status == TaskStatus.RanToCompletion)
+                .Select(x => new GetEntityAsyncResult()
+                {
+                    AdapterRecordReference = x.AdapterRecordReference,
+                    ModelsBase = x.Task.Result,
+                });
 
             this.loggerWrapper.Debug(
                 $"Number of {nameof(ModelsBase)}s (successfully) returned: " +
-                $"{modelsBases.Count()}.");
+                $"{successfulTasks.Count()}.");
 
+            AssertExceptionsAreHandled(fetchTasks);
+
+            IEnumerable<GetEntityAsyncResult> failedTasks = fetchTasks
+                .Where(x => x.Task.Status == TaskStatus.Faulted)
+                .Select(x => new GetEntityAsyncResult()
+                {
+                    AdapterRecordReference = x.AdapterRecordReference,
+                    EntityAdapterException = (EntityAdapterException)x.Task.Exception.InnerException,
+                });
+
+            this.loggerWrapper.Debug(
+                $"Number of errored (yet handled) tasks: " +
+                $"{failedTasks.Count()}");
+
+            if (!successfulTasks.Any())
+            {
+                IEnumerable<EntityAdapterException> entityAdapterExceptions =
+                    failedTasks.Select(x => x.EntityAdapterException);
+
+                // This means all the tasks failed -
+                // We've got nowt to squash!
+                throw new AllAdaptersUnavailableException(
+                    entityAdapterExceptions);
+            }
+
+            IEnumerable<GetEntityAsyncResult> getEntityAsyncResults =
+                successfulTasks.Concat(failedTasks);
+
+            toReturn = new InvokeEntityAdaptersResult()
+            {
+                GetEntityAsyncResults = getEntityAsyncResults,
+            };
+
+            return toReturn;
+        }
+
+        private static void AssertExceptionsAreHandled(
+            IEnumerable<GetEntityAsyncTaskContainer> fetchTasks)
+        {
             // Check for exceptions, too.
-            // Now, all exceptions *should* be SpiWebServiceExceptions, if
+            // Now, all exceptions *should* be EntityAdapterExceptions, if
             // it's running in an *handled* way. If there are exceptions
-            // that are not SpiWebServiceExceptions, we need to re-throw them,
+            // that are not EntityAdapterExceptions, we need to re-throw them,
             // as this shouldn't be happening.
             IEnumerable<Exception> taskExceptions = fetchTasks
-                .Where(x => x.Status == TaskStatus.Faulted)
-                .SelectMany(x => x.Exception.InnerExceptions);
+                .Where(x => x.Task.Status == TaskStatus.Faulted)
+                .Select(x => x.Task.Exception.InnerException);
 
             IEnumerable<EntityAdapterException> entityAdapterExceptions =
                 taskExceptions
@@ -130,25 +182,6 @@
                     $"are currently not handled. Please investigate.",
                     taskExceptions);
             }
-
-            this.loggerWrapper.Debug(
-                $"Number of faulted (yet, handled) {nameof(Task)}s: " +
-                $"{entityAdapterExceptions.Count()}.");
-
-            if (!modelsBases.Any())
-            {
-                // We've got nowt to squash!
-                throw new AllAdaptersUnavailableException(
-                    entityAdapterExceptions);
-            }
-
-            toReturn = new InvokeEntityAdaptersResult()
-            {
-                ModelsBases = modelsBases,
-                EntityAdapterExceptions = entityAdapterExceptions,
-            };
-
-            return toReturn;
         }
 
         private async Task<Task<Spi.Models.ModelsBase>> GetEntityAsyncTaskAsync(

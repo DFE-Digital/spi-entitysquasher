@@ -2,12 +2,14 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using System.Threading.Tasks;
     using Dfe.Spi.Common.Logging.Definitions;
     using Dfe.Spi.EntitySquasher.Application.Definitions;
     using Dfe.Spi.EntitySquasher.Application.Definitions.SettingsProviders;
     using Dfe.Spi.EntitySquasher.Application.Models;
     using Dfe.Spi.EntitySquasher.Application.Processors.Definitions;
+    using Dfe.Spi.EntitySquasher.Domain;
 
     /// <summary>
     /// Implements <see cref="IGetSquashedEntityProcessor" />.
@@ -113,14 +115,27 @@
                     entityReference)
                     .ConfigureAwait(false);
 
-            // TODO:
-            // 2) Perform the squashing and append to the result.
+            IEnumerable<GetEntityAsyncResult> getEntityAsyncResults =
+                adaptersLookupResult.GetEntityAsyncResults;
+
             Spi.Models.ModelsBase squashedEntity = null;
+
+            IEnumerable<EntityAdapterException> entityAdapterExceptions =
+                getEntityAsyncResults
+                    .Where(x => x.EntityAdapterException != null)
+                    .Select(x => x.EntityAdapterException);
+
+            // TODO:
+            // 2) Perform the squashing and append to the result - with
+            //    *these* guys.
+            IEnumerable<GetEntityAsyncResult> toSquash =
+                getEntityAsyncResults
+                    .Where(x => x.ModelsBase != null);
 
             toReturn = new SquashedEntityResult()
             {
                 EntityReference = entityReference,
-                EntityAdapterExceptions = adaptersLookupResult.EntityAdapterExceptions,
+                EntityAdapterExceptions = entityAdapterExceptions,
                 SquashedEntity = squashedEntity,
             };
 
