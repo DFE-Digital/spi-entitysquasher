@@ -7,6 +7,7 @@
     using Dfe.Spi.EntitySquasher.Application.Models.Processors;
     using Dfe.Spi.EntitySquasher.Application.Models.Result;
     using Dfe.Spi.EntitySquasher.Application.Processors.Definitions;
+    using Dfe.Spi.EntitySquasher.Domain.Models;
     using Dfe.Spi.EntitySquasher.FunctionApp.Functions;
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Http.Internal;
@@ -141,8 +142,10 @@
                     {
                         new SquashedEntityResult()
                         {
-                            // Doesn't really even need an empty object,
-                            // to be honest.
+                            EntityAdapterErrorDetails = new EntityAdapterErrorDetail[]
+                            {
+                                // Needs an empty array here.
+                            }
                         },
                     }
                 };
