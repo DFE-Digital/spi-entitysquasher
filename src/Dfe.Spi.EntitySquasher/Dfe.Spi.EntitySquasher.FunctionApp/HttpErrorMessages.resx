@@ -126,4 +126,7 @@
   <data name="_3" xml:space="preserve">
     <value>Could not find an Algorithm Configuration Declaration File for the specified algorithm "{0}".</value>
   </data>
+  <data name="_4" xml:space="preserve">
+    <value>Unable to serve any requests - all adapters are unavailable.</value>
+  </data>
 </root>

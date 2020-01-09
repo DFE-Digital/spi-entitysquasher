@@ -198,11 +198,52 @@ namespace Dfe.Spi.EntitySquasher.FunctionApp.Functions
                     $"{nameof(IGetSquashedEntityProcessor)} invoked with " +
                     $"success.");
 
-                this.loggerWrapper.Info(
-                    $"Returning {nameof(getSquashedEntityResponse)}: " +
-                    $"{getSquashedEntityResponse}.");
-
                 toReturn = new JsonResult(getSquashedEntityResponse);
+
+                // Did one or more errors occur?
+                bool adapterErrorHappened = getSquashedEntityResponse
+                    .SquashedEntityResults
+                    .SelectMany(x => x.EntityAdapterErrorDetails)
+                    .Any();
+
+                this.loggerWrapper.Info(
+                    $"{nameof(adapterErrorHappened)} = " +
+                    $"{adapterErrorHappened}");
+
+                if (adapterErrorHappened)
+                {
+                    // Do we have *any* results at all?
+                    bool resultsExist = getSquashedEntityResponse
+                        .SquashedEntityResults
+                        .Where(x => x.SquashedEntity != null)
+                        .Any();
+
+                    this.loggerWrapper.Info(
+                        $"{nameof(resultsExist)} = {resultsExist}");
+
+                    if (resultsExist)
+                    {
+                        (toReturn as JsonResult).StatusCode =
+                            (int)HttpStatusCode.PartialContent;
+
+                        this.loggerWrapper.Info(
+                            $"We were able to get some stuff, but there " +
+                            $"were some errors. Returning " +
+                            $"{HttpStatusCode.PartialContent} with the " +
+                            $"results we got.");
+                    }
+                    else
+                    {
+                        this.loggerWrapper.Error(
+                            "It seems that we were unable to serve ANY " +
+                            "requests. Returning an error back to the " +
+                            "client.");
+
+                        toReturn = HttpErrorMessagesHelper.GetHttpErrorBodyResult(
+                            HttpStatusCode.FailedDependency,
+                            4);
+                    }
+                }
             }
             catch (FileNotFoundException)
             {
