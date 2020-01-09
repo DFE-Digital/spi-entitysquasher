@@ -67,26 +67,43 @@
             string entityName = "LearningProvider";
             string[] fields = new string[]
             {
-                "someFieldOne",
-                "someFieldTwo",
+                "SomeFieldOne",
+                "SomeFieldTwo",
             };
+
+            const string mockAdapter1Id = "working-adapter-#1";
+            const string mockAdapter2Id = "failing-adapter-#2";
+            const string mockAdapter3Id = "working-adapter-#3";
+
+            IEntityAdapterClient adapter1 = this.CreateEntityAdapterClient();
+            IEntityAdapterClient adapter2 = this.CreateEntityAdapterClient();
+            IEntityAdapterClient adapter3 = this.CreateEntityAdapterClient();
+
+            Dictionary<string, IEntityAdapterClient> adapters =
+                new Dictionary<string, IEntityAdapterClient>()
+                {
+                    { mockAdapter1Id, adapter1 },
+                    { mockAdapter2Id, adapter2 },
+                    { mockAdapter3Id, adapter3 },
+                };
+
             AdapterRecordReference[] adapterRecordReferences =
                 new AdapterRecordReference[]
                 {
                     new AdapterRecordReference()
                     {
-                        Id = "1",
-                        Source = "adapter-one",
+                        Id = "123456",
+                        Source = mockAdapter1Id,
                     },
                     new AdapterRecordReference()
                     {
-                        Id = "2",
-                        Source = "adapter-two",
+                        Id = "2890d784-900f-4861-a034-30e645bd57b5",
+                        Source = mockAdapter2Id,
                     },
                     new AdapterRecordReference()
                     {
-                        Id = "3",
-                        Source = "adapter-three",
+                        Id = "abc",
+                        Source = mockAdapter3Id,
                     },
                 };
 
@@ -95,15 +112,18 @@
                 AdapterRecordReferences = adapterRecordReferences,
             };
 
-            Mock<IEntityAdapterClient> mockEntityAdapterClient =
-                new Mock<IEntityAdapterClient>();
+            Func<EntityAdapterClientKey, IEntityAdapterClient> getAsyncCallback =
+                entityAdapterClientKey =>
+                {
+                    IEntityAdapterClient entityAdapterClient =
+                        adapters[entityAdapterClientKey.Name];
 
-            IEntityAdapterClient entityAdapterClient =
-                mockEntityAdapterClient.Object;
+                    return entityAdapterClient;
+                };
 
             this.mockEntityAdapterClientManager
                 .Setup(x => x.GetAsync(It.IsAny<EntityAdapterClientKey>()))
-                .ReturnsAsync(entityAdapterClient);
+                .ReturnsAsync(getAsyncCallback);
 
             // Act
             InvokeEntityAdaptersResult invokeEntityAdaptersResult =
@@ -115,6 +135,18 @@
 
             // Assert
 
+        }
+
+        private IEntityAdapterClient CreateEntityAdapterClient()
+        {
+            IEntityAdapterClient toReturn = null;
+
+            Mock<IEntityAdapterClient> mockEntityAdapterClient =
+                new Mock<IEntityAdapterClient>();
+
+            toReturn = mockEntityAdapterClient.Object;
+
+            return toReturn;
         }
     }
 }

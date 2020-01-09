@@ -7,6 +7,7 @@
     using System.Net;
     using Dfe.Spi.Common.Http.Client;
     using Dfe.Spi.Common.Models;
+    using Dfe.Spi.EntitySquasher.Domain.Models;
 
     /// <summary>
     /// Represents an error raised upon calling a an entity adapter web
@@ -39,17 +40,8 @@
         /// Initialises a new instance of the
         /// <see cref="EntityAdapterException" /> class.
         /// </summary>
-        /// <param name="adapterName">
-        /// The originating adapter name.
-        /// </param>
-        /// <param name="requestedEntityName">
-        /// The name of the originally requested entity.
-        /// </param>
-        /// <param name="requestedId">
-        /// The originally requested entity id.
-        /// </param>
-        /// <param name="requestedFields">
-        /// The originally requested list of fields.
+        /// <param name="entityAdapterErrorDetail">
+        /// An instance of <see cref="Models.EntityAdapterErrorDetail" />.
         /// </param>
         /// <param name="httpStatusCode">
         /// The actual <see cref="HttpStatusCode" /> resulting in the exception
@@ -59,68 +51,31 @@
         /// An instance of type <see cref="HttpErrorBody" />.
         /// </param>
         public EntityAdapterException(
-            string adapterName,
-            string requestedEntityName,
-            string requestedId,
-            IEnumerable<string> requestedFields,
+            EntityAdapterErrorDetail entityAdapterErrorDetail,
             HttpStatusCode httpStatusCode,
             HttpErrorBody httpErrorBody)
             : base(
                   BuildExceptionMessage(
-                    adapterName,
-                    httpStatusCode,
-                    requestedId,
-                    requestedFields))
+                    entityAdapterErrorDetail,
+                    httpStatusCode))
         {
-            this.AdapterName = adapterName;
-            this.RequestedEntityName = requestedEntityName;
-            this.RequestedId = requestedId;
-            this.RequestedFields = requestedFields;
+            this.EntityAdapterErrorDetail = entityAdapterErrorDetail;
             this.HttpStatusCode = httpStatusCode;
             this.HttpErrorBody = httpErrorBody;
         }
 
         /// <summary>
-        /// Gets or sets the originating adapter name.
+        /// Gets an instance of <see cref="Models.EntityAdapterErrorDetail" />.
         /// </summary>
-        public string AdapterName
+        public EntityAdapterErrorDetail EntityAdapterErrorDetail
         {
             get;
-            set;
-        }
-
-        /// <summary>
-        /// Gets or sets the name of the originally requested entity.
-        /// </summary>
-        public string RequestedEntityName
-        {
-            get;
-            set;
-        }
-
-        /// <summary>
-        /// Gets or sets the originally requested entity id.
-        /// </summary>
-        public string RequestedId
-        {
-            get;
-            set;
-        }
-
-        /// <summary>
-        /// Gets or sets the originally requested list of fields.
-        /// </summary>
-        public IEnumerable<string> RequestedFields
-        {
-            get;
-            set;
+            private set;
         }
 
         private static string BuildExceptionMessage(
-            string adapterName,
-            HttpStatusCode httpStatusCode,
-            string requestedId,
-            IEnumerable<string> requestedFields)
+            EntityAdapterErrorDetail entityAdapterErrorDetail,
+            HttpStatusCode httpStatusCode)
         {
             string toReturn = null;
 
@@ -129,10 +84,10 @@
             toReturn = string.Format(
                 CultureInfo.InvariantCulture,
                 Message,
-                adapterName,
+                entityAdapterErrorDetail.AdapterName,
                 statusCode,
-                requestedId,
-                requestedFields.Count());
+                entityAdapterErrorDetail.RequestedId,
+                entityAdapterErrorDetail.RequestedFields.Count());
 
             return toReturn;
         }

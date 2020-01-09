@@ -1,12 +1,14 @@
 ﻿namespace Dfe.Spi.EntitySquasher.Application.Models.Result
 {
     using System.Collections.Generic;
-    using Dfe.Spi.EntitySquasher.Domain;
+    using System.Diagnostics.CodeAnalysis;
+    using Dfe.Spi.EntitySquasher.Domain.Models;
 
     /// <summary>
     /// Represents the result of a squash operation for a given
     /// <see cref="Models.EntityReference" /> request.
     /// </summary>
+    [ExcludeFromCodeCoverage]
     public class SquashedEntityResult : ModelsBase
     {
         /// <summary>
@@ -29,10 +31,11 @@
         }
 
         /// <summary>
-        /// Gets or sets any <see cref="EntityAdapterException" />s that
-        /// were thrown during the initial calling of entity adapters.
+        /// Gets or sets any
+        /// <see cref="Domain.Models.EntityAdapterErrorDetail" />s that
+        /// were bubbled up during the initial calling of entity adapters.
         /// </summary>
-        public IEnumerable<EntityAdapterException> EntityAdapterExceptions
+        public IEnumerable<EntityAdapterErrorDetail> EntityAdapterErrorDetails
         {
             get;
             set;

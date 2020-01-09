@@ -11,6 +11,7 @@
     using Dfe.Spi.EntitySquasher.Application.Models.Result;
     using Dfe.Spi.EntitySquasher.Domain;
     using Dfe.Spi.EntitySquasher.Domain.Definitions;
+    using Dfe.Spi.EntitySquasher.Domain.Models;
 
     /// <summary>
     /// Implements <see cref="IEntityAdapterInvoker" />.
@@ -124,13 +125,14 @@
 
             AssertExceptionsAreHandled(fetchTasks);
 
-            IEnumerable<GetEntityAsyncResult> failedTasks = fetchTasks
-                .Where(x => x.Task.Status == TaskStatus.Faulted)
-                .Select(x => new GetEntityAsyncResult()
-                {
-                    AdapterRecordReference = x.AdapterRecordReference,
-                    EntityAdapterException = (EntityAdapterException)x.Task.Exception.InnerException,
-                });
+            IEnumerable<GetEntityAsyncResult> failedTasks =
+                fetchTasks
+                    .Where(x => x.Task.Status == TaskStatus.Faulted)
+                    .Select(x => new GetEntityAsyncResult()
+                    {
+                        AdapterRecordReference = x.AdapterRecordReference,
+                        EntityAdapterException = x.Task.Exception.InnerException as EntityAdapterException,
+                    });
 
             this.loggerWrapper.Debug(
                 $"Number of errored (yet handled) tasks: " +
@@ -139,7 +141,8 @@
             if (!successfulTasks.Any())
             {
                 IEnumerable<EntityAdapterException> entityAdapterExceptions =
-                    failedTasks.Select(x => x.EntityAdapterException);
+                    failedTasks
+                        .Select(x => x.EntityAdapterException);
 
                 // This means all the tasks failed -
                 // We've got nowt to squash!

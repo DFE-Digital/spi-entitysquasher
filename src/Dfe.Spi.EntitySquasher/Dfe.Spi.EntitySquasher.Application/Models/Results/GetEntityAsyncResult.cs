@@ -1,6 +1,7 @@
 ﻿namespace Dfe.Spi.EntitySquasher.Application.Models.Result
 {
     using System.Collections.Generic;
+    using System.Diagnostics.CodeAnalysis;
     using Dfe.Spi.EntitySquasher.Domain;
     using Dfe.Spi.EntitySquasher.Domain.Definitions;
 
@@ -8,6 +9,7 @@
     /// Result object for
     /// <see cref="IEntityAdapterClient.GetEntityAsync(string, string, IEnumerable{string})" />.
     /// </summary>
+    [ExcludeFromCodeCoverage]
     public class GetEntityAsyncResult : GetEntityAsyncBase
     {
         /// <summary>

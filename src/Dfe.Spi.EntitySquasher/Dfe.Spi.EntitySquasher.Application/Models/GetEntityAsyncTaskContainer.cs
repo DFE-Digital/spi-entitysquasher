@@ -1,6 +1,7 @@
 ﻿namespace Dfe.Spi.EntitySquasher.Application.Models
 {
     using System.Collections.Generic;
+    using System.Diagnostics.CodeAnalysis;
     using System.Threading.Tasks;
     using Dfe.Spi.EntitySquasher.Domain.Definitions;
 
@@ -8,6 +9,7 @@
     /// A container class for tasks returned from
     /// <see cref="IEntityAdapterClient.GetEntityAsync(string, string, IEnumerable{string})" />.
     /// </summary>
+    [ExcludeFromCodeCoverage]
     public class GetEntityAsyncTaskContainer : GetEntityAsyncBase
     {
         /// <summary>

@@ -11,7 +11,7 @@
     using Dfe.Spi.EntitySquasher.Application.Models.Processors;
     using Dfe.Spi.EntitySquasher.Application.Models.Result;
     using Dfe.Spi.EntitySquasher.Application.Processors.Definitions;
-    using Dfe.Spi.EntitySquasher.Domain;
+    using Dfe.Spi.EntitySquasher.Domain.Models;
 
     /// <summary>
     /// Implements <see cref="IGetSquashedEntityProcessor" />.
@@ -126,10 +126,10 @@
             IEnumerable<GetEntityAsyncResult> getEntityAsyncResults =
                 adaptersLookupResult.GetEntityAsyncResults;
 
-            IEnumerable<EntityAdapterException> entityAdapterExceptions =
+            IEnumerable<EntityAdapterErrorDetail> entityAdapterErrorDetails =
                 getEntityAsyncResults
                     .Where(x => x.EntityAdapterException != null)
-                    .Select(x => x.EntityAdapterException);
+                    .Select(x => x.EntityAdapterException.EntityAdapterErrorDetail);
 
             // 2) Perform the squashing and append to the result - with
             //    *these* guys.
@@ -147,7 +147,7 @@
             toReturn = new SquashedEntityResult()
             {
                 EntityReference = entityReference,
-                EntityAdapterExceptions = entityAdapterExceptions,
+                EntityAdapterErrorDetails = entityAdapterErrorDetails,
                 SquashedEntity = squashedEntity,
             };
 

@@ -9,6 +9,7 @@
     using Dfe.Spi.Common.Models;
     using Dfe.Spi.EntitySquasher.Domain;
     using Dfe.Spi.EntitySquasher.Domain.Definitions;
+    using Dfe.Spi.EntitySquasher.Domain.Models;
     using Newtonsoft.Json;
     using RestSharp;
     using ModelsBase = Dfe.Spi.Models.ModelsBase;
@@ -109,15 +110,22 @@
                         jsonReaderException);
                 }
 
-                HttpStatusCode statusCode = restResponse.StatusCode;
+                HttpStatusCode httpStatusCode = restResponse.StatusCode;
 
                 // Throw exception.
+                EntityAdapterErrorDetail entityAdapterErrorDetail =
+                    new EntityAdapterErrorDetail()
+                    {
+                        AdapterName = this.entityAdapterName,
+                        RequestedEntityName = entityName,
+                        RequestedFields = fields,
+                        RequestedId = id,
+                        HttpStatusCode = httpStatusCode,
+                        HttpErrorBody = httpErrorBody,
+                    };
                 throw new EntityAdapterException(
-                    this.entityAdapterName,
-                    entityName,
-                    id,
-                    fields,
-                    statusCode,
+                    entityAdapterErrorDetail,
+                    httpStatusCode,
                     httpErrorBody);
             }
 

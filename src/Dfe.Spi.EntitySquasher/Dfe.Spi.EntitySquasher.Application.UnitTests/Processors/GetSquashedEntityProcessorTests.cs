@@ -32,18 +32,22 @@
                 new Mock<IEntityAdapterInvoker>();
             Mock<IGetSquashedEntityProcessorSettingsProvider> mockGetSquashedEntityProcessorSettingsProvider =
                 new Mock<IGetSquashedEntityProcessorSettingsProvider>();
+            Mock<IResultSquasher> mockResultSquasher =
+                new Mock<IResultSquasher>();
 
             IEntityAdapterInvoker entityAdapterInvoker =
                 mockEntityAdapterInvoker.Object;
             IGetSquashedEntityProcessorSettingsProvider getSquashedEntityProcessorSettingsProvider =
                 mockGetSquashedEntityProcessorSettingsProvider.Object;
+            IResultSquasher resultSquasher = mockResultSquasher.Object;
 
             this.loggerWrapper = new LoggerWrapper();
 
             this.getSquashedEntityProcessor = new GetSquashedEntityProcessor(
                 entityAdapterInvoker,
                 getSquashedEntityProcessorSettingsProvider,
-                this.loggerWrapper);
+                this.loggerWrapper,
+                resultSquasher);
         }
 
         [Test]
