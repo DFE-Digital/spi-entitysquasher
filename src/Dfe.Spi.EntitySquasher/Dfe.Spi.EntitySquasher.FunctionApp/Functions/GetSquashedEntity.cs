@@ -9,7 +9,6 @@ namespace Dfe.Spi.EntitySquasher.FunctionApp.Functions
     using System.Threading.Tasks;
     using Dfe.Spi.Common.Http.Server;
     using Dfe.Spi.Common.Logging.Definitions;
-    using Dfe.Spi.EntitySquasher.Application.Models;
     using Dfe.Spi.EntitySquasher.Application.Models.Processors;
     using Dfe.Spi.EntitySquasher.Application.Processors.Definitions;
     using Microsoft.AspNetCore.Http;

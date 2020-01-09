@@ -115,34 +115,52 @@
             // 1) Call all adapters specified in the entity reference
             //    at the same time. First, get the tasks to pull back the
             //    ModelsBases.
-            InvokeEntityAdaptersResult adaptersLookupResult =
-                await this.entityAdapterInvoker.InvokeEntityAdapters(
-                    algorithm,
-                    entityName,
-                    fields,
-                    entityReference)
-                    .ConfigureAwait(false);
+            IEnumerable<EntityAdapterErrorDetail> entityAdapterErrorDetails = null;
+            Spi.Models.ModelsBase squashedEntity = null;
+            try
+            {
+                InvokeEntityAdaptersResult adaptersLookupResult =
+                    await this.entityAdapterInvoker.InvokeEntityAdapters(
+                        algorithm,
+                        entityName,
+                        fields,
+                        entityReference)
+                        .ConfigureAwait(false);
 
-            IEnumerable<GetEntityAsyncResult> getEntityAsyncResults =
+                IEnumerable<GetEntityAsyncResult> getEntityAsyncResults =
                 adaptersLookupResult.GetEntityAsyncResults;
 
-            IEnumerable<EntityAdapterErrorDetail> entityAdapterErrorDetails =
-                getEntityAsyncResults
-                    .Where(x => x.EntityAdapterException != null)
-                    .Select(x => x.EntityAdapterException.EntityAdapterErrorDetail);
+                entityAdapterErrorDetails =
+                    getEntityAsyncResults
+                        .Where(x => x.EntityAdapterException != null)
+                        .Select(x => x.EntityAdapterException.EntityAdapterErrorDetail);
 
-            // 2) Perform the squashing and append to the result - with
-            //    *these* guys.
-            IEnumerable<GetEntityAsyncResult> toSquash =
-                getEntityAsyncResults
-                    .Where(x => x.ModelsBase != null);
+                // 2) Perform the squashing and append to the result - with
+                //    *these* guys.
+                IEnumerable<GetEntityAsyncResult> toSquash =
+                    getEntityAsyncResults
+                        .Where(x => x.ModelsBase != null);
 
-            Spi.Models.ModelsBase squashedEntity =
-                await this.resultSquasher.SquashAsync(
-                    algorithm,
-                    entityName,
-                    toSquash)
-                    .ConfigureAwait(false);
+                squashedEntity =
+                    await this.resultSquasher.SquashAsync(
+                        algorithm,
+                        entityName,
+                        toSquash)
+                        .ConfigureAwait(false);
+            }
+            catch (AllAdaptersUnavailableException allAdaptersUnavailableException)
+            {
+                this.loggerWrapper.Warning(
+                    "Warning! All adapters were unavailable when attempting " +
+                    "to serve this request. This is probably an indicator " +
+                    "that something is very wrong! The request will still " +
+                    "be served, but the model will be empty.",
+                    allAdaptersUnavailableException);
+
+                entityAdapterErrorDetails = allAdaptersUnavailableException
+                    .EntityAdapterExceptions
+                    .Select(x => x.EntityAdapterErrorDetail);
+            }
 
             toReturn = new SquashedEntityResult()
             {
