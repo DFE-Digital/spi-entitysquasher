@@ -190,7 +190,6 @@
         {
             // Arrange
             IActionResult actionResult = null;
-            JsonResult jsonResult = null;
 
             GetSquashedEntityResponse getSquashedEntityResponse =
                 new GetSquashedEntityResponse()

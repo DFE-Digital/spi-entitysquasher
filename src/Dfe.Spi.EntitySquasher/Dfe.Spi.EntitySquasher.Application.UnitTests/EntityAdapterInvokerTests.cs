@@ -3,12 +3,17 @@
     using System;
     using System.Collections;
     using System.Collections.Generic;
+    using System.Linq;
+    using System.Net;
     using System.Threading.Tasks;
     using Dfe.Spi.Common.UnitTesting.Infrastructure;
     using Dfe.Spi.EntitySquasher.Application.Definitions.Managers;
     using Dfe.Spi.EntitySquasher.Application.Models;
     using Dfe.Spi.EntitySquasher.Application.Models.Result;
+    using Dfe.Spi.EntitySquasher.Domain;
     using Dfe.Spi.EntitySquasher.Domain.Definitions;
+    using Dfe.Spi.EntitySquasher.Domain.Models;
+    using Dfe.Spi.Models;
     using Moq;
     using NUnit.Framework;
 
@@ -60,7 +65,7 @@
         }
 
         [Test]
-        public async Task Unnamed()
+        public async Task InvokeEntityAdapters_2AdaptersSucceed1Fails_OutputIsAsExpected()
         {
             // Arrange
             string algorithm = "some-algorithm";
@@ -75,9 +80,32 @@
             const string mockAdapter2Id = "failing-adapter-#2";
             const string mockAdapter3Id = "working-adapter-#3";
 
-            IEntityAdapterClient adapter1 = this.CreateEntityAdapterClient();
-            IEntityAdapterClient adapter2 = this.CreateEntityAdapterClient();
-            IEntityAdapterClient adapter3 = this.CreateEntityAdapterClient();
+            string mockAdapter2RecordId = "2890d784-900f-4861-a034-30e645bd57b5";
+
+            EntityAdapterErrorDetail expectedEntityAdapterErrorDetail =
+                new EntityAdapterErrorDetail()
+                {
+                    AdapterName = mockAdapter2Id,
+                    HttpErrorBody = new Common.Models.HttpErrorBody()
+                    {
+                        ErrorIdentifier = "FA-008",
+                        Message = "Some ficticious error message to go here.",
+                        StatusCode = HttpStatusCode.UnavailableForLegalReasons,
+                    },
+                    HttpStatusCode = HttpStatusCode.UnavailableForLegalReasons,
+                    RequestedEntityName = entityName,
+                    RequestedFields = fields,
+                    RequestedId = mockAdapter2RecordId,
+                };
+            EntityAdapterErrorDetail actualEntityAdapterErrorDetail = null;
+
+            IEntityAdapterClient adapter1 = this.CreateEntityAdapterClient(
+                TimeSpan.Parse("00:00:01"));
+            IEntityAdapterClient adapter2 = this.CreateEntityAdapterClient(
+                TimeSpan.Parse("00:00:05"),
+                expectedEntityAdapterErrorDetail);
+            IEntityAdapterClient adapter3 = this.CreateEntityAdapterClient(
+                TimeSpan.Parse("00:00:03"));
 
             Dictionary<string, IEntityAdapterClient> adapters =
                 new Dictionary<string, IEntityAdapterClient>()
@@ -97,7 +125,7 @@
                     },
                     new AdapterRecordReference()
                     {
-                        Id = "2890d784-900f-4861-a034-30e645bd57b5",
+                        Id = mockAdapter2RecordId,
                         Source = mockAdapter2Id,
                     },
                     new AdapterRecordReference()
@@ -125,6 +153,11 @@
                 .Setup(x => x.GetAsync(It.IsAny<EntityAdapterClientKey>()))
                 .ReturnsAsync(getAsyncCallback);
 
+            int expectedSuccessfulTasks = 2;
+            int actualSuccessfulTasks;
+
+            GetEntityAsyncResult unsuccessfulResult = null;
+
             // Act
             InvokeEntityAdaptersResult invokeEntityAdaptersResult =
                 await this.entityAdapterInvoker.InvokeEntityAdapters(
@@ -134,17 +167,76 @@
                     entityReference);
 
             // Assert
+            // We should have 2 successful results, and one unsuccessful
+            // result.
+            // First, assert the successful ones:
+            actualSuccessfulTasks = invokeEntityAdaptersResult
+                .GetEntityAsyncResults
+                .Count(x => x.ModelsBase != null);
 
+            Assert.AreEqual(expectedSuccessfulTasks, actualSuccessfulTasks);
+
+            // We should have one unsuccessful task.
+            unsuccessfulResult = invokeEntityAdaptersResult
+                .GetEntityAsyncResults
+                .SingleOrDefault(x => x.EntityAdapterException != null);
+
+            Assert.IsNotNull(unsuccessfulResult);
+
+            // And the error detail should match up...
+            actualEntityAdapterErrorDetail = unsuccessfulResult
+                .EntityAdapterException
+                .EntityAdapterErrorDetail;
+
+            Assert.AreEqual(
+                expectedEntityAdapterErrorDetail,
+                actualEntityAdapterErrorDetail);
         }
 
-        private IEntityAdapterClient CreateEntityAdapterClient()
+        private IEntityAdapterClient CreateEntityAdapterClient(
+            TimeSpan delay,
+            EntityAdapterErrorDetail entityAdapterErrorDetail = null)
         {
             IEntityAdapterClient toReturn = null;
 
             Mock<IEntityAdapterClient> mockEntityAdapterClient =
                 new Mock<IEntityAdapterClient>();
 
+            Func<Task<Spi.Models.ModelsBase>> getEntityAsyncCallback =
+                () =>
+                {
+                    Task<Spi.Models.ModelsBase> taskToReturn =
+                        this.FakeTaskCreator(delay, entityAdapterErrorDetail);
+
+                    return taskToReturn;
+                };
+
+            mockEntityAdapterClient
+                .Setup(x => x.GetEntityAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<IEnumerable<string>>()))
+                .Returns(getEntityAsyncCallback);
+
             toReturn = mockEntityAdapterClient.Object;
+
+            return toReturn;
+        }
+
+        private async Task<Spi.Models.ModelsBase> FakeTaskCreator(
+            TimeSpan delay,
+            EntityAdapterErrorDetail entityAdapterErrorDetail)
+        {
+            Spi.Models.ModelsBase toReturn = null;
+
+            await Task.Delay(delay);
+
+            if (entityAdapterErrorDetail != null)
+            {
+                throw new EntityAdapterException(
+                    entityAdapterErrorDetail,
+                    entityAdapterErrorDetail.HttpStatusCode,
+                    entityAdapterErrorDetail.HttpErrorBody);
+            }
+
+            toReturn = new LearningProvider();
 
             return toReturn;
         }
