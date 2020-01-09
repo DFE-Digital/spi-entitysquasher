@@ -193,6 +193,94 @@
                 actualEntityAdapterErrorDetail);
         }
 
+        [Test]
+        public void InvokeEntityAdapters_OnlyAdapterFails_ThrowsAllAdaptersUnavailableException()
+        {
+            // Arrange
+            string algorithm = "some-algorithm";
+            string entityName = "LearningProvider";
+            string[] fields = new string[]
+            {
+                "SomeFieldOne",
+                "SomeFieldTwo",
+            };
+
+            const string mockAdapter2Id = "failing-adapter-#2";
+
+            string mockAdapter2RecordId = "2890d784-900f-4861-a034-30e645bd57b5";
+
+            EntityAdapterErrorDetail expectedEntityAdapterErrorDetail =
+                new EntityAdapterErrorDetail()
+                {
+                    AdapterName = mockAdapter2Id,
+                    HttpErrorBody = new Common.Models.HttpErrorBody()
+                    {
+                        ErrorIdentifier = "FA-008",
+                        Message = "Some ficticious error message to go here.",
+                        StatusCode = HttpStatusCode.UnavailableForLegalReasons,
+                    },
+                    HttpStatusCode = HttpStatusCode.UnavailableForLegalReasons,
+                    RequestedEntityName = entityName,
+                    RequestedFields = fields,
+                    RequestedId = mockAdapter2RecordId,
+                };
+
+            IEntityAdapterClient adapter2 = this.CreateEntityAdapterClient(
+                TimeSpan.Parse("00:00:02"),
+                expectedEntityAdapterErrorDetail);
+
+            Dictionary<string, IEntityAdapterClient> adapters =
+                new Dictionary<string, IEntityAdapterClient>()
+                {
+                    { mockAdapter2Id, adapter2 },
+                };
+
+
+            AdapterRecordReference[] adapterRecordReferences =
+                new AdapterRecordReference[]
+                {
+                    new AdapterRecordReference()
+                    {
+                        Id = mockAdapter2RecordId,
+                        Source = mockAdapter2Id,
+                    },
+                };
+
+            EntityReference entityReference = new EntityReference()
+            {
+                AdapterRecordReferences = adapterRecordReferences,
+            };
+
+            Func<EntityAdapterClientKey, IEntityAdapterClient> getAsyncCallback =
+                entityAdapterClientKey =>
+                {
+                    IEntityAdapterClient entityAdapterClient =
+                        adapters[entityAdapterClientKey.Name];
+
+                    return entityAdapterClient;
+                };
+
+            this.mockEntityAdapterClientManager
+                .Setup(x => x.GetAsync(It.IsAny<EntityAdapterClientKey>()))
+                .ReturnsAsync(getAsyncCallback);
+
+            AsyncTestDelegate asyncTestDelegate =
+                async () =>
+                {
+                    // Act
+                    await this.entityAdapterInvoker.InvokeEntityAdapters(
+                        algorithm,
+                        entityName,
+                        fields,
+                        entityReference);
+                };
+
+            // Assert
+            Assert.ThrowsAsync<AllAdaptersUnavailableException>(
+                asyncTestDelegate);
+        }
+
+
         private IEntityAdapterClient CreateEntityAdapterClient(
             TimeSpan delay,
             EntityAdapterErrorDetail entityAdapterErrorDetail = null)
