@@ -8,7 +8,7 @@
     /// cache.
     /// </summary>
     public interface IEntityAdapterClientCache
-        : ICache<EntityAdapterClientKey, IEntityAdapterClient>
+        : ICacheBase<EntityAdapterClientKey, IEntityAdapterClient>
     {
         // Nothing, inherits what it needs.
     }

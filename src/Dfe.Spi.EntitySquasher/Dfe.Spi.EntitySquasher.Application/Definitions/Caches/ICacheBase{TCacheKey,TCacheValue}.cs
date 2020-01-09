@@ -1,7 +1,7 @@
 ﻿namespace Dfe.Spi.EntitySquasher.Application.Definitions.Caches
 {
     /// <summary>
-    /// Describes the operations of a cache.
+    /// Describes the operations of the cache base.
     /// </summary>
     /// <typeparam name="TCacheKey">
     /// The type of key used in the underlying storage.
@@ -9,7 +9,7 @@
     /// <typeparam name="TCacheValue">
     /// The type of item to store in the cache.
     /// </typeparam>
-    public interface ICache<TCacheKey, TCacheValue>
+    public interface ICacheBase<TCacheKey, TCacheValue>
         where TCacheValue : class
     {
         /// <summary>

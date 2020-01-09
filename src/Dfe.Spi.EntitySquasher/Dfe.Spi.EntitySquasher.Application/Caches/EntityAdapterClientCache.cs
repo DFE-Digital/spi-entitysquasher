@@ -8,7 +8,7 @@
     /// Implements <see cref="IEntityAdapterClientCache" />.
     /// </summary>
     public class EntityAdapterClientCache
-        : Cache<EntityAdapterClientKey, IEntityAdapterClient>, IEntityAdapterClientCache
+        : CacheBase<EntityAdapterClientKey, IEntityAdapterClient>, IEntityAdapterClientCache
     {
         // Nothing - inherits all it needs for now.
     }

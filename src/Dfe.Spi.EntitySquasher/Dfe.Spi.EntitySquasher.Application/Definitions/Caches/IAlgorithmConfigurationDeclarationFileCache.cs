@@ -7,7 +7,7 @@
     /// <see cref="AlgorithmConfigurationDeclarationFile" /> cache.
     /// </summary>
     public interface IAlgorithmConfigurationDeclarationFileCache
-        : ICache<string, AlgorithmConfigurationDeclarationFile>
+        : ICacheBase<string, AlgorithmConfigurationDeclarationFile>
     {
         // Nothing, inherits what it needs.
     }

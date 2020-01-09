@@ -18,7 +18,7 @@
         : IManager<TCacheKey, TManagerItem>
         where TManagerItem : class
     {
-        private readonly ICache<TCacheKey, TManagerItem> cache;
+        private readonly ICacheBase<TCacheKey, TManagerItem> cache;
         private readonly ILoggerWrapper loggerWrapper;
 
         /// <summary>
@@ -26,13 +26,13 @@
         /// <see cref="Manager{TCacheKey, TCacheValue}" /> class.
         /// </summary>
         /// <param name="cache">
-        /// An instance of type <see cref="ICache{TCacheKey, TManagerItem}" />.
+        /// An instance of type <see cref="ICacheBase{TCacheKey, TManagerItem}" />.
         /// </param>
         /// <param name="loggerWrapper">
         /// An instance of type <see cref="ILoggerWrapper" />.
         /// </param>
         public Manager(
-            ICache<TCacheKey, TManagerItem> cache,
+            ICacheBase<TCacheKey, TManagerItem> cache,
             ILoggerWrapper loggerWrapper)
         {
             this.cache = cache;
