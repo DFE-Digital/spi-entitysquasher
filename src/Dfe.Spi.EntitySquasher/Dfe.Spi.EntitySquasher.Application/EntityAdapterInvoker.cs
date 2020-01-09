@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics.CodeAnalysis;
     using System.Linq;
     using System.Threading.Tasks;
     using Dfe.Spi.Common.Logging.Definitions;
@@ -40,6 +41,10 @@
         }
 
         /// <inheritdoc />
+        [SuppressMessage(
+            "Microsoft.Design",
+            "CA1031",
+            Justification = "Unhandled exceptions are handled, and re-thrown later after the try-catch. A catch is required to allow the continuation of execution of all tasks.")]
         public async Task<InvokeEntityAdaptersResult> InvokeEntityAdapters(
             string algorithm,
             string entityName,
@@ -105,6 +110,15 @@
                     $"exceptions.",
                     entityAdapterException);
             }
+            catch (Exception exception)
+            {
+                this.loggerWrapper.Error(
+                    $"At least one other {nameof(Exception)} type, other " +
+                    $"than {nameof(EntityAdapterException)} was thrown from " +
+                    $"the entity adapter. This isn't handled, and will need " +
+                    $"to be investigated.",
+                    exception);
+            }
 
             this.loggerWrapper.Debug(
                 $"All {nameof(Task)}s have finished. Checking " +
@@ -123,7 +137,7 @@
                 $"Number of {nameof(ModelsBase)}s (successfully) returned: " +
                 $"{successfulTasks.Count()}.");
 
-            AssertExceptionsAreHandled(fetchTasks);
+            this.AssertExceptionsAreHandled(fetchTasks);
 
             IEnumerable<GetEntityAsyncResult> failedTasks =
                 fetchTasks
@@ -144,6 +158,12 @@
                     failedTasks
                         .Select(x => x.EntityAdapterException);
 
+                this.loggerWrapper.Warning(
+                    $"This request could not be served, as all the entity " +
+                    $"adapters quizzed returned (handled) exceptions. " +
+                    $"Throwing a " +
+                    $"{nameof(AllAdaptersUnavailableException)}...");
+
                 // This means all the tasks failed -
                 // We've got nowt to squash!
                 throw new AllAdaptersUnavailableException(
@@ -161,7 +181,7 @@
             return toReturn;
         }
 
-        private static void AssertExceptionsAreHandled(
+        private void AssertExceptionsAreHandled(
             IEnumerable<GetEntityAsyncTaskContainer> fetchTasks)
         {
             // Check for exceptions, too.
@@ -180,10 +200,17 @@
 
             if (taskExceptions.Count() != entityAdapterExceptions.Count())
             {
-                throw new AggregateException(
+                string message =
                     $"Some exceptions thrown by one or more of the adapters " +
                     $"were not {nameof(EntityAdapterException)}s! These " +
-                    $"are currently not handled. Please investigate.",
+                    $"are currently not handled. Throwing a " +
+                    $"{nameof(AggregateException)} containing these " +
+                    $"{nameof(Exception)}s...";
+
+                this.loggerWrapper.Error(message);
+
+                throw new AggregateException(
+                    message,
                     taskExceptions);
             }
         }

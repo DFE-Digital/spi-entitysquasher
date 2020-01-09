@@ -1,7 +1,6 @@
 ﻿namespace Dfe.Spi.EntitySquasher.Application.UnitTests
 {
     using System;
-    using System.Collections;
     using System.Collections.Generic;
     using System.Linq;
     using System.Net;
@@ -101,9 +100,16 @@
 
             IEntityAdapterClient adapter1 = this.CreateEntityAdapterClient(
                 TimeSpan.Parse("00:00:01"));
+
+            EntityAdapterException entityAdapterException =
+                new EntityAdapterException(
+                    expectedEntityAdapterErrorDetail,
+                    expectedEntityAdapterErrorDetail.HttpStatusCode,
+                    expectedEntityAdapterErrorDetail.HttpErrorBody);
+
             IEntityAdapterClient adapter2 = this.CreateEntityAdapterClient(
                 TimeSpan.Parse("00:00:05"),
-                expectedEntityAdapterErrorDetail);
+                entityAdapterException);
             IEntityAdapterClient adapter3 = this.CreateEntityAdapterClient(
                 TimeSpan.Parse("00:00:03"));
 
@@ -191,6 +197,8 @@
             Assert.AreEqual(
                 expectedEntityAdapterErrorDetail,
                 actualEntityAdapterErrorDetail);
+
+            string logOutput = this.loggerWrapper.ReturnLog();
         }
 
         [Test]
@@ -225,9 +233,15 @@
                     RequestedId = mockAdapter2RecordId,
                 };
 
+            EntityAdapterException entityAdapterException =
+                new EntityAdapterException(
+                    expectedEntityAdapterErrorDetail,
+                    expectedEntityAdapterErrorDetail.HttpStatusCode,
+                    expectedEntityAdapterErrorDetail.HttpErrorBody);
+
             IEntityAdapterClient adapter2 = this.CreateEntityAdapterClient(
                 TimeSpan.Parse("00:00:02"),
-                expectedEntityAdapterErrorDetail);
+                entityAdapterException);
 
             Dictionary<string, IEntityAdapterClient> adapters =
                 new Dictionary<string, IEntityAdapterClient>()
@@ -278,12 +292,88 @@
             // Assert
             Assert.ThrowsAsync<AllAdaptersUnavailableException>(
                 asyncTestDelegate);
+
+            string logOutput = this.loggerWrapper.ReturnLog();
         }
 
+        [Test]
+        public void InvokeEntityAdapters_UnhandledExceptionOccursInTask_ExceptionsSurfaced()
+        {
+            // Arrange
+            string algorithm = "some-algorithm";
+            string entityName = "LearningProvider";
+            string[] fields = new string[]
+            {
+                "SomeFieldOne",
+                "SomeFieldTwo",
+            };
+
+            const string mockAdapter2Id = "failing-adapter-#2";
+
+            string mockAdapter2RecordId = "2890d784-900f-4861-a034-30e645bd57b5";
+
+            SystemException systemException =
+                new SystemException("Some other, unknown exception!");
+
+            IEntityAdapterClient adapter2 = this.CreateEntityAdapterClient(
+                TimeSpan.Parse("00:00:02"),
+                systemException);
+
+            Dictionary<string, IEntityAdapterClient> adapters =
+                new Dictionary<string, IEntityAdapterClient>()
+                {
+                    { mockAdapter2Id, adapter2 },
+                };
+
+
+            AdapterRecordReference[] adapterRecordReferences =
+                new AdapterRecordReference[]
+                {
+                    new AdapterRecordReference()
+                    {
+                        Id = mockAdapter2RecordId,
+                        Source = mockAdapter2Id,
+                    },
+                };
+
+            EntityReference entityReference = new EntityReference()
+            {
+                AdapterRecordReferences = adapterRecordReferences,
+            };
+
+            Func<EntityAdapterClientKey, IEntityAdapterClient> getAsyncCallback =
+                entityAdapterClientKey =>
+                {
+                    IEntityAdapterClient entityAdapterClient =
+                        adapters[entityAdapterClientKey.Name];
+
+                    return entityAdapterClient;
+                };
+
+            this.mockEntityAdapterClientManager
+                .Setup(x => x.GetAsync(It.IsAny<EntityAdapterClientKey>()))
+                .ReturnsAsync(getAsyncCallback);
+
+            AsyncTestDelegate asyncTestDelegate =
+                async () =>
+                {
+                    // Act
+                    await this.entityAdapterInvoker.InvokeEntityAdapters(
+                        algorithm,
+                        entityName,
+                        fields,
+                        entityReference);
+                };
+
+            // Assert
+            Assert.ThrowsAsync<AggregateException>(asyncTestDelegate);
+
+            string logOutput = this.loggerWrapper.ReturnLog();
+        }
 
         private IEntityAdapterClient CreateEntityAdapterClient(
             TimeSpan delay,
-            EntityAdapterErrorDetail entityAdapterErrorDetail = null)
+            Exception toThrow = null)
         {
             IEntityAdapterClient toReturn = null;
 
@@ -294,7 +384,7 @@
                 () =>
                 {
                     Task<Spi.Models.ModelsBase> taskToReturn =
-                        this.FakeTaskCreator(delay, entityAdapterErrorDetail);
+                        this.FakeTaskCreator(delay, toThrow);
 
                     return taskToReturn;
                 };
@@ -310,18 +400,15 @@
 
         private async Task<Spi.Models.ModelsBase> FakeTaskCreator(
             TimeSpan delay,
-            EntityAdapterErrorDetail entityAdapterErrorDetail)
+            Exception toThrow)
         {
             Spi.Models.ModelsBase toReturn = null;
 
             await Task.Delay(delay);
 
-            if (entityAdapterErrorDetail != null)
+            if (toThrow != null)
             {
-                throw new EntityAdapterException(
-                    entityAdapterErrorDetail,
-                    entityAdapterErrorDetail.HttpStatusCode,
-                    entityAdapterErrorDetail.HttpErrorBody);
+                throw toThrow;
             }
 
             toReturn = new LearningProvider();
