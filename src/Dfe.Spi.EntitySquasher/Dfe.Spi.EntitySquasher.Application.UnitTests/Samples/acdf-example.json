@@ -29,7 +29,10 @@
     },
     {
       "name": "someother-adapter",
-      "baseUrl": "https://someother-adapter.somecorp.local/api/v2"
+      "baseUrl": "https://someother-adapter.somecorp.local/api/v2",
+      "headers": {
+        "X-Custom-Auth-Header": "aqjs90-18309sdjqsdiopui2092"
+      }
     },
     {
       "name": "another-example-adapter",
