@@ -2,25 +2,14 @@
   "entities": [
     {
       "name": "LearningProvider",
-      "sources": [
-        "some-adapter"
-      ],
       "fields": [
         {
-          "name": "Name",
-          "sources": [
-            "someother-adapter",
-            "another-example-adapter",
-            "some-adapter"
-          ]
+          "name": "Name"
         }
       ]
     },
     {
-      "name": "Governor",
-      "sources": [
-        "someother-adapter"
-      ]
+      "name": "Governor"
     }
   ],
   "entityAdapters": [

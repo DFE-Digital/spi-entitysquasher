@@ -7,10 +7,12 @@
 
   <ItemGroup>
     <None Remove="Samples\acdf-example.json" />
+    <None Remove="Samples\acdf-nosources.json" />
   </ItemGroup>
 
   <ItemGroup>
     <EmbeddedResource Include="Samples\acdf-example.json" />
+    <EmbeddedResource Include="Samples\acdf-nosources.json" />
   </ItemGroup>
 
   <ItemGroup>

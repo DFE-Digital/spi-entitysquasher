@@ -135,7 +135,11 @@
         {
             // Get an entity-level list of sources, if available.
             // This will either be null, or be populated.
-            string[] sources = entity.Sources.ToArray();
+            string[] sources = null;
+            if (entity.Sources != null)
+            {
+                sources = entity.Sources.ToArray();
+            }
 
             string entityName = entity.Name;
 
@@ -231,8 +235,15 @@
 
                         // We have one!
                         // Now use reflection to get the correpsonding value.
-                        value = propertyToPopulate.GetValue(
-                            getEntityAsyncResult.ModelsBase).ToString();
+                        // TODO: Handle different data types?
+                        //       It's not likely everything will be a string...
+                        object valueUnboxed = propertyToPopulate.GetValue(
+                            getEntityAsyncResult.ModelsBase);
+
+                        if (valueUnboxed != null)
+                        {
+                            value = valueUnboxed.ToString();
+                        }
 
                         if (this.IsFieldValueEmpty(field, value))
                         {

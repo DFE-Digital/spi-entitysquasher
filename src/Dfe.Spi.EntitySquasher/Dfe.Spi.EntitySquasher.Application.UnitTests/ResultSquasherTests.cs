@@ -30,19 +30,6 @@
             this.mockAlgorithmConfigurationDeclarationFileManager =
                 new Mock<IAlgorithmConfigurationDeclarationFileManager>();
 
-            Assembly assembly = typeof(ResultSquasherTests).Assembly;
-
-            string algorithmConfigurationDeclarationFileStr =
-                assembly.GetSample("acdf-example.json");
-
-            AlgorithmConfigurationDeclarationFile algorithmConfigurationDeclarationFile =
-                JsonConvert.DeserializeObject<AlgorithmConfigurationDeclarationFile>(
-                    algorithmConfigurationDeclarationFileStr);
-
-            this.mockAlgorithmConfigurationDeclarationFileManager
-                .Setup(x => x.GetAsync(It.IsAny<string>()))
-                .ReturnsAsync(algorithmConfigurationDeclarationFile);
-
             IAlgorithmConfigurationDeclarationFileManager algorithmConfigurationDeclarationFileManager =
                 mockAlgorithmConfigurationDeclarationFileManager.Object;
 
@@ -62,6 +49,41 @@
                 {
                     // Empty - don't actually need anything for the purposes of this test.
                 };
+
+            this.ConfigureAlgorithmConfigurationDeclarationFileManager(
+                "acdf-example.json");
+
+            AsyncTestDelegate asyncTestDelegate =
+                async () =>
+                {
+                    // Act
+                    await this.resultSquasher.SquashAsync(
+                        algorithm,
+                        entityName,
+                        getEntityAsyncResults);
+                };
+
+            // Assert
+            Assert.ThrowsAsync<InvalidAlgorithmConfigurationDeclarationFileException>(
+                asyncTestDelegate);
+
+            string logOutput = this.loggerWrapper.ReturnLog();
+        }
+
+        [Test]
+        public void SquashAsync_FeedEntityAsyncResultsAndAcdfWithNoSources_ThrowsInvalidAlgorithmConfigurationDeclarationFileException()
+        {
+            // Arrange
+            string algorithm = "something-something";
+            string entityName = nameof(LearningProvider);
+            GetEntityAsyncResult[] getEntityAsyncResults =
+                new GetEntityAsyncResult[]
+                {
+                    // Empty - don't actually need anything for the purposes of this test.
+                };
+
+            this.ConfigureAlgorithmConfigurationDeclarationFileManager(
+                "acdf-nosources.json");
 
             AsyncTestDelegate asyncTestDelegate =
                 async () =>
@@ -87,7 +109,7 @@
             string algorithm = "some-algorithm";
             string entityName = nameof(LearningProvider);
 
-            string expectedNameVariation = "SomeCorp Ltd";
+            string expectedNameVariation = "SomeCorp Limited";
             string actualNameVariation = null;
 
             GetEntityAsyncResult[] toSquash = new GetEntityAsyncResult[]
@@ -101,7 +123,7 @@
                      },
                      ModelsBase = new LearningProvider()
                      {
-                         Name = expectedNameVariation,
+                         Name = null,
                      },
                 },
                 new GetEntityAsyncResult()
@@ -109,14 +131,17 @@
                     AdapterRecordReference = new AdapterRecordReference()
                     {
                         Id = "abc",
-                        Source = "another-example-adapter",
+                        Source = "some-adapter",
                     },
                     ModelsBase = new LearningProvider()
                     {
-                        Name = "SomeCorp Limited",
+                        Name = expectedNameVariation,
                     },
                 },
             };
+
+            this.ConfigureAlgorithmConfigurationDeclarationFileManager(
+                "acdf-example.json");
 
             Spi.Models.ModelsBase modelsBase = null;
 
@@ -133,6 +158,23 @@
             Assert.AreEqual(expectedNameVariation, actualNameVariation);
 
             string logOutput = this.loggerWrapper.ReturnLog();
+        }
+
+        private void ConfigureAlgorithmConfigurationDeclarationFileManager(
+            string name)
+        {
+            Assembly assembly = typeof(ResultSquasherTests).Assembly;
+
+            string algorithmConfigurationDeclarationFileStr =
+                assembly.GetSample(name);
+
+            AlgorithmConfigurationDeclarationFile algorithmConfigurationDeclarationFile =
+                JsonConvert.DeserializeObject<AlgorithmConfigurationDeclarationFile>(
+                    algorithmConfigurationDeclarationFileStr);
+
+            this.mockAlgorithmConfigurationDeclarationFileManager
+                .Setup(x => x.GetAsync(It.IsAny<string>()))
+                .ReturnsAsync(algorithmConfigurationDeclarationFile);
         }
     }
 }
