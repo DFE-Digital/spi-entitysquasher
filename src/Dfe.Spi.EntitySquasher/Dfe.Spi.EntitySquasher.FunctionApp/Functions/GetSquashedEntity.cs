@@ -9,6 +9,7 @@ namespace Dfe.Spi.EntitySquasher.FunctionApp.Functions
     using System.Threading.Tasks;
     using Dfe.Spi.Common.Http.Server;
     using Dfe.Spi.Common.Logging.Definitions;
+    using Dfe.Spi.EntitySquasher.Application;
     using Dfe.Spi.EntitySquasher.Application.Models.Processors;
     using Dfe.Spi.EntitySquasher.Application.Processors.Definitions;
     using Microsoft.AspNetCore.Http;
@@ -245,19 +246,35 @@ namespace Dfe.Spi.EntitySquasher.FunctionApp.Functions
                     }
                 }
             }
-            catch (FileNotFoundException)
+            catch (FileNotFoundException fileNotFoundException)
             {
                 this.loggerWrapper.Warning(
-                    $"The processor threw a {nameof(FileNotFoundException)}.");
+                    $"The processor threw a {nameof(FileNotFoundException)}.",
+                    fileNotFoundException);
+
+                string algorithm = getSquashedEntityRequest.Algorithm;
 
                 // An ACDF could not be found for the specified algorithm.
                 // Return 404 to reflect this.
-                string algorithm = getSquashedEntityRequest.Algorithm;
-
                 toReturn = HttpErrorMessagesHelper.GetHttpErrorBodyResult(
                     HttpStatusCode.NotFound,
                     3,
                     algorithm);
+            }
+            catch (InvalidAlgorithmConfigurationDeclarationFileException invalidAlgorithmConfigurationDeclarationFileException)
+            {
+                this.loggerWrapper.Error(
+                    $"The processor threw a " +
+                    $"{nameof(InvalidAlgorithmConfigurationDeclarationFileException)}!",
+                    invalidAlgorithmConfigurationDeclarationFileException);
+
+                string message =
+                    invalidAlgorithmConfigurationDeclarationFileException.Message;
+
+                toReturn = HttpErrorMessagesHelper.GetHttpErrorBodyResult(
+                    HttpStatusCode.InternalServerError,
+                    5,
+                    message);
             }
 
             return toReturn;

@@ -237,6 +237,8 @@
                 $"{entityAdapterClientKey}...");
 
             // Get the entity adapter client from the manager and...
+            // (Note: The below wont be null - the manager'll throw an
+            //        exception if it doesn't exist).
             IEntityAdapterClient entityAdapterClient =
                 await this.entityAdapterClientManager.GetAsync(
                     entityAdapterClientKey)

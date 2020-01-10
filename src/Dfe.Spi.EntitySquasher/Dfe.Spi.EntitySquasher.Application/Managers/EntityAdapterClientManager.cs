@@ -75,6 +75,8 @@
                 $"algorithm \"{algorithm}\" from the " +
                 $"{nameof(IAlgorithmConfigurationDeclarationFileManager)}...");
 
+            // algorithmConfigurationDeclarationFile will always get populated
+            // here, or throw an exception back up (FileNotFound).
             AlgorithmConfigurationDeclarationFile algorithmConfigurationDeclarationFile =
                 await this.algorithmConfigurationDeclarationFileManager.GetAsync(
                     algorithm)
@@ -82,60 +84,49 @@
 
             // 2) Pull back the base URL of the right
             //    adapter using the name and;
-            if (algorithmConfigurationDeclarationFile != null)
+            this.loggerWrapper.Info(
+                $"Pulled back " +
+                $"{algorithmConfigurationDeclarationFile}. " +
+                $"Searching for {nameof(EntityAdapter)} with " +
+                $"{nameof(name)} \"{name}\"...");
+
+            EntityAdapter entityAdapter =
+                algorithmConfigurationDeclarationFile.EntityAdapters
+                    .SingleOrDefault(x => x.Name == name);
+
+            // 2) Create the EntityAdapterClient via the
+            //    factory and return it.
+            if (entityAdapter != null)
             {
                 this.loggerWrapper.Info(
-                    $"Pulled back " +
-                    $"{algorithmConfigurationDeclarationFile}. " +
-                    $"Searching for {nameof(EntityAdapter)} with " +
-                    $"{nameof(name)} \"{name}\"...");
+                    $"Found matching {nameof(EntityAdapter)}: " +
+                    $"{entityAdapter}.");
 
-                EntityAdapter entityAdapter =
-                    algorithmConfigurationDeclarationFile.EntityAdapters
-                        .SingleOrDefault(x => x.Name == name);
+                Uri baseUrl = entityAdapter.BaseUrl;
 
-                // 2) Create the EntityAdapterClient via the
-                //    factory and return it.
-                if (entityAdapter != null)
-                {
-                    this.loggerWrapper.Info(
-                        $"Found matching {nameof(EntityAdapter)}: " +
-                        $"{entityAdapter}.");
+                this.loggerWrapper.Debug($"{nameof(baseUrl)} = {baseUrl}");
 
-                    Uri baseUrl = entityAdapter.BaseUrl;
+                Dictionary<string, string> headers = entityAdapter.Headers;
 
-                    this.loggerWrapper.Debug($"{nameof(baseUrl)} = {baseUrl}");
+                this.loggerWrapper.Debug(
+                    $"{nameof(headers)} = {headers.Count} item(s)");
 
-                    Dictionary<string, string> headers = entityAdapter.Headers;
+                toReturn = this.entityAdapterClientFactory.Create(
+                    name,
+                    baseUrl,
+                    headers);
 
-                    this.loggerWrapper.Debug(
-                        $"{nameof(headers)} = {headers.Count} item(s)");
-
-                    toReturn = this.entityAdapterClientFactory.Create(
-                        name,
-                        baseUrl,
-                        headers);
-
-                    this.loggerWrapper.Info(
-                        $"Created {nameof(IEntityAdapterClient)} with " +
-                        $"{nameof(baseUrl)} = {baseUrl}.");
-                }
-                else
-                {
-                    this.loggerWrapper.Warning(
-                        $"Found {algorithmConfigurationDeclarationFile}, " +
-                        $"but could not find {nameof(EntityAdapter)} with " +
-                        $"{nameof(name)} = \"{name}\"!");
-                }
+                this.loggerWrapper.Info(
+                    $"Created {nameof(IEntityAdapterClient)} with " +
+                    $"{nameof(baseUrl)} = {baseUrl}.");
             }
             else
             {
-                this.loggerWrapper.Warning(
-                    $"The " +
-                    $"{nameof(IAlgorithmConfigurationDeclarationFileManager)} " +
-                    $"did not return a " +
-                    $"{nameof(AlgorithmConfigurationDeclarationFile)} for " +
-                    $"{nameof(algorithm)} \"{algorithm}\".");
+                throw new InvalidAlgorithmConfigurationDeclarationFileException(
+                    $"Found {algorithmConfigurationDeclarationFile} for " +
+                    $"{nameof(algorithm)} = \"{algorithm}\", but could not " +
+                    $"find {nameof(EntityAdapter)} with {nameof(name)} = " +
+                    $"\"{name}\"!");
             }
 
             return toReturn;

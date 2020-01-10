@@ -95,5 +95,14 @@ namespace Dfe.Spi.EntitySquasher.FunctionApp {
                 return ResourceManager.GetString("_4", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The Algorithm Configuration Declaration File was found for the specified algorithm, however it&apos;s incorrectly configured: {0}.
+        /// </summary>
+        internal static string _5 {
+            get {
+                return ResourceManager.GetString("_5", resourceCulture);
+            }
+        }
     }
 }

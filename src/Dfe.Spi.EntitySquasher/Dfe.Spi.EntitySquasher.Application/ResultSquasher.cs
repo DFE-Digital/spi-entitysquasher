@@ -51,6 +51,8 @@
                 $"{nameof(AlgorithmConfigurationDeclarationFile)} for " +
                 $"{nameof(algorithm)} = \"{algorithm}\"...");
 
+            // algorithmConfigurationDeclarationFile will always get populated
+            // here, or throw an exception back up (FileNotFound).
             AlgorithmConfigurationDeclarationFile algorithmConfigurationDeclarationFile =
                 await this.algorithmConfigurationDeclarationFileManager.GetAsync(
                     algorithm)
@@ -65,19 +67,17 @@
 
             // Find the declared entity in the ACDF...
             Entity entity = algorithmConfigurationDeclarationFile.Entities
-                .Single(x => x.Name == entityName);
+                .SingleOrDefault(x => x.Name == entityName);
 
             if (entity == null)
             {
-                string message =
+                throw new InvalidAlgorithmConfigurationDeclarationFileException(
                     $"Unable to squash the results together, as the " +
                     $"specified {nameof(algorithm)}'s " +
                     $"{nameof(AlgorithmConfigurationDeclarationFile)} does " +
                     $"not specify configuration for the entity " +
                     $"\"{entityName}\"! An entry MUST exist for " +
-                    $"\"{entityName}\".";
-
-                this.ThrowInvalidOperationException(message);
+                    $"\"{entityName}\".");
             }
 
             this.loggerWrapper.Info(
@@ -184,15 +184,13 @@
 
                 if (sources == null)
                 {
-                    string message =
+                    throw new InvalidAlgorithmConfigurationDeclarationFileException(
                         $"No sources are specified, either at an " +
                         $"{nameof(Entity)} level, or a {nameof(Field)} " +
                         $"level. Without the list of sources, the squasher " +
                         $"cannot work how to compose the result. Sources " +
                         $"MUST be specified at either an {nameof(Entity)} " +
-                        $"or {nameof(Field)} level (at minimum).";
-
-                    this.ThrowInvalidOperationException(message);
+                        $"or {nameof(Field)} level (at minimum).");
                 }
 
                 // sources now contains the list we should use.
@@ -292,13 +290,6 @@
             //       null.
             //       Default to skipping on null only.
             return toReturn;
-        }
-
-        private void ThrowInvalidOperationException(string message)
-        {
-            this.loggerWrapper.Error(message);
-
-            throw new InvalidOperationException(message);
         }
     }
 }

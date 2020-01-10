@@ -129,4 +129,7 @@
   <data name="_4" xml:space="preserve">
     <value>Unable to serve any requests - all adapters are unavailable.</value>
   </data>
+  <data name="_5" xml:space="preserve">
+    <value>The Algorithm Configuration Declaration File was found for the specified algorithm, however it's incorrectly configured: {0}</value>
+  </data>
 </root>

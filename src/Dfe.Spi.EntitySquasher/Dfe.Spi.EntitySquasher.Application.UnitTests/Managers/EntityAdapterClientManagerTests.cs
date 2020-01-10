@@ -68,31 +68,7 @@
         }
 
         [Test]
-        public async Task GetAsync_AlgorithmNameDoesNotExist_ReturnsNull()
-        {
-            // Arrange
-            EntityAdapterClientKey entityAdapterClientKey =
-                new EntityAdapterClientKey()
-                {
-                    Algorithm = "algorithm-that-doesn't-exist",
-                    Name = "name-that-does-not-exist",
-                };
-
-            IEntityAdapterClient entityAdapterClient = null;
-
-            // Act
-            entityAdapterClient =
-                await this.entityAdapterClientManager.GetAsync(
-                    entityAdapterClientKey);
-
-            // Assert
-            Assert.IsNull(entityAdapterClient);
-
-            string logOutput = this.loggerWrapper.ReturnLog();
-        }
-
-        [Test]
-        public async Task GetAsync_AlgorithmDoesExistButAdapterDoesNot_ReturnsNull()
+        public void GetAsync_AlgorithmDoesExistButAdapterDoesNot_ThrowsInvalidAlgorithmConfigurationDeclarationFileException()
         {
             // Arrange
             EntityAdapterClientKey entityAdapterClientKey =
@@ -117,13 +93,18 @@
 
             IEntityAdapterClient entityAdapterClient = null;
 
-            // Act
-            entityAdapterClient =
-                await this.entityAdapterClientManager.GetAsync(
-                    entityAdapterClientKey);
+            AsyncTestDelegate asyncTestDelegate =
+                async () =>
+                {
+                    // Act
+                    entityAdapterClient =
+                        await this.entityAdapterClientManager.GetAsync(
+                            entityAdapterClientKey);
+                };
 
             // Assert
-            Assert.IsNull(entityAdapterClient);
+            Assert.ThrowsAsync<InvalidAlgorithmConfigurationDeclarationFileException>(
+                asyncTestDelegate);
 
             string logOutput = this.loggerWrapper.ReturnLog();
         }

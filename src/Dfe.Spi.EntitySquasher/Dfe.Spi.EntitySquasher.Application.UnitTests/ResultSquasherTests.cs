@@ -1,6 +1,5 @@
 ﻿namespace Dfe.Spi.EntitySquasher.Application.UnitTests
 {
-    using System.Collections.Generic;
     using System.Reflection;
     using System.Threading.Tasks;
     using Dfe.Spi.Common.UnitTesting;
@@ -31,12 +30,54 @@
             this.mockAlgorithmConfigurationDeclarationFileManager =
                 new Mock<IAlgorithmConfigurationDeclarationFileManager>();
 
+            Assembly assembly = typeof(ResultSquasherTests).Assembly;
+
+            string algorithmConfigurationDeclarationFileStr =
+                assembly.GetSample("acdf-example.json");
+
+            AlgorithmConfigurationDeclarationFile algorithmConfigurationDeclarationFile =
+                JsonConvert.DeserializeObject<AlgorithmConfigurationDeclarationFile>(
+                    algorithmConfigurationDeclarationFileStr);
+
+            this.mockAlgorithmConfigurationDeclarationFileManager
+                .Setup(x => x.GetAsync(It.IsAny<string>()))
+                .ReturnsAsync(algorithmConfigurationDeclarationFile);
+
             IAlgorithmConfigurationDeclarationFileManager algorithmConfigurationDeclarationFileManager =
                 mockAlgorithmConfigurationDeclarationFileManager.Object;
 
             this.resultSquasher = new ResultSquasher(
                 algorithmConfigurationDeclarationFileManager,
                 this.loggerWrapper);
+        }
+
+        [Test]
+        public void SquashAsync_FeedWithUnknownEntityName_ThrowsInvalidAlgorithmConfigurationDeclarationFileException()
+        {
+            // Arrange
+            string algorithm = "something-something";
+            string entityName = "DoesntExist";
+            GetEntityAsyncResult[] getEntityAsyncResults =
+                new GetEntityAsyncResult[]
+                {
+                    // Empty - don't actually need anything for the purposes of this test.
+                };
+
+            AsyncTestDelegate asyncTestDelegate =
+                async () =>
+                {
+                    // Act
+                    await this.resultSquasher.SquashAsync(
+                        algorithm,
+                        entityName,
+                        getEntityAsyncResults);
+                };
+
+            // Assert
+            Assert.ThrowsAsync<InvalidAlgorithmConfigurationDeclarationFileException>(
+                asyncTestDelegate);
+
+            string logOutput = this.loggerWrapper.ReturnLog();
         }
 
         [Test]
@@ -76,19 +117,6 @@
                     },
                 },
             };
-
-            Assembly assembly = typeof(ResultSquasherTests).Assembly;
-
-            string algorithmConfigurationDeclarationFileStr =
-                assembly.GetSample("acdf-example.json");
-
-            AlgorithmConfigurationDeclarationFile algorithmConfigurationDeclarationFile =
-                JsonConvert.DeserializeObject<AlgorithmConfigurationDeclarationFile>(
-                    algorithmConfigurationDeclarationFileStr);
-
-            this.mockAlgorithmConfigurationDeclarationFileManager
-                .Setup(x => x.GetAsync(It.Is<string>(y => y == algorithm)))
-                .ReturnsAsync(algorithmConfigurationDeclarationFile);
 
             Spi.Models.ModelsBase modelsBase = null;
 
