@@ -1,9 +1,10 @@
 ﻿namespace Dfe.Spi.EntitySquasher.FunctionApp.UnitTests.Functions
 {
     using Dfe.Spi.Common.Http.Server;
+    using Dfe.Spi.Common.Models;
     using Dfe.Spi.Common.UnitTesting;
     using Dfe.Spi.Common.UnitTesting.Infrastructure;
-    using Dfe.Spi.EntitySquasher.Application.Models;
+    using Dfe.Spi.EntitySquasher.Application;
     using Dfe.Spi.EntitySquasher.Application.Models.Processors;
     using Dfe.Spi.EntitySquasher.Application.Models.Result;
     using Dfe.Spi.EntitySquasher.Application.Processors.Definitions;
@@ -124,6 +125,58 @@
             actualStatusCode = httpErrorBodyResult.StatusCode;
 
             Assert.AreEqual(expectedStatusCode, actualStatusCode);
+
+            // Log output...
+            string logOutput = this.loggerWrapper.ReturnLog();
+        }
+
+        [Test]
+        public async Task Run_PostWellFormedPayloadWithSupportedAlgorithmButInvalidAcdf_ReturnsInternalServerError()
+        {
+            // Arrange
+            string message =
+                "This is an exception message that will appear in the error " +
+                "reported back to the client.";
+
+            this.mockGetSquashedEntityProcessor
+                .Setup(x => x.GetSquashedEntityAsync(It.IsAny<GetSquashedEntityRequest>()))
+                .Callback(() =>
+                {
+                    throw new InvalidAlgorithmConfigurationDeclarationFileException(
+                        message);
+                });
+
+            IActionResult actionResult = null;
+            HttpErrorBodyResult httpErrorBodyResult = null;
+
+            string requestBodyStr = this.assembly.GetSample(
+                "get-squashed-entity-request-1.json");
+
+            HttpRequest httpRequest = this.CreateHttpRequest(requestBodyStr);
+
+            int? expectedStatusCode = (int)HttpStatusCode.InternalServerError;
+            int? actualStatusCode;
+
+            HttpErrorBody httpErrorBody = null;
+            string errorBodyMessage = null;
+
+            // Act
+            actionResult = await this.getSquashedEntity.Run(httpRequest);
+
+            // Assert
+            Assert.IsInstanceOf<HttpErrorBodyResult>(actionResult);
+
+            httpErrorBodyResult = (HttpErrorBodyResult)actionResult;
+            actualStatusCode = httpErrorBodyResult.StatusCode;
+
+            Assert.AreEqual(expectedStatusCode, actualStatusCode);
+
+            httpErrorBody =
+                httpErrorBodyResult.Value as HttpErrorBody;
+
+            errorBodyMessage = httpErrorBody.Message;
+
+            Assert.IsTrue(errorBodyMessage.Contains(message));
 
             // Log output...
             string logOutput = this.loggerWrapper.ReturnLog();
