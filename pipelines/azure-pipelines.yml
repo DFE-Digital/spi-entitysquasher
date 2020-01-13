@@ -7,6 +7,10 @@ trigger:
 workspace:
   clean: all
 
+variables:
+  buildConfiguration: 'release'
+  buildPlatform: 'any cpu'
+
 steps:
   - task: NuGetToolInstaller@1
     displayName: 'Use NuGet 4.7.1'
