@@ -8,8 +8,8 @@ workspace:
   clean: all
 
 variables:
-  buildConfiguration: 'release'
-  buildPlatform: 'any cpu'
+  BuildConfiguration: 'Release'
+  BuildPlatform: 'Any CPU'
 
 steps:
   - task: NuGetToolInstaller@1
@@ -45,17 +45,17 @@ steps:
       command: publish
       publishWebProjects: false
       projects: 'src/Dfe.Spi.EntitySquasher/Dfe.Spi.EntitySquasher.FunctionApp/Dfe.Spi.EntitySquasher.FunctionApp.csproj'
-      arguments: '--configuration $(BuildConfiguration) --output $(build.artifactstagingdirectory)/publish --no-restore --no-build'
+      arguments: '--configuration $(BuildConfiguration) --output $(Build.ArtifactStagingDirectory)/publish --no-restore --no-build'
 
   - task: CopyFiles@2
     displayName: 'Copy ARM template'
     inputs:
       Contents: |
         azure/*
-      TargetFolder: '$(build.artifactstagingdirectory)/publish'
+      TargetFolder: '$(Build.ArtifactStagingDirectory)/publish'
       OverWrite: true
 
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact'
     inputs:
-      PathtoPublish: '$(build.artifactstagingdirectory)/publish'
+      PathtoPublish: '$(Build.ArtifactStagingDirectory)/publish'
