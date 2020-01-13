@@ -39,23 +39,16 @@
         ]
       }
     },
-    "externalRequestId": {
-      "type": "string"
-    },
     "fields": {
       "type": "array",
       "items": {
         "type": "string"
       }
-    },
-    "internalRequestId": {
-      "type": "string"
     }
   },
   "required": [
     "entityName",
     "entityReferences",
-    "fields",
-    "internalRequestId"
+    "fields"
   ]
 }

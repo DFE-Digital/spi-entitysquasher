@@ -24,6 +24,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dfe.Spi.EntitySquasher.Infr
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dfe.Spi.EntitySquasher.Infrastructure.EntityAdapter", "Dfe.Spi.EntitySquasher.Infrastructure.EntityAdapter\Dfe.Spi.EntitySquasher.Infrastructure.EntityAdapter.csproj", "{F1B7D583-6A99-4D90-B2FF-D80F3A8FC2DA}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Deploy", "Deploy", "{07B5133C-3432-4FDF-B1A9-A14F2BAD9D56}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Release", "Release", "{F7EB97AD-3CEE-4B99-8BA3-0AF679C2FAE8}"
+	ProjectSection(SolutionItems) = preProject
+		..\..\azure\template.json = ..\..\azure\template.json
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -63,8 +70,10 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
+		{08842A01-2864-45A1-9BCB-58C2B9302AF4} = {07B5133C-3432-4FDF-B1A9-A14F2BAD9D56}
 		{6ADBFD54-51E8-40B2-854C-A3C0DE07E34C} = {7049BA93-BB9C-4739-8013-F59455D83173}
 		{C7D227E4-BFA0-42C5-A01A-F3399091676D} = {7049BA93-BB9C-4739-8013-F59455D83173}
+		{F7EB97AD-3CEE-4B99-8BA3-0AF679C2FAE8} = {07B5133C-3432-4FDF-B1A9-A14F2BAD9D56}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {356C00E0-904D-48D4-B07F-85915B12516D}

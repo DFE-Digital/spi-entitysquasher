@@ -128,7 +128,7 @@
                         .ConfigureAwait(false);
 
                 IEnumerable<GetEntityAsyncResult> getEntityAsyncResults =
-                adaptersLookupResult.GetEntityAsyncResults;
+                    adaptersLookupResult.GetEntityAsyncResults;
 
                 entityAdapterErrorDetails =
                     getEntityAsyncResults

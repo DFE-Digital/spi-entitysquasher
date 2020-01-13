@@ -8,11 +8,18 @@
   <ItemGroup>
     <None Remove="Samples\acdf-example.json" />
     <None Remove="Samples\acdf-nosources.json" />
+    <None Remove="Samples\get-squashed-entity-request-1.json" />
+    <None Remove="Samples\invoke-entity-adapters-result-1.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Samples\invoke-entity-adapters-result-1.json" />
   </ItemGroup>
 
   <ItemGroup>
     <EmbeddedResource Include="Samples\acdf-example.json" />
     <EmbeddedResource Include="Samples\acdf-nosources.json" />
+    <EmbeddedResource Include="Samples\get-squashed-entity-request-1.json" />
   </ItemGroup>
 
   <ItemGroup>

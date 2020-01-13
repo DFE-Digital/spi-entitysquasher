@@ -1,5 +1,5 @@
 {
-  "algorithm": "example",
+  "algorithm": "",
   "entityName": "LearningProvider",
   "entityReferences": [
 
@@ -13,26 +13,6 @@
         {
           "id": "123",
           "source": "another-example-adapter"
-        }
-      ]
-    },
-
-    // Entity request #2
-    {
-      "adapterRecordReferences": [
-        {
-          "id": "def",
-          "source": "some-adapter"
-        }
-      ]
-    },
-
-    // Entity request #3
-    {
-      "adapterRecordReferences": [
-        {
-          "id": "7485f1cc-3cc2-4b56-845d-58f1d6547ca8",
-          "source": "someother-adapter"
         }
       ]
     }
