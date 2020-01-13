@@ -19,7 +19,7 @@
 
     <!-- Microsoft -->
     <PackageReference Include="Microsoft.Azure.Functions.Extensions" Version="1.0.0" PrivateAssets="All" />
-    <PackageReference Include="Microsoft.NET.Sdk.Functions" Version="1.0.31" PrivateAssets="All" />
+    <PackageReference Include="Microsoft.NET.Sdk.Functions" Version="1.0.22" PrivateAssets="All" />
 
     <!-- Development/Non-Runtime -->
     <PackageReference Include="StyleCop.Analyzers" Version="1.1.118" PrivateAssets="All" />
