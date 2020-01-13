@@ -25,7 +25,7 @@ steps:
     displayName: 'Build Function App'
     inputs:
       command: 'build'
-      projects: 'src/**/*.UnitTests.csproj'
+      projects: 'src/**/*.csproj'
       arguments: '--configuration $(BuildConfiguration) --no-restore'
 
   - task: DotNetCoreCLI@2
