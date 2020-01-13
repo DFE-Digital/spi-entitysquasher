@@ -25,7 +25,7 @@ steps:
     displayName: 'Build Function App'
     inputs:
       command: 'build'
-      projects: 'src/Dfe.Spi.EntitySquasher/Dfe.Spi.EntitySquasher.FunctionApp/Dfe.Spi.EntitySquasher.FunctionApp.csproj'
+      projects: 'src/**/*.UnitTests.csproj'
       arguments: '--configuration $(BuildConfiguration) --no-restore'
 
   - task: DotNetCoreCLI@2
