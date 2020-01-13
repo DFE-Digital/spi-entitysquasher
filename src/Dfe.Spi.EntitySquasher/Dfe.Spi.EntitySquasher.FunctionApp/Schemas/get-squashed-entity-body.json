@@ -1,0 +1,54 @@
+{
+  "properties": {
+    "algorithm": {
+      "type": "string"
+    },
+    "entityName": {
+      "type": "string",
+      "enum": [
+        "LearningProvider",
+        "Governor"
+      ]
+    },
+    "entityReferences": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "adapterRecordReferences": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "source": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id",
+                "source"
+              ]
+            }
+          }
+        },
+        "required": [
+          "adapterRecordReferences"
+        ]
+      }
+    },
+    "fields": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "required": [
+    "entityName",
+    "entityReferences",
+    "fields"
+  ]
+}

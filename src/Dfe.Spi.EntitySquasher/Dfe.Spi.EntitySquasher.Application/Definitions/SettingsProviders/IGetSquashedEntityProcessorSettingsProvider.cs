@@ -1,5 +1,7 @@
 ﻿namespace Dfe.Spi.EntitySquasher.Application.Definitions.SettingsProviders
 {
+    using Dfe.Spi.EntitySquasher.Application.Processors.Definitions;
+
     /// <summary>
     /// Describes the operations of the
     /// <see cref="IGetSquashedEntityProcessor" /> settings provider.

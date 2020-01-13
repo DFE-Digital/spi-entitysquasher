@@ -6,7 +6,7 @@
     /// Represents a reference to an adapter record.
     /// </summary>
     [ExcludeFromCodeCoverage]
-    public class AdapterRecordReference
+    public class AdapterRecordReference : ModelsBase
     {
         /// <summary>
         /// Gets or sets the id of the record.
@@ -18,7 +18,8 @@
         }
 
         /// <summary>
-        /// Gets or sets the name of the source (i.e. the adapter).
+        /// Gets or sets the name of the source (i.e. the
+        /// adapter).
         /// </summary>
         public string Source
         {

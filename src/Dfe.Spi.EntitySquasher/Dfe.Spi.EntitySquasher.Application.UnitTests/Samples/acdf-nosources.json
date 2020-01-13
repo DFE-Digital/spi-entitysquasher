@@ -1,0 +1,32 @@
+{
+  "entities": [
+    {
+      "name": "LearningProvider",
+      "fields": [
+        {
+          "name": "Name"
+        }
+      ]
+    },
+    {
+      "name": "Governor"
+    }
+  ],
+  "entityAdapters": [
+    {
+      "name": "some-adapter",
+      "baseUrl": "https://some-adapter.somecorp.local/api"
+    },
+    {
+      "name": "someother-adapter",
+      "baseUrl": "https://someother-adapter.somecorp.local/api/v2",
+      "headers": {
+        "X-Custom-Auth-Header": "aqjs90-18309sdjqsdiopui2092"
+      }
+    },
+    {
+      "name": "another-example-adapter",
+      "baseUrl": "https://another-example-adapter.somecorp.local/"
+    }
+  ]
+}
