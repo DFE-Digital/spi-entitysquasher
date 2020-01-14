@@ -109,8 +109,20 @@
             string algorithm = "some-algorithm";
             string entityName = nameof(LearningProvider);
 
-            string expectedNameVariation = "SomeCorp Limited";
+            string expectedNameVariation = "SomeCorp";
             string actualNameVariation = null;
+
+            string expectedLegalNameVariation = "SOMECORP LTD";
+            string actualLegalNameVariation = null;
+
+            long expectedPostcode = 123;
+            long actualPostcode;
+
+            long expectedUkprn = 888;
+            long actualUkprn;
+
+            long expectedUrn = 98765;
+            long actualUrn;
 
             GetEntityAsyncResult[] toSquash = new GetEntityAsyncResult[]
             {
@@ -123,7 +135,11 @@
                      },
                      ModelsBase = new LearningProvider()
                      {
-                         Name = null,
+                         Name = "  ",
+                         Postcode = 999,
+                         Ukprn = expectedUkprn,
+                         Urn = 777,
+                         LegalName = "SomeCorp Ltd"
                      },
                 },
                 new GetEntityAsyncResult()
@@ -135,6 +151,10 @@
                     },
                     ModelsBase = new LearningProvider()
                     {
+                        LegalName = expectedLegalNameVariation,
+                        Postcode = expectedPostcode,
+                        Ukprn = 12345,
+                        Urn = expectedUrn,
                         Name = expectedNameVariation,
                     },
                 },
@@ -144,6 +164,7 @@
                 "acdf-example.json");
 
             Spi.Models.ModelsBase modelsBase = null;
+            Spi.Models.LearningProvider learningProvider = null;
 
             // Act
             modelsBase =
@@ -153,9 +174,26 @@
                     toSquash);
 
             // Assert
-            actualNameVariation = modelsBase.Name;
+            Assert.IsInstanceOf<LearningProvider>(modelsBase);
 
+            learningProvider = modelsBase as LearningProvider;
+
+            actualNameVariation = learningProvider.Name;
             Assert.AreEqual(expectedNameVariation, actualNameVariation);
+
+            actualLegalNameVariation = learningProvider.LegalName;
+            Assert.AreEqual(
+                expectedLegalNameVariation,
+                actualLegalNameVariation);
+
+            actualPostcode = learningProvider.Postcode;
+            Assert.AreEqual(expectedPostcode, actualPostcode);
+            
+            actualUkprn = learningProvider.Ukprn;
+            Assert.AreEqual(expectedUkprn, actualUkprn);
+
+            actualUrn = learningProvider.Urn;
+            Assert.AreEqual(expectedUrn, actualUrn);
 
             string logOutput = this.loggerWrapper.ReturnLog();
         }
