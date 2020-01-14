@@ -296,10 +296,11 @@
         {
             bool toReturn = value == null;
 
-            // TODO: Introduce an option on the field configuration to consider
-            //       the field empty if it's an empty string, and not just
-            //       null.
-            //       Default to skipping on null only.
+            if (!toReturn && field.TreatWhitespaceAsNull)
+            {
+                toReturn = string.IsNullOrWhiteSpace(value);
+            }
+
             return toReturn;
         }
     }

@@ -8,6 +8,7 @@
       "fields": [
         {
           "name": "Name",
+          "treatWhitespaceAsNull": true,
           "sources": [
             "someother-adapter",
             "another-example-adapter",

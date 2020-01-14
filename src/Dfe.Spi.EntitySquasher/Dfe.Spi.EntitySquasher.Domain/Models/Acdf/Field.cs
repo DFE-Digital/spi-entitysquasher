@@ -8,6 +8,15 @@
     [ExcludeFromCodeCoverage]
     public class Field : EntitySettingBase
     {
-        // Nothing, inherits all it needs.
+        /// <summary>
+        /// Gets or sets a value indicating whether or not to treat whitespace
+        /// (including empty) <see cref="string" /> values in the same way a
+        /// null value would be.
+        /// </summary>
+        public bool TreatWhitespaceAsNull
+        {
+            get;
+            set;
+        }
     }
 }
