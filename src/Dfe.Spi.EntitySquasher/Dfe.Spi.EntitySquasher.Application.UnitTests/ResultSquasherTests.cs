@@ -115,8 +115,8 @@
             string expectedLegalNameVariation = "SOMECORP LTD";
             string actualLegalNameVariation = null;
 
-            long expectedPostcode = 123;
-            long actualPostcode;
+            string expectedPostcode = "LE1 1SU";
+            string actualPostcode = null;
 
             long expectedUkprn = 888;
             long actualUkprn;
@@ -136,7 +136,7 @@
                      ModelsBase = new LearningProvider()
                      {
                          Name = "  ",
-                         Postcode = 999,
+                         Postcode = "LE1 1ST",
                          Ukprn = expectedUkprn,
                          Urn = 777,
                          LegalName = "SomeCorp Ltd"
