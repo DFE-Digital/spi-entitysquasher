@@ -24,7 +24,7 @@
 
   <ItemGroup>
     <!-- Dfe.Spi.* -->
-    <PackageReference Include="Dfe.Spi.Models" Version="1.0.3" PrivateAssets="All" />
+    <PackageReference Include="Dfe.Spi.Models" Version="1.0.5" PrivateAssets="All" />
     <PackageReference Include="Dfe.Spi.Common.UnitTesting" Version="1.0.6" PrivateAssets="All" />
     
     <!-- Microsoft -->

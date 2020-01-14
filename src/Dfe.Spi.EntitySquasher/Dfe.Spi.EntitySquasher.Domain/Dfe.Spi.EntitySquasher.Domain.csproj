@@ -9,7 +9,7 @@
     <PackageReference Include="Dfe.Spi.Common.Http.Client" Version="1.0.2" />
     <PackageReference Include="Dfe.Spi.Common.Logging" Version="1.0.7" />
     <PackageReference Include="Dfe.Spi.Common.Models" Version="1.0.1" />
-    <PackageReference Include="Dfe.Spi.Models" Version="1.0.1" />
+    <PackageReference Include="Dfe.Spi.Models" Version="1.0.5" />
     
     <!-- Other -->
     <PackageReference Include="Meridian.MeaningfulToString" Version="1.0.4" />
