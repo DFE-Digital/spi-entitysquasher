@@ -4,6 +4,7 @@
     using System.Collections.Generic;
     using System.Globalization;
     using System.Net;
+    using System.Reflection;
     using System.Threading.Tasks;
     using Dfe.Spi.Common.Logging.Definitions;
     using Dfe.Spi.Common.Models;
@@ -67,14 +68,19 @@
 
             this.loggerWrapper.Debug($"Executing {restRequest}...");
 
-            IRestResponse<ModelsBase> restResponse =
-                await this.restClient.ExecuteTaskAsync<ModelsBase>(
+            IRestResponse restResponse =
+                await this.restClient.ExecuteTaskAsync(
                     restRequest)
                     .ConfigureAwait(false);
 
             if (restResponse.IsSuccessful)
             {
-                toReturn = restResponse.Data;
+                string content = restResponse.Content;
+
+                Type type = this.GetActualUnboxingType(entityName);
+
+                toReturn =
+                    JsonConvert.DeserializeObject(content, type) as ModelsBase;
 
                 this.loggerWrapper.Info(
                     $"Request executed with success: {restResponse}.");
@@ -128,6 +134,34 @@
                     httpStatusCode,
                     httpErrorBody);
             }
+
+            return toReturn;
+        }
+
+        private Type GetActualUnboxingType(string entityName)
+        {
+            Type toReturn = null;
+
+            // Use ModelsBase as a starting point...
+            toReturn = typeof(ModelsBase);
+
+            string requiredConcreteType = toReturn.FullName;
+
+            requiredConcreteType = requiredConcreteType.Replace(
+                toReturn.Name,
+                entityName);
+
+            this.loggerWrapper.Debug(
+                $"{nameof(requiredConcreteType)} = " +
+                $"\"{requiredConcreteType}\"");
+
+            Assembly assembly = toReturn.Assembly;
+
+            // Get the actual type...
+            toReturn = assembly.GetType(requiredConcreteType);
+
+            this.loggerWrapper.Debug(
+                $"Actual type to deserialise to: {toReturn.FullName}");
 
             return toReturn;
         }
