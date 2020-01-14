@@ -14,6 +14,21 @@
             "another-example-adapter",
             "some-adapter"
           ]
+        },
+        {
+          "name": "LegalName"
+        },
+        {
+          "name": "Postcode"
+        },
+        {
+          "name": "Ukprn",
+          "sources": [
+            "someother-adapter"
+          ]
+        },
+        {
+          "name": "Urn"
         }
       ]
     },

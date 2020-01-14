@@ -200,7 +200,7 @@
                 // sources now contains the list we should use.
                 // Let's go through in order.
                 // *Only* keep looping whilst we *don't* have a value.
-                string value = null;
+                object value = null;
 
                 GetEntityAsyncResult getEntityAsyncResult = null;
 
@@ -235,15 +235,8 @@
 
                         // We have one!
                         // Now use reflection to get the correpsonding value.
-                        // TODO: Handle different data types?
-                        //       It's not likely everything will be a string...
-                        object valueUnboxed = propertyToPopulate.GetValue(
+                        value = propertyToPopulate.GetValue(
                             getEntityAsyncResult.ModelsBase);
-
-                        if (valueUnboxed != null)
-                        {
-                            value = valueUnboxed.ToString();
-                        }
 
                         if (this.IsFieldValueEmpty(field, value))
                         {
@@ -271,7 +264,7 @@
                 }
 
                 this.loggerWrapper.Debug(
-                    $"{nameof(value)} = \"{value}\". Updating property " +
+                    $"{nameof(value)} = {value}. Updating property " +
                     $"\"{name}\" on our result model using reflection...");
 
                 // value now has the value we need...
@@ -292,7 +285,7 @@
 
         private bool IsFieldValueEmpty(
             Field field,
-            string value)
+            object value)
         {
             bool toReturn = value == null;
 
@@ -301,14 +294,27 @@
             {
                 this.loggerWrapper.Debug(
                     $"Field \"{name}\" has been marked to treat whitespace " +
-                    $"as null.");
+                    $"as null. We should ignore this option if the value " +
+                    $"isn't a {nameof(String)} (otherwise, how could it be " +
+                    $"whitespace?).");
 
-                toReturn = string.IsNullOrWhiteSpace(value);
-
-                if (toReturn)
+                string valueStr = value as string;
+                if (valueStr != null)
                 {
-                    this.loggerWrapper.Debug(
-                        $"Value for field \"{name}\" is empty or whitespace.");
+                    toReturn = string.IsNullOrWhiteSpace(valueStr);
+
+                    if (toReturn)
+                    {
+                        this.loggerWrapper.Debug(
+                            $"Value for field \"{name}\" is empty or whitespace.");
+                    }
+                }
+                else
+                {
+                    this.loggerWrapper.Info(
+                        $"Field \"{name}\" has been marked to treat " +
+                        $"whitespace as null, but the value is not a " +
+                        $"{nameof(String)}. This option will be ignored.");
                 }
             }
             else
