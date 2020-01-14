@@ -296,9 +296,25 @@
         {
             bool toReturn = value == null;
 
+            string name = field.Name;
             if (!toReturn && field.TreatWhitespaceAsNull)
             {
+                this.loggerWrapper.Debug(
+                    $"Field \"{name}\" has been marked to treat whitespace " +
+                    $"as null.");
+
                 toReturn = string.IsNullOrWhiteSpace(value);
+
+                if (toReturn)
+                {
+                    this.loggerWrapper.Debug(
+                        $"Value for field \"{name}\" is empty or whitespace.");
+                }
+            }
+            else
+            {
+                this.loggerWrapper.Debug(
+                    $"Value for field \"{name}\" is null.");
             }
 
             return toReturn;
