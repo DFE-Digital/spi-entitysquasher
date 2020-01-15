@@ -1,6 +1,7 @@
 ﻿namespace Dfe.Spi.EntitySquasher.AcdfGen
 {
     using System;
+    using System.Diagnostics.CodeAnalysis;
     using CommandLine;
     using Dfe.Spi.Common.Logging.Definitions;
     using Dfe.Spi.EntitySquasher.AcdfGen.Application.Definitions.Processors;
@@ -44,6 +45,7 @@
         /// <returns>
         /// An exit code for the application process.
         /// </returns>
+        [ExcludeFromCodeCoverage]
         public static int Main(string[] args)
         {
             int toReturn = -1;
@@ -114,6 +116,7 @@
             return toReturn;
         }
 
+        [ExcludeFromCodeCoverage]
         private static int InvokeRun(Options options)
         {
             int toReturn = -1;
