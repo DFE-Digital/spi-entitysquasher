@@ -1,16 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <OutputType>Exe</OutputType>
-    <TargetFramework>netcoreapp2.2</TargetFramework>
-    <AssemblyName>acdf-gen</AssemblyName>
+    <TargetFramework>netstandard2.0</TargetFramework>
   </PropertyGroup>
 
   <ItemGroup>
-    <!-- Other -->
-    <PackageReference Include="CommandLineParser" Version="2.6.0" />
-    <PackageReference Include="StructureMap" Version="4.7.1" />
-
     <!-- Development/Non-Runtime -->
     <PackageReference Include="StyleCop.Analyzers" Version="1.1.118" PrivateAssets="All" />
     <PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="2.9.8" PrivateAssets="All" />
@@ -21,7 +15,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Dfe.Spi.EntitySquasher.AcdfGen.Application\Dfe.Spi.EntitySquasher.AcdfGen.Application.csproj" />
+    <ProjectReference Include="..\Dfe.Spi.EntitySquasher.Domain\Dfe.Spi.EntitySquasher.Domain.csproj" />
   </ItemGroup>
 
   <PropertyGroup>
@@ -29,7 +23,7 @@
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <DocumentationFile>Dfe.Spi.EntitySquasher.AcdfGen.ConsoleApp.xml</DocumentationFile>
+    <DocumentationFile>Dfe.Spi.EntitySquasher.AcdfGen.Application.xml</DocumentationFile>
   </PropertyGroup>
 
 </Project>
