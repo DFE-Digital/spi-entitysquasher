@@ -1,5 +1,6 @@
 ﻿namespace Dfe.Spi.EntitySquasher.AcdfGen.Application.Models
 {
+    using System.Collections.Generic;
     using Dfe.Spi.EntitySquasher.AcdfGen.Application.Definitions.Processors;
 
     /// <summary>
@@ -9,6 +10,13 @@
     public class GenerateAlgorithmConfigurationDeclarationFileRequest
         : ModelsBase
     {
-        // Nothing for now.
+        /// <summary>
+        /// Gets or sets a set of adapter names.
+        /// </summary>
+        public IEnumerable<string> AdapterNames
+        {
+            get;
+            set;
+        }
     }
 }

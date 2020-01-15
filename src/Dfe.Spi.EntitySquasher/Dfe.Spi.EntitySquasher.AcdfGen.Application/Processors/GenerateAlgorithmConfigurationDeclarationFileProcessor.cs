@@ -38,16 +38,43 @@
         {
             GenerateAlgorithmConfigurationDeclarationFileResponse toReturn = null;
 
+            if (generateAlgorithmConfigurationDeclarationFileRequest == null)
+            {
+                throw new ArgumentNullException(
+                    nameof(generateAlgorithmConfigurationDeclarationFileRequest));
+            }
+
             // 1) Use reflection to cycle through the concrete types available
             //    in Dfe.Spi.Models. Generate the majority of the file.
             IEnumerable<Entity> entities = this.GenerateEntities();
 
-            // TODO: Temporary code to enumerate the collection. To remove.
-            entities.ToArray();
+            // 2) Generate placeholders for the adapters based on the input.
+            IEnumerable<string> adapterNames =
+                generateAlgorithmConfigurationDeclarationFileRequest.AdapterNames;
+
+            IEnumerable<EntityAdapter> entityAdapters =
+                this.GenerateEntityAdapters(adapterNames);
+
+            // Construct the instance fully.
+            AlgorithmConfigurationDeclarationFile algorithmConfigurationDeclarationFile =
+                new AlgorithmConfigurationDeclarationFile()
+                {
+                    Entities = entities,
+                    EntityAdapters = entityAdapters,
+                };
 
             // TODO:
-            // 2) Generate placeholders for the adapters based on the input.
             // 3) Save the file with a filename based on input.
+            return toReturn;
+        }
+
+        private IEnumerable<EntityAdapter> GenerateEntityAdapters(
+            IEnumerable<string> adapterNames)
+        {
+            IEnumerable<EntityAdapter> toReturn = null;
+
+            toReturn = adapterNames.Select(this.Map);
+
             return toReturn;
         }
 
@@ -78,6 +105,22 @@
             toReturn = nonAbstractTypes
                 .Select(this.Map)
                 .OrderBy(x => x.Name);
+
+            return toReturn;
+        }
+
+        private EntityAdapter Map(string name)
+        {
+            EntityAdapter toReturn = new EntityAdapter()
+            {
+                BaseUrl = null,
+                Headers = null,
+                Name = name,
+            };
+
+            this.loggerWrapper.Info(
+                $"Generated {nameof(EntityAdapter)} with " +
+                $"{nameof(toReturn.Name)} = \"{toReturn.Name}\".");
 
             return toReturn;
         }
@@ -119,6 +162,10 @@
                 },
             };
 
+            this.loggerWrapper.Info(
+                $"Generated {nameof(Entity)} with {nameof(toReturn.Name)} = " +
+                $"\"{toReturn.Name}\".");
+
             return toReturn;
         }
 
@@ -139,6 +186,10 @@
                     null,
                 },
             };
+
+            this.loggerWrapper.Info(
+                $"Generated {nameof(Field)} with {nameof(toReturn.Name)} = " +
+                $"\"{toReturn.Name}\".");
 
             return toReturn;
         }

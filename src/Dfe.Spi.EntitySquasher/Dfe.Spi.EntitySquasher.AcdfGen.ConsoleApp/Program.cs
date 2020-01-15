@@ -1,5 +1,6 @@
 ﻿namespace Dfe.Spi.EntitySquasher.AcdfGen
 {
+    using System;
     using CommandLine;
     using Dfe.Spi.EntitySquasher.AcdfGen.Application.Definitions.Processors;
     using Dfe.Spi.EntitySquasher.AcdfGen.Application.Models;
@@ -55,10 +56,15 @@
         {
             int toReturn = -1;
 
+            if (options == null)
+            {
+                throw new ArgumentNullException(nameof(options));
+            }
+
             GenerateAlgorithmConfigurationDeclarationFileRequest generateAlgorithmConfigurationDeclarationFileRequest =
                 new GenerateAlgorithmConfigurationDeclarationFileRequest()
                 {
-                    // Nothing, yet.
+                    AdapterNames = options.AdapterNames,
                 };
 
             GenerateAlgorithmConfigurationDeclarationFileResponse generateAlgorithmConfigurationDeclarationFileResponse =
