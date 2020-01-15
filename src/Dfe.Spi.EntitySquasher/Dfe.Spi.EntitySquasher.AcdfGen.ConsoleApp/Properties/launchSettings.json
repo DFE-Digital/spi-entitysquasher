@@ -2,7 +2,7 @@
   "profiles": {
     "Dfe.Spi.EntitySquasher.AcdfGen.ConsoleApp": {
       "commandName": "Project",
-      "commandLineArgs": "--adapter-names abc def"
+      "commandLineArgs": "--filename acdf-default.json --adapter-names abc def"
     }
   }
 }

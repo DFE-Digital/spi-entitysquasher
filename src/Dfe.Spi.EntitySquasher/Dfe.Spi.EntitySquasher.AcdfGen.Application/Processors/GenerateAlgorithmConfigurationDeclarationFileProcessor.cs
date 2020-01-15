@@ -92,11 +92,21 @@
                 $"Saving {nameof(algorithmConfigurationDeclarationFile)} to " +
                 $"underlying storage...");
 
+            string filename =
+                generateAlgorithmConfigurationDeclarationFileRequest.Filename;
+
             string location =
                 this.generatedAlgorithmConfigurationDeclarationFileRepository.Save(
+                    filename,
                     algorithmConfigurationDeclarationFile);
 
             this.loggerWrapper.Info($"File saved to storage: \"{location}\".");
+
+            toReturn = new GenerateAlgorithmConfigurationDeclarationFileResponse()
+            {
+                // Nothing for now.
+                // Just return an instance to indicate success.
+            };
 
             return toReturn;
         }

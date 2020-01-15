@@ -20,5 +20,18 @@
             get;
             set;
         }
+
+        /// <summary>
+        /// Gets or sets the destination filename for the generated file.
+        /// </summary>
+        [Option(
+            "filename",
+            Required = true,
+            HelpText = "The destination filename for the generated file.")]
+        public string Filename
+        {
+            get;
+            set;
+        }
     }
 }

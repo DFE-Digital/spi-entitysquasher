@@ -2,6 +2,7 @@
 {
     using System.Collections.Generic;
     using Dfe.Spi.EntitySquasher.AcdfGen.Application.Definitions.Processors;
+    using Dfe.Spi.EntitySquasher.Domain.Models.Acdf;
 
     /// <summary>
     /// Request object for
@@ -14,6 +15,17 @@
         /// Gets or sets a set of adapter names.
         /// </summary>
         public IEnumerable<string> AdapterNames
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// Gets or sets the filename to save the
+        /// <see cref="AlgorithmConfigurationDeclarationFile" /> to the
+        /// underlying storage.
+        /// </summary>
+        public string Filename
         {
             get;
             set;

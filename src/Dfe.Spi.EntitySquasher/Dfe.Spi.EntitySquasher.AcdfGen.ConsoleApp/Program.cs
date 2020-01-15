@@ -2,6 +2,7 @@
 {
     using System;
     using CommandLine;
+    using Dfe.Spi.Common.Logging.Definitions;
     using Dfe.Spi.EntitySquasher.AcdfGen.Application.Definitions.Processors;
     using Dfe.Spi.EntitySquasher.AcdfGen.Application.Models;
     using Dfe.Spi.EntitySquasher.AcdfGen.Definitions;
@@ -13,19 +14,25 @@
     /// </summary>
     public class Program : IProgram
     {
+        private readonly ILoggerWrapper loggerWrapper;
         private readonly IGenerateAlgorithmConfigurationDeclarationFileProcessor generateAlgorithmConfigurationDeclarationFileProcessor;
 
         /// <summary>
         /// Initialises a new instance of the <see cref="Program" /> class.
         /// </summary>
+        /// <param name="loggerWrapper">
+        /// An instance of type <see cref="ILoggerWrapper" />.
+        /// </param>
         /// <param name="generateAlgorithmConfigurationDeclarationFileProcessor">
         /// An instance of type
         /// <see cref="IGenerateAlgorithmConfigurationDeclarationFileProcessor" />.
         /// </param>
-        public Program(IGenerateAlgorithmConfigurationDeclarationFileProcessor generateAlgorithmConfigurationDeclarationFileProcessor)
+        public Program(
+            ILoggerWrapper loggerWrapper,
+            IGenerateAlgorithmConfigurationDeclarationFileProcessor generateAlgorithmConfigurationDeclarationFileProcessor)
         {
-            this.generateAlgorithmConfigurationDeclarationFileProcessor =
-                generateAlgorithmConfigurationDeclarationFileProcessor;
+            this.loggerWrapper = loggerWrapper;
+            this.generateAlgorithmConfigurationDeclarationFileProcessor = generateAlgorithmConfigurationDeclarationFileProcessor;
         }
 
         /// <summary>
@@ -65,15 +72,44 @@
                 new GenerateAlgorithmConfigurationDeclarationFileRequest()
                 {
                     AdapterNames = options.AdapterNames,
+                    Filename = options.Filename,
                 };
 
-            GenerateAlgorithmConfigurationDeclarationFileResponse generateAlgorithmConfigurationDeclarationFileResponse =
-                this.generateAlgorithmConfigurationDeclarationFileProcessor.GenerateAlgorithmConfigurationDeclarationFile(
-                    generateAlgorithmConfigurationDeclarationFileRequest);
+            GenerateAlgorithmConfigurationDeclarationFileResponse generateAlgorithmConfigurationDeclarationFileResponse = null;
+            try
+            {
+                this.loggerWrapper.Debug(
+                    $"Invoking " +
+                    $"{nameof(IGenerateAlgorithmConfigurationDeclarationFileProcessor)} " +
+                    $"with " +
+                    $"{generateAlgorithmConfigurationDeclarationFileRequest}...");
 
-            // If everything passes here, without exception, call it a
-            // success.
-            toReturn = 0;
+                generateAlgorithmConfigurationDeclarationFileResponse =
+                    this.generateAlgorithmConfigurationDeclarationFileProcessor.GenerateAlgorithmConfigurationDeclarationFile(
+                        generateAlgorithmConfigurationDeclarationFileRequest);
+
+                // If everything passes here, without exception, call it a
+                // success.
+                toReturn = 0;
+
+                this.loggerWrapper.Info(
+                    $"The " +
+                    $"{nameof(IGenerateAlgorithmConfigurationDeclarationFileProcessor)} " +
+                    $"completed with success.");
+            }
+            catch (Exception exception)
+            {
+                this.loggerWrapper.Error(
+                    $"The " +
+                    $"{nameof(IGenerateAlgorithmConfigurationDeclarationFileProcessor)} " +
+                    $"threw an unhandled exception! This will be re-thrown " +
+                    $"to the run-time.",
+                    exception);
+
+                throw;
+            }
+
+            this.loggerWrapper.Info($"Returning exit code: {toReturn}.");
 
             return toReturn;
         }
