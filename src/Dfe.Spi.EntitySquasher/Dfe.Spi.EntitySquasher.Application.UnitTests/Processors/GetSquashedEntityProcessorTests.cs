@@ -78,6 +78,84 @@
         }
 
         [Test]
+        public async Task GetSquashedEntityAsync_EntityAdapterInvokerThrowsAllAdaptersUnavailableException_OnlyErrorsReturned()
+        {
+            // Arrange
+            string getSquashedEntityRequestStr =
+                this.assembly.GetSample("get-squashed-entity-request-1.json");
+
+            GetSquashedEntityRequest getSquashedEntityRequest =
+                JsonConvert.DeserializeObject<GetSquashedEntityRequest>(
+                    getSquashedEntityRequestStr);
+
+            HttpStatusCode httpStatusCode = HttpStatusCode.AlreadyReported;
+
+            HttpErrorBody httpErrorBody = new HttpErrorBody()
+            {
+                ErrorIdentifier = "ABC",
+                Message = "Some Error Message",
+                StatusCode = httpStatusCode,
+            };
+
+            EntityAdapterErrorDetail expectedEntityAdapterErrorDetail =
+                new EntityAdapterErrorDetail()
+                {
+                    AdapterName = "some-adapter",
+                    HttpErrorBody = httpErrorBody,
+                    HttpStatusCode = httpStatusCode,
+                    RequestedEntityName = "LearningProvider",
+                    RequestedFields = new string[]
+                        {
+                            "Name",
+                        },
+                    RequestedId = "9c9f835f-723d-4461-bd9d-e7b955c45623",
+                };
+
+            EntityAdapterException entityAdapterException =
+                new EntityAdapterException(
+                    expectedEntityAdapterErrorDetail,
+                    httpStatusCode,
+                    httpErrorBody);
+
+            AllAdaptersUnavailableException allAdaptersUnavailableException =
+                new AllAdaptersUnavailableException(
+                    new EntityAdapterException[]
+                    {
+                        entityAdapterException,
+                    });
+
+            this.mockEntityAdapterInvoker
+                .Setup(x => x.InvokeEntityAdapters(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<IEnumerable<string>>(), It.IsAny<EntityReference>()))
+                .Throws(allAdaptersUnavailableException);
+
+            Spi.Models.ModelsBase modelsBase = null;
+
+            SquashedEntityResult squashedEntityResult = null;
+            GetSquashedEntityResponse getSquashedEntityResponse = null;
+            EntityAdapterErrorDetail actualEntityAdapterErrorDetail = null;
+
+            // Act
+            getSquashedEntityResponse =
+                await this.getSquashedEntityProcessor.GetSquashedEntityAsync(
+                    getSquashedEntityRequest);
+
+            // Assert
+            squashedEntityResult =
+                getSquashedEntityResponse.SquashedEntityResults.Single();
+
+            actualEntityAdapterErrorDetail =
+                squashedEntityResult.EntityAdapterErrorDetails.Single();
+
+            Assert.AreEqual(
+                expectedEntityAdapterErrorDetail,
+                actualEntityAdapterErrorDetail);
+
+            modelsBase = squashedEntityResult.SquashedEntity;
+
+            Assert.IsNull(modelsBase);
+        }
+
+        [Test]
         public async Task GetSquashedEntityAsync_UnderlyingServicesReturnOneModelAndOneError_SquashesCorrectlyAndReturnsError()
         {
             // Arrange
