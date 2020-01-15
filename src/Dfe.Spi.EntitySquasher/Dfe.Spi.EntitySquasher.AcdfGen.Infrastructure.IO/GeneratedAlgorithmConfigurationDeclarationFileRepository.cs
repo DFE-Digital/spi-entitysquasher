@@ -1,10 +1,10 @@
 ﻿namespace Dfe.Spi.EntitySquasher.AcdfGen.Infrastructure.IO
 {
+    using System.IO;
     using Dfe.Spi.Common.Logging.Definitions;
     using Dfe.Spi.EntitySquasher.AcdfGen.Domain.Definitions;
     using Dfe.Spi.EntitySquasher.Domain.Models.Acdf;
     using Newtonsoft.Json;
-    using System.IO;
 
     /// <summary>
     /// Implements
