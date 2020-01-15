@@ -7,6 +7,7 @@
     using Dfe.Spi.Common.Logging.Definitions;
     using Dfe.Spi.EntitySquasher.AcdfGen.Application.Definitions.Processors;
     using Dfe.Spi.EntitySquasher.AcdfGen.Application.Models;
+    using Dfe.Spi.EntitySquasher.AcdfGen.Domain.Definitions;
     using Dfe.Spi.EntitySquasher.Domain.Models.Acdf;
 
     /// <summary>
@@ -16,6 +17,7 @@
     public class GenerateAlgorithmConfigurationDeclarationFileProcessor :
         IGenerateAlgorithmConfigurationDeclarationFileProcessor
     {
+        private readonly IGeneratedAlgorithmConfigurationDeclarationFileRepository generatedAlgorithmConfigurationDeclarationFileRepository;
         private readonly ILoggerWrapper loggerWrapper;
 
         /// <summary>
@@ -23,12 +25,18 @@
         /// <see cref="GenerateAlgorithmConfigurationDeclarationFileProcessor" />
         /// class.
         /// </summary>
+        /// <param name="generatedAlgorithmConfigurationDeclarationFileRepository">
+        /// An instance of type
+        /// <see cref="IGeneratedAlgorithmConfigurationDeclarationFileRepository" />.
+        /// </param>
         /// <param name="loggerWrapper">
         /// An instance of type <see cref="ILoggerWrapper" />.
         /// </param>
         public GenerateAlgorithmConfigurationDeclarationFileProcessor(
+            IGeneratedAlgorithmConfigurationDeclarationFileRepository generatedAlgorithmConfigurationDeclarationFileRepository,
             ILoggerWrapper loggerWrapper)
         {
+            this.generatedAlgorithmConfigurationDeclarationFileRepository = generatedAlgorithmConfigurationDeclarationFileRepository;
             this.loggerWrapper = loggerWrapper;
         }
 
@@ -46,14 +54,26 @@
 
             // 1) Use reflection to cycle through the concrete types available
             //    in Dfe.Spi.Models. Generate the majority of the file.
+            this.loggerWrapper.Debug($"Generating {nameof(Entity)}(s)...");
+
             IEnumerable<Entity> entities = this.GenerateEntities();
+
+            this.loggerWrapper.Info(
+                $"{entities.Count()} {nameof(Entity)}(s) generated.");
 
             // 2) Generate placeholders for the adapters based on the input.
             IEnumerable<string> adapterNames =
                 generateAlgorithmConfigurationDeclarationFileRequest.AdapterNames;
 
+            this.loggerWrapper.Debug(
+                $"Generating {nameof(EntityAdapter)}(s)...");
+
             IEnumerable<EntityAdapter> entityAdapters =
                 this.GenerateEntityAdapters(adapterNames);
+
+            this.loggerWrapper.Info(
+                $"{entityAdapters.Count()} {nameof(EntityAdapter)}(s) " +
+                $"generated.");
 
             // Construct the instance fully.
             AlgorithmConfigurationDeclarationFile algorithmConfigurationDeclarationFile =
@@ -63,8 +83,21 @@
                     EntityAdapters = entityAdapters,
                 };
 
-            // TODO:
+            this.loggerWrapper.Debug(
+                $"{nameof(algorithmConfigurationDeclarationFile)} = " +
+                $"{algorithmConfigurationDeclarationFile}");
+
             // 3) Save the file with a filename based on input.
+            this.loggerWrapper.Debug(
+                $"Saving {nameof(algorithmConfigurationDeclarationFile)} to " +
+                $"underlying storage...");
+
+            string location =
+                this.generatedAlgorithmConfigurationDeclarationFileRepository.Save(
+                    algorithmConfigurationDeclarationFile);
+
+            this.loggerWrapper.Info($"File saved to storage: \"{location}\".");
+
             return toReturn;
         }
 
