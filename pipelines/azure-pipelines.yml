@@ -71,4 +71,4 @@ steps:
   - task: PublishBuildArtifacts@1
     displayName: 'Publish acdf-gen'
     inputs:
-      PathtoPublish: '$(Build.ArtifactStagingDirectory)/publish'
+      PathtoPublish: '$(Build.ArtifactStagingDirectory)/acdf-gen'
