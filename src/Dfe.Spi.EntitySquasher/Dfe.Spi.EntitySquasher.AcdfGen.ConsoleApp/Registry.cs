@@ -1,6 +1,8 @@
 ﻿namespace Dfe.Spi.EntitySquasher.AcdfGen
 {
     using System.Diagnostics.CodeAnalysis;
+    using Dfe.Spi.Common.Logging.Definitions;
+    using Dfe.Spi.EntitySquasher.AcdfGen.Application;
     using StructureMap.Graph;
 
     /// <summary>
@@ -16,6 +18,11 @@
         public Registry()
         {
             this.Scan(DoScan);
+
+            // Explicitly target this implementation, otherwise when published,
+            // the runtime will get confused between this one and the one
+            // in the test package.
+            this.For<ILoggerWrapper>().Use<LoggerWrapper>();
         }
 
         private static void DoScan(IAssemblyScanner assemblyScanner)
