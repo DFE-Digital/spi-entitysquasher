@@ -72,13 +72,13 @@ steps:
     displayName: 'Run acdf-gen'
     inputs:
       command: 'custom'
-      custom: '$(Build.ArtifactStagingDirectory)/acdf-gen/acdf-gen.dll'
+      custom: '$(Build.ArtifactStagingDirectory)/acdf-gen/Dfe.Spi.EntitySquasher.AcdfGen.ConsoleApp/acdf-gen.dll'
       arguments: '--filename acdf-default.json --adapterNames GIAS UKRLP'
-      workingDirectory: '$(Build.ArtifactStagingDirectory)/acdf-gen'
+      workingDirectory: '$(Build.ArtifactStagingDirectory)/acdf-gen/Dfe.Spi.EntitySquasher.AcdfGen.ConsoleApp'
 
   - task: CopyFiles@2
     displayName: 'Copy Generated ACDF'
     inputs:
-      Contents: $(Build.ArtifactStagingDirectory)/acdf-gen/acdf-default.json
+      Contents: $(Build.ArtifactStagingDirectory)/acdf-gen/Dfe.Spi.EntitySquasher.AcdfGen.ConsoleApp/acdf-default.json
       TargetFolder: '$(Build.ArtifactStagingDirectory)/publish'
       OverWrite: true
