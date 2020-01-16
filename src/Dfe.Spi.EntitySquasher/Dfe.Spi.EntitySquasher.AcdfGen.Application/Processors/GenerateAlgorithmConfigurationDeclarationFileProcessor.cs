@@ -116,7 +116,7 @@
         {
             IEnumerable<EntityAdapter> toReturn = null;
 
-            toReturn = adapterNames.Select(this.Map);
+            toReturn = adapterNames.Select(this.Map).ToArray();
 
             return toReturn;
         }
@@ -147,7 +147,8 @@
 
             toReturn = nonAbstractTypes
                 .Select(this.Map)
-                .OrderBy(x => x.Name);
+                .OrderBy(x => x.Name)
+                .ToArray();
 
             return toReturn;
         }
@@ -190,7 +191,8 @@
 
             IEnumerable<Field> fields = propertyInfos
                 .Select(this.Map)
-                .OrderBy(x => x.Name);
+                .OrderBy(x => x.Name)
+                .ToArray();
 
             toReturn = new Entity()
             {

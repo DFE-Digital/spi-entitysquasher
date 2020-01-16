@@ -1,11 +1,13 @@
 ﻿namespace Dfe.Spi.EntitySquasher.AcdfGen.Models
 {
     using System.Collections.Generic;
+    using System.Diagnostics.CodeAnalysis;
     using CommandLine;
 
     /// <summary>
     /// The options class, as used by the <see cref="CommandLine" />.
     /// </summary>
+    [ExcludeFromCodeCoverage]
     public class Options
     {
         /// <summary>

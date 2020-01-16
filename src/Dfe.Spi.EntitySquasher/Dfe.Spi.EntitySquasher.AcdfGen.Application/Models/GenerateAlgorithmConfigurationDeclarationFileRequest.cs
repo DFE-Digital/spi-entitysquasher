@@ -1,6 +1,7 @@
 ﻿namespace Dfe.Spi.EntitySquasher.AcdfGen.Application.Models
 {
     using System.Collections.Generic;
+    using System.Diagnostics.CodeAnalysis;
     using Dfe.Spi.EntitySquasher.AcdfGen.Application.Definitions.Processors;
     using Dfe.Spi.EntitySquasher.Domain.Models.Acdf;
 
@@ -8,6 +9,7 @@
     /// Request object for
     /// <see cref="IGenerateAlgorithmConfigurationDeclarationFileProcessor.GenerateAlgorithmConfigurationDeclarationFile(GenerateAlgorithmConfigurationDeclarationFileRequest)" />.
     /// </summary>
+    [ExcludeFromCodeCoverage]
     public class GenerateAlgorithmConfigurationDeclarationFileRequest
         : ModelsBase
     {

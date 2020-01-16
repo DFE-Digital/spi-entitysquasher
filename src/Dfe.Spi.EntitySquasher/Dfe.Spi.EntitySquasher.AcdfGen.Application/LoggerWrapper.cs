@@ -1,12 +1,14 @@
 ﻿namespace Dfe.Spi.EntitySquasher.AcdfGen.Application
 {
     using System;
+    using System.Diagnostics.CodeAnalysis;
     using Dfe.Spi.Common.Logging.Definitions;
     using Microsoft.AspNetCore.Http;
 
     /// <summary>
     /// Implements <see cref="ILoggerWrapper" />.
     /// </summary>
+    [ExcludeFromCodeCoverage]
     public class LoggerWrapper : ILoggerWrapper
     {
         private readonly ConsoleColor defaultConsoleColour;
