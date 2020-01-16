@@ -1,11 +1,13 @@
 ﻿namespace Dfe.Spi.EntitySquasher.AcdfGen
 {
+    using System.Diagnostics.CodeAnalysis;
     using StructureMap.Graph;
 
     /// <summary>
     /// Custom, host-specific implementation of
     /// <see cref="StructureMap.Registry" />.
     /// </summary>
+    [ExcludeFromCodeCoverage]
     public class Registry : StructureMap.Registry
     {
         /// <summary>

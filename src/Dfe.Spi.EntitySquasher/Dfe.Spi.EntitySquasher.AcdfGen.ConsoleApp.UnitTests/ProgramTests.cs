@@ -80,5 +80,41 @@
 
             string logOutput = this.loggerWrapper.ReturnLog();
         }
+
+        [Test]
+        public void Run_ProcessorExecutesWithSuccess_ZeroExitCodeReturned()
+        {
+            // Arrange
+            Options options = new Options()
+            {
+                Filename = "a-filename.json",
+                AdapterNames = new string[]
+                {
+                    "some-adapter",
+                    "someother-adapter",
+                },
+            };
+
+            GenerateAlgorithmConfigurationDeclarationFileResponse generateAlgorithmConfigurationDeclarationFileResponse =
+                new GenerateAlgorithmConfigurationDeclarationFileResponse()
+                {
+                    // Nothing, for now.
+                };
+
+            this.mockGenerateAlgorithmConfigurationDeclarationFileProcessor
+                .Setup(x => x.GenerateAlgorithmConfigurationDeclarationFile(It.IsAny<GenerateAlgorithmConfigurationDeclarationFileRequest>()))
+                .Returns(generateAlgorithmConfigurationDeclarationFileResponse);
+
+            int expectedExitCode = 0;
+            int actualExitCode;
+
+            // Act
+            actualExitCode = this.program.Run(options);
+
+            // Assert
+            Assert.AreEqual(expectedExitCode, actualExitCode);
+
+            string logOutput = this.loggerWrapper.ReturnLog();
+        }
     }
 }
