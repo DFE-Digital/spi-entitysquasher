@@ -5,6 +5,7 @@
     using Dfe.Spi.EntitySquasher.AcdfGen.Domain.Definitions;
     using Dfe.Spi.EntitySquasher.Domain.Models.Acdf;
     using Newtonsoft.Json;
+    using Newtonsoft.Json.Serialization;
 
     /// <summary>
     /// Implements
@@ -36,10 +37,20 @@
         {
             string toReturn = null;
 
+            DefaultContractResolver defaultContractResolver =
+                new DefaultContractResolver()
+                {
+                    NamingStrategy = new CamelCaseNamingStrategy(),
+                };
+
             string algorithmConfigurationDeclarationFileStr =
                 JsonConvert.SerializeObject(
                     algorithmConfigurationDeclarationFile,
-                    Formatting.Indented);
+                    new JsonSerializerSettings()
+                    {
+                        ContractResolver = defaultContractResolver,
+                        Formatting = Formatting.Indented,
+                    });
 
             this.loggerWrapper.Debug(
                 $"{nameof(algorithmConfigurationDeclarationFileStr)} = " +
