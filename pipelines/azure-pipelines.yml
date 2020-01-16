@@ -69,9 +69,10 @@ steps:
       PathtoPublish: '$(Build.ArtifactStagingDirectory)/publish'
 
   - task: DotNetCoreCLI@2
+    displayName: 'Run acdf-gen'
     inputs:
       command: 'custom'
-      custom: 'acdf-gen.dll'
+      custom: '$(Build.ArtifactStagingDirectory)/acdf-gen/acdf-gen.dll'
       arguments: '--filename acdf-default.json --adapterNames GIAS UKRLP'
       workingDirectory: '$(Build.ArtifactStagingDirectory)/acdf-gen'
 
