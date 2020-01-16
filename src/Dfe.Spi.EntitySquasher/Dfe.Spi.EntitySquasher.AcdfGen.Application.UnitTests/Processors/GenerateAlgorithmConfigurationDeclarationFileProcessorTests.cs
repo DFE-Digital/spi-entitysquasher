@@ -53,7 +53,7 @@
         }
 
         [Test]
-        public void UnnamedTest()
+        public void GenerateAlgorithmConfigurationDeclarationFile_ExecutionCompletesSuccessfully_AcdfChecked()
         {
             // Arrange
             string[] adapterNames = new string[]
