@@ -64,11 +64,6 @@ steps:
       TargetFolder: '$(Build.ArtifactStagingDirectory)/publish'
       OverWrite: true
 
-  - task: PublishBuildArtifacts@1
-    displayName: 'Publish Squasher App'
-    inputs:
-      PathtoPublish: '$(Build.ArtifactStagingDirectory)/publish'
-
   - task: DotNetCoreCLI@2
     displayName: 'Run acdf-gen'
     inputs:
@@ -79,6 +74,11 @@ steps:
   - task: CopyFiles@2
     displayName: 'Copy Generated ACDF'
     inputs:
-      Contents: $(Build.ArtifactStagingDirectory)/acdf-gen/Dfe.Spi.EntitySquasher.AcdfGen.ConsoleApp/acdf-default.json
+      Contents: acdf-default.json
       TargetFolder: '$(Build.ArtifactStagingDirectory)/publish'
       OverWrite: true
+
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish All Artifacts'
+    inputs:
+      PathtoPublish: '$(Build.ArtifactStagingDirectory)/publish'
