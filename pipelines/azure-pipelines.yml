@@ -54,6 +54,7 @@ steps:
       publishWebProjects: false
       projects: 'src/Dfe.Spi.EntitySquasher/Dfe.Spi.EntitySquasher.AcdfGen.ConsoleApp/Dfe.Spi.EntitySquasher.AcdfGen.ConsoleApp.csproj'
       arguments: '--configuration $(BuildConfiguration) --output $(Build.ArtifactStagingDirectory)/acdf-gen --no-restore --no-build'
+      zipAfterPublish: false
 
   - task: CopyFiles@2
     displayName: 'Copy ARM template'
