@@ -64,6 +64,11 @@ steps:
       OverWrite: true
 
   - task: PublishBuildArtifacts@1
-    displayName: 'Publish Artifact'
+    displayName: 'Publish Squasher App'
+    inputs:
+      PathtoPublish: '$(Build.ArtifactStagingDirectory)/publish'
+
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish acdf-gen'
     inputs:
       PathtoPublish: '$(Build.ArtifactStagingDirectory)/publish'
