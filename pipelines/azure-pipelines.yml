@@ -40,12 +40,20 @@ steps:
       arguments: '--configuration $(BuildConfiguration) --no-restore'
 
   - task: DotNetCoreCLI@2
-    displayName: 'Publish Website'
+    displayName: 'Publish Squasher App'
     inputs:
       command: publish
       publishWebProjects: false
       projects: 'src/Dfe.Spi.EntitySquasher/Dfe.Spi.EntitySquasher.FunctionApp/Dfe.Spi.EntitySquasher.FunctionApp.csproj'
       arguments: '--configuration $(BuildConfiguration) --output $(Build.ArtifactStagingDirectory)/publish --no-restore --no-build'
+
+  - task: DotNetCoreCLI@2
+    displayName: 'Publish acdf-gen'
+    inputs:
+      command: publish
+      publishWebProjects: false
+      projects: 'src/Dfe.Spi.EntitySquasher/Dfe.Spi.EntitySquasher.AcdfGen.ConsoleApp/Dfe.Spi.EntitySquasher.AcdfGen.ConsoleApp.csproj'
+      arguments: '--configuration $(BuildConfiguration) --output $(Build.ArtifactStagingDirectory)/acdf-gen --no-restore --no-build'
 
   - task: CopyFiles@2
     displayName: 'Copy ARM template'
