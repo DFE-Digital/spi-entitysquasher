@@ -5,9 +5,7 @@
       // non-serialisable.
     },
     {
-      "modelsBase": {
-        // Again, doesn't need anything.
-      }
+      "modelsBase": null
     }
   ]
 }

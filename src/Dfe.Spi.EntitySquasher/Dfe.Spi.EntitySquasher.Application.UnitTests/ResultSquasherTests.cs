@@ -118,11 +118,11 @@
             string expectedPostcode = "LE1 1SU";
             string actualPostcode = null;
 
-            long expectedUkprn = 888;
-            long actualUkprn;
+            long? expectedUkprn = 888;
+            long? actualUkprn = null;
 
-            long expectedUrn = 98765;
-            long actualUrn;
+            long? expectedUrn = 98765;
+            long? actualUrn = null;
 
             GetEntityAsyncResult[] toSquash = new GetEntityAsyncResult[]
             {
