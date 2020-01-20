@@ -5,7 +5,7 @@
     using Dfe.Spi.Common.UnitTesting.Infrastructure;
     using Dfe.Spi.EntitySquasher.AcdfGen.Application.Definitions.Processors;
     using Dfe.Spi.EntitySquasher.AcdfGen.Application.Models;
-    using Dfe.Spi.EntitySquasher.AcdfGen.Models;
+    using Dfe.Spi.EntitySquasher.AcdfGen.ConsoleApp.Models;
     using Moq;
     using NUnit.Framework;
 
