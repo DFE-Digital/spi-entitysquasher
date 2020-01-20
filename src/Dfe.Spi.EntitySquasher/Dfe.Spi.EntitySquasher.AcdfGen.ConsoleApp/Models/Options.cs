@@ -1,4 +1,4 @@
-﻿namespace Dfe.Spi.EntitySquasher.AcdfGen.Models
+﻿namespace Dfe.Spi.EntitySquasher.AcdfGen.ConsoleApp.Models
 {
     using System.Collections.Generic;
     using System.Diagnostics.CodeAnalysis;

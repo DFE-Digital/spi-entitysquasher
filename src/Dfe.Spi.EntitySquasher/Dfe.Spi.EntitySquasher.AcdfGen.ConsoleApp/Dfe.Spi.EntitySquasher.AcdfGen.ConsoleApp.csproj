@@ -7,9 +7,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <!-- Microsoft -->
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="2.1.0" />
+
     <!-- Other -->
     <PackageReference Include="CommandLineParser" Version="2.6.0" />
-    <PackageReference Include="StructureMap" Version="4.7.1" />
 
     <!-- Development/Non-Runtime -->
     <PackageReference Include="StyleCop.Analyzers" Version="1.1.118" PrivateAssets="All" />

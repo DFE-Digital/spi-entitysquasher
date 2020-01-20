@@ -1,6 +1,6 @@
-﻿namespace Dfe.Spi.EntitySquasher.AcdfGen.Definitions
+﻿namespace Dfe.Spi.EntitySquasher.AcdfGen.ConsoleApp.Definitions
 {
-    using Dfe.Spi.EntitySquasher.AcdfGen.Models;
+    using Dfe.Spi.EntitySquasher.AcdfGen.ConsoleApp.Models;
 
     /// <summary>
     /// Describes the operations of the main entry point class.

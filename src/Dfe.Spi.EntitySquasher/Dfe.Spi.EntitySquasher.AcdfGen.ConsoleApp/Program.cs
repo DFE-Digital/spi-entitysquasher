@@ -1,4 +1,4 @@
-﻿namespace Dfe.Spi.EntitySquasher.AcdfGen
+﻿namespace Dfe.Spi.EntitySquasher.AcdfGen.ConsoleApp
 {
     using System;
     using System.Diagnostics.CodeAnalysis;
@@ -6,9 +6,12 @@
     using Dfe.Spi.Common.Logging.Definitions;
     using Dfe.Spi.EntitySquasher.AcdfGen.Application.Definitions.Processors;
     using Dfe.Spi.EntitySquasher.AcdfGen.Application.Models;
-    using Dfe.Spi.EntitySquasher.AcdfGen.Definitions;
-    using Dfe.Spi.EntitySquasher.AcdfGen.Models;
-    using StructureMap;
+    using Dfe.Spi.EntitySquasher.AcdfGen.Application.Processors;
+    using Dfe.Spi.EntitySquasher.AcdfGen.ConsoleApp.Definitions;
+    using Dfe.Spi.EntitySquasher.AcdfGen.ConsoleApp.Models;
+    using Dfe.Spi.EntitySquasher.AcdfGen.Domain.Definitions;
+    using Dfe.Spi.EntitySquasher.AcdfGen.Infrastructure.IO;
+    using Microsoft.Extensions.DependencyInjection;
 
     /// <summary>
     /// Main entry class for the console app.
@@ -121,13 +124,25 @@
         {
             int toReturn = -1;
 
-            Registry registry = new Registry();
-            using (Container container = new Container(registry))
+            using (ServiceProvider serviceProvider = CreateServiceProvider())
             {
-                IProgram program = container.GetInstance<IProgram>();
+                IProgram program = serviceProvider.GetService<IProgram>();
 
                 toReturn = program.Run(options);
             }
+
+            return toReturn;
+        }
+
+        [ExcludeFromCodeCoverage]
+        private static ServiceProvider CreateServiceProvider()
+        {
+            ServiceProvider toReturn = new ServiceCollection()
+                .AddScoped<IGeneratedAlgorithmConfigurationDeclarationFileRepository, GeneratedAlgorithmConfigurationDeclarationFileRepository>()
+                .AddScoped<IGenerateAlgorithmConfigurationDeclarationFileProcessor, GenerateAlgorithmConfigurationDeclarationFileProcessor>()
+                .AddScoped<ILoggerWrapper, LoggerWrapper>()
+                .AddScoped<IProgram, Program>()
+                .BuildServiceProvider();
 
             return toReturn;
         }
