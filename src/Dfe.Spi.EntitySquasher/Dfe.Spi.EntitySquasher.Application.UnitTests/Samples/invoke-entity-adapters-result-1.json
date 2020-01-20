@@ -1,5 +1,13 @@
 ﻿{
   "getEntityAsyncResults": [
-
+    {
+      // Nothing - the exception will be populated in-code, as it's
+      // non-serialisable.
+    },
+    {
+      "modelsBase": {
+        // Again, doesn't need anything.
+      }
+    }
   ]
 }
