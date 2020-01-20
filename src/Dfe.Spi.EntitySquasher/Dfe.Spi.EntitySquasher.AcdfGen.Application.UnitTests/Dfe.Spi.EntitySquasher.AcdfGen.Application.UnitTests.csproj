@@ -1,0 +1,25 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.2</TargetFramework>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Dfe.Spi.* -->
+    <PackageReference Include="Dfe.Spi.Common.UnitTesting" Version="1.0.6" PrivateAssets="All" />
+
+    <!-- Microsoft -->
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.9.0" PrivateAssets="All" />
+
+    <!-- Other -->
+    <PackageReference Include="Moq" Version="4.13.1" PrivateAssets="All" />
+    <PackageReference Include="nunit" Version="3.11.0" PrivateAssets="All" />
+    <PackageReference Include="NUnit3TestAdapter" Version="3.11.0" PrivateAssets="All" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Dfe.Spi.EntitySquasher.AcdfGen.Application\Dfe.Spi.EntitySquasher.AcdfGen.Application.csproj" />
+  </ItemGroup>
+
+</Project>

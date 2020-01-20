@@ -40,12 +40,21 @@ steps:
       arguments: '--configuration $(BuildConfiguration) --no-restore'
 
   - task: DotNetCoreCLI@2
-    displayName: 'Publish Website'
+    displayName: 'Publish Squasher App'
     inputs:
       command: publish
       publishWebProjects: false
       projects: 'src/Dfe.Spi.EntitySquasher/Dfe.Spi.EntitySquasher.FunctionApp/Dfe.Spi.EntitySquasher.FunctionApp.csproj'
       arguments: '--configuration $(BuildConfiguration) --output $(Build.ArtifactStagingDirectory)/publish --no-restore --no-build'
+
+  - task: DotNetCoreCLI@2
+    displayName: 'Publish acdf-gen'
+    inputs:
+      command: publish
+      publishWebProjects: false
+      projects: 'src/Dfe.Spi.EntitySquasher/Dfe.Spi.EntitySquasher.AcdfGen.ConsoleApp/Dfe.Spi.EntitySquasher.AcdfGen.ConsoleApp.csproj'
+      arguments: '--configuration $(BuildConfiguration) --output $(Build.ArtifactStagingDirectory)/acdf-gen --no-restore --no-build'
+      zipAfterPublish: false
 
   - task: CopyFiles@2
     displayName: 'Copy ARM template'
@@ -55,7 +64,21 @@ steps:
       TargetFolder: '$(Build.ArtifactStagingDirectory)/publish'
       OverWrite: true
 
+  - task: DotNetCoreCLI@2
+    displayName: 'Run acdf-gen'
+    inputs:
+      command: 'custom'
+      custom: '$(Build.ArtifactStagingDirectory)/acdf-gen/Dfe.Spi.EntitySquasher.AcdfGen.ConsoleApp/acdf-gen.dll'
+      arguments: '--filename acdf-default.json --adapter-names GIAS UKRLP'
+
+  - task: CopyFiles@2
+    displayName: 'Copy Generated ACDF'
+    inputs:
+      Contents: acdf-default.json
+      TargetFolder: '$(Build.ArtifactStagingDirectory)/publish'
+      OverWrite: true
+
   - task: PublishBuildArtifacts@1
-    displayName: 'Publish Artifact'
+    displayName: 'Publish All Artifacts'
     inputs:
       PathtoPublish: '$(Build.ArtifactStagingDirectory)/publish'
