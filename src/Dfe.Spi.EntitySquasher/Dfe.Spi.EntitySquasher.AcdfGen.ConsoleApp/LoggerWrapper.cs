@@ -11,21 +11,19 @@
     [ExcludeFromCodeCoverage]
     public class LoggerWrapper : ILoggerWrapper
     {
-        private readonly ConsoleColor defaultConsoleColour;
-
         /// <summary>
         /// Initialises a new instance of the <see cref="LoggerWrapper" />
         /// class.
         /// </summary>
         public LoggerWrapper()
         {
-            this.defaultConsoleColour = Console.ForegroundColor;
+            // Nothing for now.
         }
 
         /// <inheritdoc />
         public void Debug(string message, Exception exception = null)
         {
-            this.WriteConsole(this.defaultConsoleColour, message, exception);
+            this.WriteConsole(null, message, exception);
         }
 
         /// <inheritdoc />
@@ -59,11 +57,18 @@
         }
 
         private void WriteConsole(
-            ConsoleColor consoleColor,
+            ConsoleColor? consoleColor,
             string message,
             Exception exception = null)
         {
-            Console.ForegroundColor = consoleColor;
+            if (consoleColor.HasValue)
+            {
+                Console.ForegroundColor = consoleColor.Value;
+            }
+            else
+            {
+                Console.ResetColor();
+            }
 
             Console.WriteLine(message);
 
