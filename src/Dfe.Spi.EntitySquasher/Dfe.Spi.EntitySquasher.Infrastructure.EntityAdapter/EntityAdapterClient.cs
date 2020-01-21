@@ -6,6 +6,7 @@
     using System.Net;
     using System.Reflection;
     using System.Threading.Tasks;
+    using Dfe.Spi.Common.Extensions;
     using Dfe.Spi.Common.Logging.Definitions;
     using Dfe.Spi.Common.Models;
     using Dfe.Spi.EntitySquasher.Domain;
