@@ -25,8 +25,6 @@ namespace Dfe.Spi.EntitySquasher.FunctionApp.Functions
     /// </summary>
     public class GetSquashedEntity
     {
-        private const string SchemaFilename = "get-squashed-entity-body.json";
-
         private readonly IGetSquashedEntityProcessor getSquashedEntityProcessor;
         private readonly ILoggerWrapper loggerWrapper;
 
@@ -138,37 +136,14 @@ namespace Dfe.Spi.EntitySquasher.FunctionApp.Functions
             {
                 this.loggerWrapper.Debug(
                     $"The {nameof(JsonSchema)} for this function hasn't " +
-                    $"been loaded yet. Getting the embedded schema as a " +
-                    $"string...");
+                    $"been loaded yet...");
 
                 Type type = typeof(GetSquashedEntity);
-                Assembly assembly = type.Assembly;
 
-                string[] embeddedResources =
-                    assembly.GetManifestResourceNames();
-
-                string fullPath = embeddedResources
-                    .Single(x => x.EndsWith(
-                        SchemaFilename,
-                        StringComparison.InvariantCulture));
-
-                string dataStr = null;
-                using (Stream stream = assembly.GetManifestResourceStream(fullPath))
-                {
-                    using (StreamReader streamReader = new StreamReader(stream))
-                    {
-                        dataStr = await streamReader.ReadToEndAsync()
-                            .ConfigureAwait(false);
-                    }
-                }
-
-                this.loggerWrapper.Info(
-                    $"{nameof(dataStr)} loaded. Creating " +
-                    $"{nameof(JsonSchema)}...");
-
-                // Then load it.
-                this.jsonSchema = await JsonSchema.FromJsonAsync(dataStr)
+                this.jsonSchema = await type.GetFunctionJsonSchemaAsync()
                     .ConfigureAwait(false);
+
+                this.loggerWrapper.Info($"{nameof(JsonSchema)} loaded.");
             }
 
             toReturn = this.jsonSchema;

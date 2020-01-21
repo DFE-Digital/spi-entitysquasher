@@ -12,10 +12,7 @@
   
   <ItemGroup>
     <!-- Dfe.Spi.* -->
-    <PackageReference Include="Dfe.Spi.Common.Http.Server" Version="1.0.1" />
-
-    <!-- Other -->
-    <PackageReference Include="NJsonSchema" Version="10.0.28" />
+    <PackageReference Include="Dfe.Spi.Common.Http.Server" Version="1.0.2" />
 
     <!-- Microsoft -->
     <PackageReference Include="Microsoft.Azure.Functions.Extensions" Version="1.0.0" />
