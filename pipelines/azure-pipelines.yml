@@ -28,7 +28,7 @@ steps:
       vstsFeed: 'c5095ddb-6433-4990-a3a5-1df8a78b1302/$(FeedSecret)'
 
   - task: DotNetCoreCLI@2
-    displayName: 'Build'
+    displayName: 'Build Everything'
     inputs:
       command: 'build'
       projects: 'src/**/*.csproj'
