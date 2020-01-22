@@ -1,6 +1,7 @@
 ﻿namespace Dfe.Spi.EntitySquasher.FunctionApp.UnitTests.Functions
 {
     using Dfe.Spi.Common.Http.Server;
+    using Dfe.Spi.Common.Http.Server.Definitions;
     using Dfe.Spi.Common.Models;
     using Dfe.Spi.Common.UnitTesting;
     using Dfe.Spi.Common.UnitTesting.Infrastructure;
@@ -29,7 +30,9 @@
         private Assembly assembly;
         private GetSquashedEntity getSquashedEntity;
         private LoggerWrapper loggerWrapper;
+
         private Mock<IGetSquashedEntityProcessor> mockGetSquashedEntityProcessor;
+        private Mock<IHttpErrorBodyResultProvider> mockHttpErrorBodyResultProvider;
 
         [SetUp]
         public void Arrange()
@@ -39,19 +42,24 @@
 
             this.mockGetSquashedEntityProcessor =
                 new Mock<IGetSquashedEntityProcessor>();
+            this.mockHttpErrorBodyResultProvider =
+                new Mock<IHttpErrorBodyResultProvider>();
 
             IGetSquashedEntityProcessor getSquashedEntityProcessor =
                 mockGetSquashedEntityProcessor.Object;
+            IHttpErrorBodyResultProvider httpErrorBodyResultProvider =
+                mockHttpErrorBodyResultProvider.Object;
 
             this.loggerWrapper = new LoggerWrapper();
 
             this.getSquashedEntity = new GetSquashedEntity(
                 getSquashedEntityProcessor,
+                httpErrorBodyResultProvider,
                 loggerWrapper);
         }
 
         [Test]
-        public void Run_PostWithoutHttpRequest_ThrowsNullArgumentException()
+        public void RunAsync_PostWithoutHttpRequest_ThrowsNullArgumentException()
         {
             // Arrange
             HttpRequest httpRequest = null;
@@ -60,7 +68,7 @@
                 async () =>
                 {
                     // Act
-                    await this.getSquashedEntity.Run(httpRequest);
+                    await this.getSquashedEntity.RunAsync(httpRequest);
                 };
 
             // Assert
@@ -68,7 +76,7 @@
         }
 
         [Test]
-        public async Task Run_PostWithoutBody_ReturnsBadRequestStatusCode()
+        public async Task RunAsync_PostWithoutBody_ReturnsBadRequestStatusCode()
         {
             HttpRequest httpRequest = this.CreateHttpRequest();
 
@@ -76,7 +84,7 @@
         }
 
         [Test]
-        public async Task Run_PostMalformedBody_ReturnsBadRequestStatusCode()
+        public async Task RunAsync_PostMalformedBody_ReturnsBadRequestStatusCode()
         {
             string requestBodyStr = "some rubbish goes here";
 
@@ -86,7 +94,7 @@
         }
 
         [Test]
-        public async Task Run_PostWellFormedPayloadNotConformingToSchema_ReturnsBadRequestStatusCode()
+        public async Task RunAsync_PostWellFormedPayloadNotConformingToSchema_ReturnsBadRequestStatusCode()
         {
             string requestBodyStr = this.assembly.GetSample(
                 "empty-object.json");
@@ -97,7 +105,7 @@
         }
 
         [Test]
-        public async Task Run_PostWellFormedPayloadWithUnsupportedAlgorithm_ReturnsNotFoundStatusCode()
+        public async Task RunAsync_PostWellFormedPayloadWithUnsupportedAlgorithm_ReturnsNotFoundStatusCode()
         {
             // Arrange
             this.mockGetSquashedEntityProcessor
@@ -105,18 +113,25 @@
                 .Throws<FileNotFoundException>();
 
             IActionResult actionResult = null;
-            HttpErrorBodyResult httpErrorBodyResult = null;
+            HttpErrorBodyResult httpErrorBodyResult = new HttpErrorBodyResult(
+                HttpStatusCode.NotFound,
+                null,
+                null);
 
             string requestBodyStr = this.assembly.GetSample(
                 "get-squashed-entity-request-1.json");
 
             HttpRequest httpRequest = this.CreateHttpRequest(requestBodyStr);
 
-            int? expectedStatusCode = (int)HttpStatusCode.NotFound;
+            this.mockHttpErrorBodyResultProvider
+                .Setup(x => x.GetHttpErrorBodyResult(It.IsAny<HttpStatusCode>(), It.IsAny<int>(), It.IsAny<string[]>()))
+                .Returns(httpErrorBodyResult);
+
+            int? expectedStatusCode = (int)httpErrorBodyResult.StatusCode;
             int? actualStatusCode;
 
             // Act
-            actionResult = await this.getSquashedEntity.Run(httpRequest);
+            actionResult = await this.getSquashedEntity.RunAsync(httpRequest);
 
             // Assert
             Assert.IsInstanceOf<HttpErrorBodyResult>(actionResult);
@@ -131,7 +146,7 @@
         }
 
         [Test]
-        public async Task Run_PostWellFormedPayloadWithSupportedAlgorithmButInvalidAcdf_ReturnsInternalServerError()
+        public async Task RunAsync_PostWellFormedPayloadWithSupportedAlgorithmButInvalidAcdf_ReturnsInternalServerError()
         {
             // Arrange
             string message =
@@ -147,21 +162,28 @@
                 });
 
             IActionResult actionResult = null;
-            HttpErrorBodyResult httpErrorBodyResult = null;
+            HttpErrorBodyResult httpErrorBodyResult = new HttpErrorBodyResult(
+                HttpStatusCode.InternalServerError,
+                null,
+                $"An error happened! {message}");
 
             string requestBodyStr = this.assembly.GetSample(
                 "get-squashed-entity-request-1.json");
 
             HttpRequest httpRequest = this.CreateHttpRequest(requestBodyStr);
 
-            int? expectedStatusCode = (int)HttpStatusCode.InternalServerError;
+            this.mockHttpErrorBodyResultProvider
+                .Setup(x => x.GetHttpErrorBodyResult(It.IsAny<HttpStatusCode>(), It.IsAny<int>(), It.IsAny<string[]>()))
+                .Returns(httpErrorBodyResult);
+
+            int? expectedStatusCode = (int)httpErrorBodyResult.StatusCode;
             int? actualStatusCode;
 
             HttpErrorBody httpErrorBody = null;
             string errorBodyMessage = null;
 
             // Act
-            actionResult = await this.getSquashedEntity.Run(httpRequest);
+            actionResult = await this.getSquashedEntity.RunAsync(httpRequest);
 
             // Assert
             Assert.IsInstanceOf<HttpErrorBodyResult>(actionResult);
@@ -183,7 +205,7 @@
         }
 
         [Test]
-        public async Task Run_PostWellFormedPayloadWithSupportedAlgorithmOneAdapterFails_ReturnsWithLearningProviderBodyAndPartialSuccess()
+        public async Task RunAsync_PostWellFormedPayloadWithSupportedAlgorithmOneAdapterFails_ReturnsWithLearningProviderBodyAndPartialSuccess()
         {
             GetSquashedEntityResponse getSquashedEntityResponse =
                 new GetSquashedEntityResponse()
@@ -216,7 +238,7 @@
         }
 
         [Test]
-        public async Task Run_PostWellFormedPayloadWithSupportedAlgorithmNoAdaptersFail_ReturnsWithLearningProviderBodyAndOk()
+        public async Task RunAsync_PostWellFormedPayloadWithSupportedAlgorithmNoAdaptersFail_ReturnsWithLearningProviderBodyAndOk()
         {
             GetSquashedEntityResponse getSquashedEntityResponse =
                 new GetSquashedEntityResponse()
@@ -239,7 +261,7 @@
         }
 
         [Test]
-        public async Task Run_PostWellFormedPayloadWithSupportedAlgorithmAllAdaptersFail_ReturnsWithFailedDependency()
+        public async Task RunAsync_PostWellFormedPayloadWithSupportedAlgorithmAllAdaptersFail_ReturnsWithFailedDependency()
         {
             // Arrange
             IActionResult actionResult = null;
@@ -272,13 +294,20 @@
 
             HttpRequest httpRequest = this.CreateHttpRequest(requestBodyStr);
 
-            HttpErrorBodyResult httpErrorBodyResult = null;
+            HttpErrorBodyResult httpErrorBodyResult = new HttpErrorBodyResult(
+               HttpStatusCode.FailedDependency,
+               null,
+               null);
 
-            int? expectedStatusCode = (int)HttpStatusCode.FailedDependency;
+            int? expectedStatusCode = (int)httpErrorBodyResult.StatusCode;
             int? actualStatusCode = null;
 
+            this.mockHttpErrorBodyResultProvider
+                .Setup(x => x.GetHttpErrorBodyResult(It.IsAny<HttpStatusCode>(), It.IsAny<int>(), It.IsAny<string[]>()))
+                .Returns(httpErrorBodyResult);
+
             // Act
-            actionResult = await this.getSquashedEntity.Run(httpRequest);
+            actionResult = await this.getSquashedEntity.RunAsync(httpRequest);
 
             // Assert
             Assert.IsInstanceOf<HttpErrorBodyResult>(actionResult);
@@ -314,7 +343,7 @@
             HttpStatusCode? actualStatusCode = null;
 
             // Act
-            actionResult = await this.getSquashedEntity.Run(httpRequest);
+            actionResult = await this.getSquashedEntity.RunAsync(httpRequest);
 
             // Assert
             Assert.IsInstanceOf<JsonResult>(actionResult);
@@ -357,13 +386,20 @@
         {
             // Arrange
             IActionResult actionResult = null;
-            HttpErrorBodyResult httpErrorBodyResult = null;
+            HttpErrorBodyResult httpErrorBodyResult = new HttpErrorBodyResult(
+                HttpStatusCode.BadRequest,
+                null,
+                null);
 
-            int? expectedStatusCode = (int)HttpStatusCode.BadRequest;
+            int? expectedStatusCode = (int)httpErrorBodyResult.StatusCode;
             int? actualStatusCode;
 
+            this.mockHttpErrorBodyResultProvider
+                .Setup(x => x.GetHttpErrorBodyResult(It.IsAny<HttpStatusCode>(), It.IsAny<int>(), It.IsAny<string[]>()))
+                .Returns(httpErrorBodyResult);
+
             // Act
-            actionResult = await this.getSquashedEntity.Run(httpRequest);
+            actionResult = await this.getSquashedEntity.RunAsync(httpRequest);
 
             // Assert
             Assert.IsInstanceOf<HttpErrorBodyResult>(actionResult);

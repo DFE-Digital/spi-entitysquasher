@@ -2,6 +2,8 @@
 {
     using System;
     using System.Diagnostics.CodeAnalysis;
+    using Dfe.Spi.Common.Http.Server;
+    using Dfe.Spi.Common.Http.Server.Definitions;
     using Dfe.Spi.Common.Logging;
     using Dfe.Spi.Common.Logging.Definitions;
     using Dfe.Spi.EntitySquasher.Application;
@@ -32,6 +34,8 @@
     [ExcludeFromCodeCoverage]
     public class Startup : FunctionsStartup
     {
+        private const string SystemErrorIdentifier = "ESQ";
+
         /// <inheritdoc />
         public override void Configure(
             IFunctionsHostBuilder functionsHostBuilder)
@@ -57,7 +61,13 @@
             AddCaches(serviceCollection);
             AddManagers(serviceCollection);
 
+            HttpErrorBodyResultProvider httpErrorBodyResultProvider =
+                new HttpErrorBodyResultProvider(
+                    SystemErrorIdentifier,
+                    HttpErrorMessages.ResourceManager);
+
             serviceCollection
+                .AddSingleton<IHttpErrorBodyResultProvider>(httpErrorBodyResultProvider)
                 .AddScoped<IResultSquasher, ResultSquasher>()
                 .AddScoped<IEntityAdapterInvoker, EntityAdapterInvoker>()
                 .AddScoped<IGetSquashedEntityProcessor, GetSquashedEntityProcessor>()
