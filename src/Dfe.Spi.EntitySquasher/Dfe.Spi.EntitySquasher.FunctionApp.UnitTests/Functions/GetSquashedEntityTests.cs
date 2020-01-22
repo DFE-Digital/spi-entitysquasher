@@ -22,6 +22,7 @@
     using System.Net;
     using System.Reflection;
     using System.Text;
+    using System.Threading;
     using System.Threading.Tasks;
 
     [TestFixture]
@@ -68,7 +69,9 @@
                 async () =>
                 {
                     // Act
-                    await this.getSquashedEntity.RunAsync(httpRequest);
+                    await this.getSquashedEntity.RunAsync(
+                        httpRequest,
+                        CancellationToken.None);
                 };
 
             // Assert
@@ -80,7 +83,9 @@
         {
             HttpRequest httpRequest = this.CreateHttpRequest();
 
-            await this.ReturnsBadRequestStatusCode(httpRequest);
+            await this.ReturnsBadRequestStatusCode(
+                httpRequest,
+                CancellationToken.None);
         }
 
         [Test]
@@ -90,7 +95,9 @@
 
             HttpRequest httpRequest = this.CreateHttpRequest(requestBodyStr);
 
-            await this.ReturnsBadRequestStatusCode(httpRequest);
+            await this.ReturnsBadRequestStatusCode(
+                httpRequest,
+                CancellationToken.None);
         }
 
         [Test]
@@ -101,7 +108,9 @@
 
             HttpRequest httpRequest = this.CreateHttpRequest(requestBodyStr);
 
-            await this.ReturnsBadRequestStatusCode(httpRequest);
+            await this.ReturnsBadRequestStatusCode(
+                httpRequest,
+                CancellationToken.None);
         }
 
         [Test]
@@ -131,7 +140,9 @@
             int? actualStatusCode;
 
             // Act
-            actionResult = await this.getSquashedEntity.RunAsync(httpRequest);
+            actionResult = await this.getSquashedEntity.RunAsync(
+                httpRequest,
+                CancellationToken.None);
 
             // Assert
             Assert.IsInstanceOf<HttpErrorBodyResult>(actionResult);
@@ -183,7 +194,9 @@
             string errorBodyMessage = null;
 
             // Act
-            actionResult = await this.getSquashedEntity.RunAsync(httpRequest);
+            actionResult = await this.getSquashedEntity.RunAsync(
+                httpRequest,
+                CancellationToken.None);
 
             // Assert
             Assert.IsInstanceOf<HttpErrorBodyResult>(actionResult);
@@ -234,7 +247,8 @@
 
             await this.ReturnsBodyAndCorrectStatusCode(
                 HttpStatusCode.PartialContent,
-                getSquashedEntityResponse);
+                getSquashedEntityResponse,
+                CancellationToken.None);
         }
 
         [Test]
@@ -257,7 +271,8 @@
 
          await this.ReturnsBodyAndCorrectStatusCode(
                 null, // It appears that null is the same as 200 to the runtime.
-                getSquashedEntityResponse);
+                getSquashedEntityResponse,
+                CancellationToken.None);
         }
 
         [Test]
@@ -307,7 +322,9 @@
                 .Returns(httpErrorBodyResult);
 
             // Act
-            actionResult = await this.getSquashedEntity.RunAsync(httpRequest);
+            actionResult = await this.getSquashedEntity.RunAsync(
+                httpRequest,
+                CancellationToken.None);
 
             // Assert
             Assert.IsInstanceOf<HttpErrorBodyResult>(actionResult);
@@ -323,7 +340,8 @@
 
         private async Task ReturnsBodyAndCorrectStatusCode(
             HttpStatusCode? expectedStatusCode,
-            GetSquashedEntityResponse expectedGetSquashedEntityResponse)
+            GetSquashedEntityResponse expectedGetSquashedEntityResponse,
+            CancellationToken cancellationToken)
         {
             // Arrange
             IActionResult actionResult = null;
@@ -343,7 +361,9 @@
             HttpStatusCode? actualStatusCode = null;
 
             // Act
-            actionResult = await this.getSquashedEntity.RunAsync(httpRequest);
+            actionResult = await this.getSquashedEntity.RunAsync(
+                httpRequest,
+                cancellationToken);
 
             // Assert
             Assert.IsInstanceOf<JsonResult>(actionResult);
@@ -382,7 +402,8 @@
         }
 
         private async Task ReturnsBadRequestStatusCode(
-            HttpRequest httpRequest)
+            HttpRequest httpRequest,
+            CancellationToken cancellationToken)
         {
             // Arrange
             IActionResult actionResult = null;
@@ -399,7 +420,9 @@
                 .Returns(httpErrorBodyResult);
 
             // Act
-            actionResult = await this.getSquashedEntity.RunAsync(httpRequest);
+            actionResult = await this.getSquashedEntity.RunAsync(
+                httpRequest,
+                cancellationToken);
 
             // Assert
             Assert.IsInstanceOf<HttpErrorBodyResult>(actionResult);

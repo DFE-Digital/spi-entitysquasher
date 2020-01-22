@@ -4,6 +4,7 @@ namespace Dfe.Spi.EntitySquasher.FunctionApp.Functions
     using System.IO;
     using System.Linq;
     using System.Net;
+    using System.Threading;
     using System.Threading.Tasks;
     using Dfe.Spi.Common.Http.Server;
     using Dfe.Spi.Common.Http.Server.Definitions;
@@ -55,15 +56,21 @@ namespace Dfe.Spi.EntitySquasher.FunctionApp.Functions
         /// <param name="httpRequest">
         /// An instance of <see cref="HttpContext" />.
         /// </param>
+        /// <param name="cancellationToken">
+        /// An instance of <see cref="CancellationToken" />.
+        /// </param>
         /// <returns>
         /// An instance of type <see cref="IActionResult" />.
         /// </returns>
         [FunctionName("get-squashed-entity")]
-        public override async Task<IActionResult> RunAsync(
+        public async Task<IActionResult> RunAsync(
             [HttpTrigger(AuthorizationLevel.Function, "POST", Route = null)]
-            HttpRequest httpRequest)
+            HttpRequest httpRequest,
+            CancellationToken cancellationToken)
         {
-            IActionResult toReturn = await base.RunAsync(httpRequest)
+            IActionResult toReturn = await this.ValidateAndRunAsync(
+                httpRequest,
+                cancellationToken)
                 .ConfigureAwait(false);
 
             return toReturn;
@@ -95,7 +102,8 @@ namespace Dfe.Spi.EntitySquasher.FunctionApp.Functions
 
         /// <inheritdoc />
         protected async override Task<IActionResult> ProcessWellFormedRequestAsync(
-            GetSquashedEntityRequest getSquashedEntityRequest)
+            GetSquashedEntityRequest getSquashedEntityRequest,
+            CancellationToken cancellationToken)
         {
             IActionResult toReturn = null;
 

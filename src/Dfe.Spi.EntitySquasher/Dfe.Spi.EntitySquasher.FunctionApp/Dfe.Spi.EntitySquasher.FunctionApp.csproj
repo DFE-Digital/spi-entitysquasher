@@ -12,7 +12,7 @@
   
   <ItemGroup>
     <!-- Dfe.Spi.* -->
-    <PackageReference Include="Dfe.Spi.Common.Http.Server" Version="1.0.5" />
+    <PackageReference Include="Dfe.Spi.Common.Http.Server" Version="1.0.6" />
 
     <!-- Microsoft -->
     <PackageReference Include="Microsoft.Azure.Functions.Extensions" Version="1.0.0" />
