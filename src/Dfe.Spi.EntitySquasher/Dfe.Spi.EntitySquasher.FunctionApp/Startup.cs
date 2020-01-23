@@ -10,8 +10,10 @@
     using Dfe.Spi.EntitySquasher.Application.Caches;
     using Dfe.Spi.EntitySquasher.Application.Definitions;
     using Dfe.Spi.EntitySquasher.Application.Definitions.Caches;
+    using Dfe.Spi.EntitySquasher.Application.Definitions.Factories;
     using Dfe.Spi.EntitySquasher.Application.Definitions.Managers;
     using Dfe.Spi.EntitySquasher.Application.Definitions.SettingsProviders;
+    using Dfe.Spi.EntitySquasher.Application.Factories;
     using Dfe.Spi.EntitySquasher.Application.Managers;
     using Dfe.Spi.EntitySquasher.Application.Processors;
     using Dfe.Spi.EntitySquasher.Application.Processors.Definitions;
@@ -93,6 +95,8 @@
             IServiceCollection serviceCollection)
         {
             serviceCollection
+                .AddScoped<IAlgorithmConfigurationDeclarationFileManagerFactory, AlgorithmConfigurationDeclarationFileManagerFactory>()
+                .AddScoped<IEntityAdapterClientManagerFactory, EntityAdapterClientManagerFactory>()
                 .AddScoped<IEntityAdapterClientFactory, EntityAdapterClientFactory>();
         }
 

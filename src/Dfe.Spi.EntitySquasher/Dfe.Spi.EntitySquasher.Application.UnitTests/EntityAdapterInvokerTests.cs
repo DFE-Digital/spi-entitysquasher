@@ -7,6 +7,7 @@
     using System.Threading;
     using System.Threading.Tasks;
     using Dfe.Spi.Common.UnitTesting.Infrastructure;
+    using Dfe.Spi.EntitySquasher.Application.Definitions.Factories;
     using Dfe.Spi.EntitySquasher.Application.Definitions.Managers;
     using Dfe.Spi.EntitySquasher.Application.Models;
     using Dfe.Spi.EntitySquasher.Application.Models.Result;
@@ -33,10 +34,20 @@
             IEntityAdapterClientManager entityAdapterClientManager =
                 mockEntityAdapterClientManager.Object;
 
+            Mock<IEntityAdapterClientManagerFactory> mockEntityAdapterClientManagerFactory =
+                new Mock<IEntityAdapterClientManagerFactory>();
+
+            mockEntityAdapterClientManagerFactory
+                .Setup(x => x.Create())
+                .Returns(entityAdapterClientManager);
+
+            IEntityAdapterClientManagerFactory entityAdapterClientManagerFactory =
+                mockEntityAdapterClientManagerFactory.Object;
+
             this.loggerWrapper = new LoggerWrapper();
 
             this.entityAdapterInvoker = new EntityAdapterInvoker(
-                entityAdapterClientManager,
+                entityAdapterClientManagerFactory,
                 this.loggerWrapper);
         }
 

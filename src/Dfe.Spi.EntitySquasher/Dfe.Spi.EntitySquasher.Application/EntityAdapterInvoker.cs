@@ -8,12 +8,12 @@
     using System.Threading.Tasks;
     using Dfe.Spi.Common.Logging.Definitions;
     using Dfe.Spi.EntitySquasher.Application.Definitions;
+    using Dfe.Spi.EntitySquasher.Application.Definitions.Factories;
     using Dfe.Spi.EntitySquasher.Application.Definitions.Managers;
     using Dfe.Spi.EntitySquasher.Application.Models;
     using Dfe.Spi.EntitySquasher.Application.Models.Result;
     using Dfe.Spi.EntitySquasher.Domain;
     using Dfe.Spi.EntitySquasher.Domain.Definitions;
-    using Dfe.Spi.EntitySquasher.Domain.Models;
 
     /// <summary>
     /// Implements <see cref="IEntityAdapterInvoker" />.
@@ -27,18 +27,27 @@
         /// Initialises a new instance of the
         /// <see cref="EntityAdapterInvoker" /> class.
         /// </summary>
-        /// <param name="entityAdapterClientManager">
-        /// An instance of type <see cref="IEntityAdapterClientManager" />.
+        /// <param name="entityAdapterClientManagerFactory">
+        /// An instance of type
+        /// <see cref="IEntityAdapterClientManagerFactory" />.
         /// </param>
         /// <param name="loggerWrapper">
         /// An instance of type <see cref="ILoggerWrapper" />.
         /// </param>
         public EntityAdapterInvoker(
-            IEntityAdapterClientManager entityAdapterClientManager,
+            IEntityAdapterClientManagerFactory entityAdapterClientManagerFactory,
             ILoggerWrapper loggerWrapper)
         {
-            this.entityAdapterClientManager = entityAdapterClientManager;
+            if (entityAdapterClientManagerFactory == null)
+            {
+                throw new ArgumentNullException(
+                    nameof(entityAdapterClientManagerFactory));
+            }
+
             this.loggerWrapper = loggerWrapper;
+
+            this.entityAdapterClientManager =
+                entityAdapterClientManagerFactory.Create();
         }
 
         /// <inheritdoc />

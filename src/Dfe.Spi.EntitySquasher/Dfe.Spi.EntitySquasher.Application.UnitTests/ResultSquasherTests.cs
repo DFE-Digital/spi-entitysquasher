@@ -5,6 +5,7 @@
     using System.Threading.Tasks;
     using Dfe.Spi.Common.UnitTesting;
     using Dfe.Spi.Common.UnitTesting.Infrastructure;
+    using Dfe.Spi.EntitySquasher.Application.Definitions.Factories;
     using Dfe.Spi.EntitySquasher.Application.Definitions.Managers;
     using Dfe.Spi.EntitySquasher.Application.Models;
     using Dfe.Spi.EntitySquasher.Application.Models.Result;
@@ -20,7 +21,6 @@
         private Mock<IAlgorithmConfigurationDeclarationFileManager> mockAlgorithmConfigurationDeclarationFileManager;
 
         private LoggerWrapper loggerWrapper;
-
         private ResultSquasher resultSquasher;
 
         [SetUp]
@@ -34,8 +34,18 @@
             IAlgorithmConfigurationDeclarationFileManager algorithmConfigurationDeclarationFileManager =
                 mockAlgorithmConfigurationDeclarationFileManager.Object;
 
+            Mock<IAlgorithmConfigurationDeclarationFileManagerFactory> mockAlgorithmConfigurationDeclarationFileManagerFactory =
+                new Mock<IAlgorithmConfigurationDeclarationFileManagerFactory>();
+
+            mockAlgorithmConfigurationDeclarationFileManagerFactory
+                .Setup(x => x.Create())
+                .Returns(algorithmConfigurationDeclarationFileManager);
+
+            IAlgorithmConfigurationDeclarationFileManagerFactory algorithmConfigurationDeclarationFileManagerFactory =
+                mockAlgorithmConfigurationDeclarationFileManagerFactory.Object;
+
             this.resultSquasher = new ResultSquasher(
-                algorithmConfigurationDeclarationFileManager,
+                algorithmConfigurationDeclarationFileManagerFactory,
                 this.loggerWrapper);
         }
 
