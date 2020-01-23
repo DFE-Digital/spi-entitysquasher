@@ -1,6 +1,7 @@
 ﻿namespace Dfe.Spi.EntitySquasher.Application.Definitions
 {
     using System.Collections.Generic;
+    using System.Threading;
     using System.Threading.Tasks;
     using Dfe.Spi.EntitySquasher.Application.Models.Result;
     using Dfe.Spi.Models;
@@ -26,12 +27,16 @@
         /// The <see cref="GetEntityAsyncResult" /> instances, containing the
         /// <see cref="ModelsBase" />s to squash together.
         /// </param>
+        /// <param name="cancellationToken">
+        /// An instance of <see cref="CancellationToken" />.
+        /// </param>
         /// <returns>
         /// An instance of <see cref="ModelsBase" />.
         /// </returns>
         Task<ModelsBase> SquashAsync(
             string algorithm,
             string entityName,
-            IEnumerable<GetEntityAsyncResult> toSquash);
+            IEnumerable<GetEntityAsyncResult> toSquash,
+            CancellationToken cancellationToken);
     }
 }

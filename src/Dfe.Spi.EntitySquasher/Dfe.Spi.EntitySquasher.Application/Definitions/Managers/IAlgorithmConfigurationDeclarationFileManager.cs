@@ -1,5 +1,6 @@
 ﻿namespace Dfe.Spi.EntitySquasher.Application.Definitions.Managers
 {
+    using Dfe.Spi.Common.Caching.Definitions.Managers;
     using Dfe.Spi.EntitySquasher.Domain.Models.Acdf;
 
     /// <summary>
@@ -7,7 +8,7 @@
     /// <see cref="AlgorithmConfigurationDeclarationFile" /> manager.
     /// </summary>
     public interface IAlgorithmConfigurationDeclarationFileManager
-        : IManager<string, AlgorithmConfigurationDeclarationFile>
+        : IMemoryCacheManager<string, AlgorithmConfigurationDeclarationFile>
     {
         // Nothing - just inherits what it needs.
     }

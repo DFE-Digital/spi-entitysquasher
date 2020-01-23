@@ -1,6 +1,7 @@
 ﻿namespace Dfe.Spi.EntitySquasher.Application.UnitTests
 {
     using System.Reflection;
+    using System.Threading;
     using System.Threading.Tasks;
     using Dfe.Spi.Common.UnitTesting;
     using Dfe.Spi.Common.UnitTesting.Infrastructure;
@@ -49,6 +50,7 @@
                 {
                     // Empty - don't actually need anything for the purposes of this test.
                 };
+            CancellationToken cancellationToken = CancellationToken.None;
 
             this.ConfigureAlgorithmConfigurationDeclarationFileManager(
                 "acdf-example.json");
@@ -60,7 +62,8 @@
                     await this.resultSquasher.SquashAsync(
                         algorithm,
                         entityName,
-                        getEntityAsyncResults);
+                        getEntityAsyncResults,
+                        cancellationToken);
                 };
 
             // Assert
@@ -81,6 +84,7 @@
                 {
                     // Empty - don't actually need anything for the purposes of this test.
                 };
+            CancellationToken cancellationToken = CancellationToken.None;
 
             this.ConfigureAlgorithmConfigurationDeclarationFileManager(
                 "acdf-nosources.json");
@@ -92,7 +96,8 @@
                     await this.resultSquasher.SquashAsync(
                         algorithm,
                         entityName,
-                        getEntityAsyncResults);
+                        getEntityAsyncResults,
+                        cancellationToken);
                 };
 
             // Assert
@@ -160,6 +165,8 @@
                 },
             };
 
+            CancellationToken cancellationToken = CancellationToken.None;
+
             this.ConfigureAlgorithmConfigurationDeclarationFileManager(
                 "acdf-example.json");
 
@@ -167,11 +174,11 @@
             Spi.Models.LearningProvider learningProvider = null;
 
             // Act
-            modelsBase =
-                await this.resultSquasher.SquashAsync(
-                    algorithm,
-                    entityName,
-                    toSquash);
+            modelsBase = await this.resultSquasher.SquashAsync(
+                algorithm,
+                entityName,
+                toSquash,
+                cancellationToken);
 
             // Assert
             Assert.IsInstanceOf<LearningProvider>(modelsBase);
@@ -211,7 +218,7 @@
                     algorithmConfigurationDeclarationFileStr);
 
             this.mockAlgorithmConfigurationDeclarationFileManager
-                .Setup(x => x.GetAsync(It.IsAny<string>()))
+                .Setup(x => x.GetAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(algorithmConfigurationDeclarationFile);
         }
     }

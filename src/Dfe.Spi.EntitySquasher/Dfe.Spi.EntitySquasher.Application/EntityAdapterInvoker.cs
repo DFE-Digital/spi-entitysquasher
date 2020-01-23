@@ -4,6 +4,7 @@
     using System.Collections.Generic;
     using System.Diagnostics.CodeAnalysis;
     using System.Linq;
+    using System.Threading;
     using System.Threading.Tasks;
     using Dfe.Spi.Common.Logging.Definitions;
     using Dfe.Spi.EntitySquasher.Application.Definitions;
@@ -45,11 +46,12 @@
             "Microsoft.Design",
             "CA1031",
             Justification = "Unhandled exceptions are handled, and re-thrown later after the try-catch. A catch is required to allow the continuation of execution of all tasks.")]
-        public async Task<InvokeEntityAdaptersResult> InvokeEntityAdapters(
+        public async Task<InvokeEntityAdaptersResult> InvokeEntityAdaptersAsync(
             string algorithm,
             string entityName,
             IEnumerable<string> fields,
-            EntityReference entityReference)
+            EntityReference entityReference,
+            CancellationToken cancellationToken)
         {
             InvokeEntityAdaptersResult toReturn = null;
 
@@ -76,7 +78,8 @@
                     algorithm,
                     entityName,
                     fields,
-                    adapterRecordReference)
+                    adapterRecordReference,
+                    cancellationToken)
                     .ConfigureAwait(false);
 
                 getEntityTaskContainer = new GetEntityAsyncTaskContainer()
@@ -219,7 +222,8 @@
             string algorithm,
             string entityName,
             IEnumerable<string> fields,
-            AdapterRecordReference adapterRecordReference)
+            AdapterRecordReference adapterRecordReference,
+            CancellationToken cancellationToken)
         {
             Task<Spi.Models.ModelsBase> toReturn = null;
 
@@ -241,7 +245,8 @@
             //        exception if it doesn't exist).
             IEntityAdapterClient entityAdapterClient =
                 await this.entityAdapterClientManager.GetAsync(
-                    entityAdapterClientKey)
+                    entityAdapterClientKey,
+                    cancellationToken)
                     .ConfigureAwait(false);
 
             this.loggerWrapper.Info(

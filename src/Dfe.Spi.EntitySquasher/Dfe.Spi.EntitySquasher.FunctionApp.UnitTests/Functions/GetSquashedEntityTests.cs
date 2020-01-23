@@ -64,6 +64,7 @@
         {
             // Arrange
             HttpRequest httpRequest = null;
+            CancellationToken cancellationToken = CancellationToken.None;
 
             AsyncTestDelegate asyncTestDelegate =
                 async () =>
@@ -71,7 +72,7 @@
                     // Act
                     await this.getSquashedEntity.RunAsync(
                         httpRequest,
-                        CancellationToken.None);
+                        cancellationToken);
                 };
 
             // Assert
@@ -82,10 +83,11 @@
         public async Task RunAsync_PostWithoutBody_ReturnsBadRequestStatusCode()
         {
             HttpRequest httpRequest = this.CreateHttpRequest();
+            CancellationToken cancellationToken = CancellationToken.None;
 
             await this.ReturnsBadRequestStatusCode(
                 httpRequest,
-                CancellationToken.None);
+                cancellationToken);
         }
 
         [Test]
@@ -94,10 +96,11 @@
             string requestBodyStr = "some rubbish goes here";
 
             HttpRequest httpRequest = this.CreateHttpRequest(requestBodyStr);
+            CancellationToken cancellationToken = CancellationToken.None;
 
             await this.ReturnsBadRequestStatusCode(
                 httpRequest,
-                CancellationToken.None);
+                cancellationToken);
         }
 
         [Test]
@@ -107,10 +110,11 @@
                 "empty-object.json");
 
             HttpRequest httpRequest = this.CreateHttpRequest(requestBodyStr);
+            CancellationToken cancellationToken;
 
             await this.ReturnsBadRequestStatusCode(
                 httpRequest,
-                CancellationToken.None);
+                cancellationToken);
         }
 
         [Test]
@@ -118,7 +122,7 @@
         {
             // Arrange
             this.mockGetSquashedEntityProcessor
-                .Setup(x => x.GetSquashedEntityAsync(It.IsAny<GetSquashedEntityRequest>()))
+                .Setup(x => x.GetSquashedEntityAsync(It.IsAny<GetSquashedEntityRequest>(), It.IsAny<CancellationToken>()))
                 .Throws<FileNotFoundException>();
 
             IActionResult actionResult = null;
@@ -131,6 +135,7 @@
                 "get-squashed-entity-request-1.json");
 
             HttpRequest httpRequest = this.CreateHttpRequest(requestBodyStr);
+            CancellationToken cancellationToken = CancellationToken.None;
 
             this.mockHttpErrorBodyResultProvider
                 .Setup(x => x.GetHttpErrorBodyResult(It.IsAny<HttpStatusCode>(), It.IsAny<int>(), It.IsAny<string[]>()))
@@ -142,7 +147,7 @@
             // Act
             actionResult = await this.getSquashedEntity.RunAsync(
                 httpRequest,
-                CancellationToken.None);
+                cancellationToken);
 
             // Assert
             Assert.IsInstanceOf<HttpErrorBodyResult>(actionResult);
@@ -165,7 +170,7 @@
                 "reported back to the client.";
 
             this.mockGetSquashedEntityProcessor
-                .Setup(x => x.GetSquashedEntityAsync(It.IsAny<GetSquashedEntityRequest>()))
+                .Setup(x => x.GetSquashedEntityAsync(It.IsAny<GetSquashedEntityRequest>(), It.IsAny<CancellationToken>()))
                 .Callback(() =>
                 {
                     throw new InvalidAlgorithmConfigurationDeclarationFileException(
@@ -182,6 +187,7 @@
                 "get-squashed-entity-request-1.json");
 
             HttpRequest httpRequest = this.CreateHttpRequest(requestBodyStr);
+            CancellationToken cancellationToken = CancellationToken.None;
 
             this.mockHttpErrorBodyResultProvider
                 .Setup(x => x.GetHttpErrorBodyResult(It.IsAny<HttpStatusCode>(), It.IsAny<int>(), It.IsAny<string[]>()))
@@ -301,7 +307,7 @@
                 };
 
             this.mockGetSquashedEntityProcessor
-                .Setup(x => x.GetSquashedEntityAsync(It.IsAny<GetSquashedEntityRequest>()))
+                .Setup(x => x.GetSquashedEntityAsync(It.IsAny<GetSquashedEntityRequest>(), It.IsAny<CancellationToken>()))
                 .Returns(Task.FromResult(getSquashedEntityResponse));
 
             string requestBodyStr = this.assembly.GetSample(
@@ -350,7 +356,7 @@
             GetSquashedEntityResponse actualGetSquashedEntityResponse = null;
 
             this.mockGetSquashedEntityProcessor
-                .Setup(x => x.GetSquashedEntityAsync(It.IsAny<GetSquashedEntityRequest>()))
+                .Setup(x => x.GetSquashedEntityAsync(It.IsAny<GetSquashedEntityRequest>(), It.IsAny<CancellationToken>()))
                 .Returns(Task.FromResult(expectedGetSquashedEntityResponse));
 
             string requestBodyStr = this.assembly.GetSample(

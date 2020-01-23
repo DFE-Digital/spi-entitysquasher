@@ -4,6 +4,7 @@
     using System.Collections.Generic;
     using System.Linq;
     using System.Reflection;
+    using System.Threading;
     using System.Threading.Tasks;
     using Dfe.Spi.Common.Logging.Definitions;
     using Dfe.Spi.EntitySquasher.Application.Definitions;
@@ -42,7 +43,8 @@
         public async Task<Spi.Models.ModelsBase> SquashAsync(
             string algorithm,
             string entityName,
-            IEnumerable<GetEntityAsyncResult> toSquash)
+            IEnumerable<GetEntityAsyncResult> toSquash,
+            CancellationToken cancellationToken)
         {
             Spi.Models.ModelsBase toReturn = null;
 
@@ -55,7 +57,8 @@
             // here, or throw an exception back up (FileNotFound).
             AlgorithmConfigurationDeclarationFile algorithmConfigurationDeclarationFile =
                 await this.algorithmConfigurationDeclarationFileManager.GetAsync(
-                    algorithm)
+                    algorithm,
+                    cancellationToken)
                     .ConfigureAwait(false);
 
             this.loggerWrapper.Info(

@@ -1,5 +1,6 @@
 ﻿namespace Dfe.Spi.EntitySquasher.Application.Caches
 {
+    using Dfe.Spi.Common.Caching.Caches;
     using Dfe.Spi.EntitySquasher.Application.Definitions.Caches;
     using Dfe.Spi.EntitySquasher.Application.Models;
     using Dfe.Spi.EntitySquasher.Domain.Definitions;
@@ -8,7 +9,7 @@
     /// Implements <see cref="IEntityAdapterClientCache" />.
     /// </summary>
     public class EntityAdapterClientCache
-        : CacheBase<EntityAdapterClientKey, IEntityAdapterClient>, IEntityAdapterClientCache
+        : MemoryCacheProvider<EntityAdapterClientKey, IEntityAdapterClient>, IEntityAdapterClientCache
     {
         // Nothing - inherits all it needs for now.
     }

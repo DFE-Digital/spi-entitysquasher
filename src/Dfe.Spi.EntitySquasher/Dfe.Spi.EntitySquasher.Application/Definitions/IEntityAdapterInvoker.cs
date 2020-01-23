@@ -1,6 +1,7 @@
 ﻿namespace Dfe.Spi.EntitySquasher.Application.Definitions
 {
     using System.Collections.Generic;
+    using System.Threading;
     using System.Threading.Tasks;
     using Dfe.Spi.EntitySquasher.Application.Models;
     using Dfe.Spi.EntitySquasher.Application.Models.Result;
@@ -27,13 +28,17 @@
         /// <param name="entityReference">
         /// An instance of <see cref="EntityReference" />.
         /// </param>
+        /// <param name="cancellationToken">
+        /// An instance of type <see cref="CancellationToken" />.
+        /// </param>
         /// <returns>
         /// An instance of <see cref="InvokeEntityAdaptersResult" />.
         /// </returns>
-        Task<InvokeEntityAdaptersResult> InvokeEntityAdapters(
+        Task<InvokeEntityAdaptersResult> InvokeEntityAdaptersAsync(
             string algorithm,
             string entityName,
             IEnumerable<string> fields,
-            EntityReference entityReference);
+            EntityReference entityReference,
+            CancellationToken cancellationToken);
     }
 }
