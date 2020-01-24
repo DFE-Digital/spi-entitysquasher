@@ -86,8 +86,15 @@
             // This will be split with a period.
             // For example:
             // default.GIAS or default.UKRLP.
+            this.loggerWrapper.Debug(
+                $"Parsing \"{key}\" as an instance of " +
+                $"{nameof(EntityAdapterClientKey)}...");
+
             EntityAdapterClientKey entityAdapterClientKey =
                 EntityAdapterClientKey.Parse(key);
+
+            this.loggerWrapper.Info(
+                $"Parsed {entityAdapterClientKey} from \"{key}\".");
 
             string algorithm = entityAdapterClientKey.Algorithm;
             string name = entityAdapterClientKey.Name;
