@@ -1,12 +1,13 @@
 ﻿namespace Dfe.Spi.EntitySquasher.Application.UnitTests
 {
+    using System;
     using System.Reflection;
     using System.Threading;
     using System.Threading.Tasks;
+    using Dfe.Spi.Common.Caching.Definitions.Managers;
     using Dfe.Spi.Common.UnitTesting;
     using Dfe.Spi.Common.UnitTesting.Infrastructure;
     using Dfe.Spi.EntitySquasher.Application.Definitions.Factories;
-    using Dfe.Spi.EntitySquasher.Application.Definitions.Managers;
     using Dfe.Spi.EntitySquasher.Application.Models;
     using Dfe.Spi.EntitySquasher.Application.Models.Result;
     using Dfe.Spi.EntitySquasher.Domain.Models.Acdf;
@@ -18,7 +19,7 @@
     [TestFixture]
     public class ResultSquasherTests
     {
-        private Mock<IAlgorithmConfigurationDeclarationFileManager> mockAlgorithmConfigurationDeclarationFileManager;
+        private Mock<ICacheManager> mockCacheManager;
 
         private LoggerWrapper loggerWrapper;
         private ResultSquasher resultSquasher;
@@ -28,25 +29,42 @@
         {
             this.loggerWrapper = new LoggerWrapper();
 
-            this.mockAlgorithmConfigurationDeclarationFileManager =
-                new Mock<IAlgorithmConfigurationDeclarationFileManager>();
+            this.mockCacheManager = new Mock<ICacheManager>();
 
-            IAlgorithmConfigurationDeclarationFileManager algorithmConfigurationDeclarationFileManager =
-                mockAlgorithmConfigurationDeclarationFileManager.Object;
+            ICacheManager cacheManager = mockCacheManager.Object;
 
-            Mock<IAlgorithmConfigurationDeclarationFileManagerFactory> mockAlgorithmConfigurationDeclarationFileManagerFactory =
-                new Mock<IAlgorithmConfigurationDeclarationFileManagerFactory>();
+            Mock<IAlgorithmConfigurationDeclarationFileCacheManagerFactory> mockAlgorithmConfigurationDeclarationFileCacheManagerFactory =
+                new Mock<IAlgorithmConfigurationDeclarationFileCacheManagerFactory>();
 
-            mockAlgorithmConfigurationDeclarationFileManagerFactory
+            mockAlgorithmConfigurationDeclarationFileCacheManagerFactory
                 .Setup(x => x.Create())
-                .Returns(algorithmConfigurationDeclarationFileManager);
+                .Returns(cacheManager);
 
-            IAlgorithmConfigurationDeclarationFileManagerFactory algorithmConfigurationDeclarationFileManagerFactory =
-                mockAlgorithmConfigurationDeclarationFileManagerFactory.Object;
+            IAlgorithmConfigurationDeclarationFileCacheManagerFactory algorithmConfigurationDeclarationFileCacheManagerFactory =
+                mockAlgorithmConfigurationDeclarationFileCacheManagerFactory.Object;
 
             this.resultSquasher = new ResultSquasher(
-                algorithmConfigurationDeclarationFileManagerFactory,
+                algorithmConfigurationDeclarationFileCacheManagerFactory,
                 this.loggerWrapper);
+        }
+
+        [Test]
+        public void Ctor_PostWithoutEntityAdapterClientCacheManagerFactory_ThrowsArgumentNullException()
+        {
+            // Arrange
+            IAlgorithmConfigurationDeclarationFileCacheManagerFactory algorithmConfigurationDeclarationFileCacheManagerFactory = null;
+
+            TestDelegate testDelegate =
+                () =>
+                {
+                    // Act
+                    new ResultSquasher(
+                        algorithmConfigurationDeclarationFileCacheManagerFactory,
+                        this.loggerWrapper);
+                };
+
+            // Assert
+            Assert.Throws<ArgumentNullException>(testDelegate);
         }
 
         [Test]
@@ -227,7 +245,7 @@
                 JsonConvert.DeserializeObject<AlgorithmConfigurationDeclarationFile>(
                     algorithmConfigurationDeclarationFileStr);
 
-            this.mockAlgorithmConfigurationDeclarationFileManager
+            this.mockCacheManager
                 .Setup(x => x.GetAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(algorithmConfigurationDeclarationFile);
         }
