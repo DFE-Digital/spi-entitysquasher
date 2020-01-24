@@ -6,10 +6,10 @@
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
+    using Dfe.Spi.Common.Caching.Definitions.Managers;
     using Dfe.Spi.Common.Logging.Definitions;
     using Dfe.Spi.EntitySquasher.Application.Definitions;
     using Dfe.Spi.EntitySquasher.Application.Definitions.Factories;
-    using Dfe.Spi.EntitySquasher.Application.Definitions.Managers;
     using Dfe.Spi.EntitySquasher.Application.Models;
     using Dfe.Spi.EntitySquasher.Application.Models.Result;
     using Dfe.Spi.EntitySquasher.Domain;
@@ -20,34 +20,33 @@
     /// </summary>
     public class EntityAdapterInvoker : IEntityAdapterInvoker
     {
-        private readonly IEntityAdapterClientManager entityAdapterClientManager;
+        private readonly ICacheManager cacheManager;
         private readonly ILoggerWrapper loggerWrapper;
 
         /// <summary>
         /// Initialises a new instance of the
         /// <see cref="EntityAdapterInvoker" /> class.
         /// </summary>
-        /// <param name="entityAdapterClientManagerFactory">
+        /// <param name="entityAdapterClientCacheManagerFactory">
         /// An instance of type
-        /// <see cref="IEntityAdapterClientManagerFactory" />.
+        /// <see cref="IEntityAdapterClientCacheManagerFactory" />.
         /// </param>
         /// <param name="loggerWrapper">
         /// An instance of type <see cref="ILoggerWrapper" />.
         /// </param>
         public EntityAdapterInvoker(
-            IEntityAdapterClientManagerFactory entityAdapterClientManagerFactory,
+            IEntityAdapterClientCacheManagerFactory entityAdapterClientCacheManagerFactory,
             ILoggerWrapper loggerWrapper)
         {
-            if (entityAdapterClientManagerFactory == null)
+            if (entityAdapterClientCacheManagerFactory == null)
             {
                 throw new ArgumentNullException(
-                    nameof(entityAdapterClientManagerFactory));
+                    nameof(entityAdapterClientCacheManagerFactory));
             }
 
             this.loggerWrapper = loggerWrapper;
 
-            this.entityAdapterClientManager =
-                entityAdapterClientManagerFactory.Create();
+            this.cacheManager = entityAdapterClientCacheManagerFactory.Create();
         }
 
         /// <inheritdoc />
@@ -245,18 +244,25 @@
                     Name = source,
                 };
 
+            string entityAdapterClientKeyStr =
+                entityAdapterClientKey.ExportToString();
+
             this.loggerWrapper.Debug(
                 $"Fetching {nameof(IEntityAdapterClient)} for " +
-                $"{entityAdapterClientKey}...");
+                $"{entityAdapterClientKey} " +
+                $"(\"{entityAdapterClientKeyStr}\")...");
 
             // Get the entity adapter client from the manager and...
             // (Note: The below wont be null - the manager'll throw an
             //        exception if it doesn't exist).
-            IEntityAdapterClient entityAdapterClient =
-                await this.entityAdapterClientManager.GetAsync(
-                    entityAdapterClientKey,
+            object unboxedEntityAdapterClient =
+                await this.cacheManager.GetAsync(
+                    entityAdapterClientKeyStr,
                     cancellationToken)
                     .ConfigureAwait(false);
+
+            IEntityAdapterClient entityAdapterClient =
+                unboxedEntityAdapterClient as IEntityAdapterClient;
 
             this.loggerWrapper.Info(
                 $"{nameof(IEntityAdapterClient)} returned for " +
