@@ -2,11 +2,12 @@
 {
     using System.Collections.Generic;
     using System.Diagnostics.CodeAnalysis;
+    using System.Threading;
     using Dfe.Spi.EntitySquasher.Application.Definitions;
 
     /// <summary>
     /// Result object for
-    /// <see cref="IEntityAdapterInvoker.InvokeEntityAdapters(string, string, IEnumerable{string}, EntityReference)" />.
+    /// <see cref="IEntityAdapterInvoker.InvokeEntityAdaptersAsync(string, string, IEnumerable{string}, EntityReference, CancellationToken)" />.
     /// </summary>
     [ExcludeFromCodeCoverage]
     public class InvokeEntityAdaptersResult : ModelsBase

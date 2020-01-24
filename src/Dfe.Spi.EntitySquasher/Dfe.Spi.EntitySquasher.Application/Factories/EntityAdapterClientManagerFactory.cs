@@ -1,34 +1,38 @@
-﻿namespace Dfe.Spi.EntitySquasher.Application.Managers
+﻿namespace Dfe.Spi.EntitySquasher.Application.Factories
 {
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Threading;
     using System.Threading.Tasks;
+    using Dfe.Spi.Common.Caching;
+    using Dfe.Spi.Common.Caching.Definitions.Managers;
     using Dfe.Spi.Common.Logging.Definitions;
     using Dfe.Spi.EntitySquasher.Application.Definitions.Caches;
-    using Dfe.Spi.EntitySquasher.Application.Definitions.Managers;
+    using Dfe.Spi.EntitySquasher.Application.Definitions.Factories;
     using Dfe.Spi.EntitySquasher.Application.Models;
     using Dfe.Spi.EntitySquasher.Domain.Definitions;
     using Dfe.Spi.EntitySquasher.Domain.Definitions.Factories;
     using Dfe.Spi.EntitySquasher.Domain.Models.Acdf;
 
     /// <summary>
-    /// Implements <see cref="IEntityAdapterClientManager" />.
+    /// Implements <see cref="IEntityAdapterClientCacheManagerFactory" />.
     /// </summary>
-    public class EntityAdapterClientManager
-        : Manager<EntityAdapterClientKey, IEntityAdapterClient>, IEntityAdapterClientManager
+    public class EntityAdapterClientManagerFactory
+        : IEntityAdapterClientCacheManagerFactory
     {
-        private readonly IAlgorithmConfigurationDeclarationFileManager algorithmConfigurationDeclarationFileManager;
+        private readonly ICacheManager cacheManager;
+        private readonly IEntityAdapterClientCache entityAdapterClientCache;
         private readonly IEntityAdapterClientFactory entityAdapterClientFactory;
         private readonly ILoggerWrapper loggerWrapper;
 
         /// <summary>
         /// Initialises a new instance of the
-        /// <see cref="EntityAdapterClientManager" /> class.
+        /// <see cref="EntityAdapterClientManagerFactory" /> class.
         /// </summary>
-        /// <param name="algorithmConfigurationDeclarationFileManager">
+        /// <param name="algorithmConfigurationDeclarationFileManagerFactory">
         /// An instance of type
-        /// <see cref="IAlgorithmConfigurationDeclarationFileManager" />.
+        /// <see cref="IAlgorithmConfigurationDeclarationFileCacheManagerFactory" />.
         /// </param>
         /// <param name="entityAdapterClientCache">
         /// An instance of type <see cref="IEntityAdapterClientCache" />.
@@ -39,56 +43,79 @@
         /// <param name="loggerWrapper">
         /// An instance of type <see cref="ILoggerWrapper" />.
         /// </param>
-        public EntityAdapterClientManager(
-            IAlgorithmConfigurationDeclarationFileManager algorithmConfigurationDeclarationFileManager,
+        public EntityAdapterClientManagerFactory(
+            IAlgorithmConfigurationDeclarationFileCacheManagerFactory algorithmConfigurationDeclarationFileManagerFactory,
             IEntityAdapterClientCache entityAdapterClientCache,
             IEntityAdapterClientFactory entityAdapterClientFactory,
             ILoggerWrapper loggerWrapper)
-            : base(
-                  entityAdapterClientCache,
-                  loggerWrapper)
         {
-            this.algorithmConfigurationDeclarationFileManager = algorithmConfigurationDeclarationFileManager;
-            this.entityAdapterClientFactory = entityAdapterClientFactory;
+            if (algorithmConfigurationDeclarationFileManagerFactory == null)
+            {
+                throw new ArgumentNullException(
+                    nameof(algorithmConfigurationDeclarationFileManagerFactory));
+            }
+
+            this.entityAdapterClientCache = entityAdapterClientCache;
             this.loggerWrapper = loggerWrapper;
+            this.entityAdapterClientFactory = entityAdapterClientFactory;
+
+            this.cacheManager =
+                algorithmConfigurationDeclarationFileManagerFactory.Create();
         }
 
         /// <inheritdoc />
-        protected override async Task<IEntityAdapterClient> InitialiseCacheItem(
-            EntityAdapterClientKey key)
+        public ICacheManager Create()
+        {
+            CacheManager toReturn =
+                new CacheManager(
+                    this.entityAdapterClientCache,
+                    this.loggerWrapper,
+                    this.InitialiseCacheItemAsync);
+
+            return toReturn;
+        }
+
+        /// <inheritdoc />
+        public async Task<object> InitialiseCacheItemAsync(
+            string key,
+            CancellationToken cancellationToken)
         {
             IEntityAdapterClient toReturn = null;
 
-            if (key == null)
-            {
-                throw new ArgumentNullException(
-                    nameof(key));
-            }
+            // The input key will contain the algorithm, and the name.
+            // This will be split with a period.
+            // For example:
+            // default.GIAS or default.UKRLP.
+            EntityAdapterClientKey entityAdapterClientKey =
+                EntityAdapterClientKey.Parse(key);
 
-            string algorithm = key.Algorithm;
-            string name = key.Name;
+            string algorithm = entityAdapterClientKey.Algorithm;
+            string name = entityAdapterClientKey.Name;
 
             // 1) Pull back the ACDF from the manager and;
             this.loggerWrapper.Debug(
                 $"Pulling back " +
                 $"{nameof(AlgorithmConfigurationDeclarationFile)} for " +
                 $"algorithm \"{algorithm}\" from the " +
-                $"{nameof(IAlgorithmConfigurationDeclarationFileManager)}...");
+                $"{nameof(ICacheManager)}...");
 
             // algorithmConfigurationDeclarationFile will always get populated
             // here, or throw an exception back up (FileNotFound).
-            AlgorithmConfigurationDeclarationFile algorithmConfigurationDeclarationFile =
-                await this.algorithmConfigurationDeclarationFileManager.GetAsync(
-                    algorithm)
+            object unboxedAlgorithmConfigurationDeclarationFile =
+                await this.cacheManager.GetAsync(
+                    algorithm,
+                    cancellationToken)
                     .ConfigureAwait(false);
+
+            AlgorithmConfigurationDeclarationFile algorithmConfigurationDeclarationFile =
+                unboxedAlgorithmConfigurationDeclarationFile as AlgorithmConfigurationDeclarationFile;
 
             // 2) Pull back the base URL of the right
             //    adapter using the name and;
             this.loggerWrapper.Info(
-                $"Pulled back " +
-                $"{algorithmConfigurationDeclarationFile}. " +
-                $"Searching for {nameof(EntityAdapter)} with " +
-                $"{nameof(name)} \"{name}\"...");
+                $"Pulled back {algorithmConfigurationDeclarationFile}. " +
+                $"Searching for {nameof(EntityAdapter)} with {nameof(name)} " +
+                $"\"{name}\"...");
 
             EntityAdapter entityAdapter =
                 algorithmConfigurationDeclarationFile.EntityAdapters

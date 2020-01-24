@@ -2,11 +2,12 @@
 {
     using System.Collections.Generic;
     using System.Diagnostics.CodeAnalysis;
+    using System.Threading;
     using Dfe.Spi.EntitySquasher.Application.Processors.Definitions;
 
     /// <summary>
     /// Request object for
-    /// <see cref="IGetSquashedEntityProcessor.GetSquashedEntityAsync(GetSquashedEntityRequest)" />.
+    /// <see cref="IGetSquashedEntityProcessor.GetSquashedEntityAsync(GetSquashedEntityRequest, CancellationToken)" />.
     /// </summary>
     [ExcludeFromCodeCoverage]
     public class GetSquashedEntityRequest : RequestResponseBase

@@ -5,6 +5,7 @@
     using System.Linq;
     using System.Net;
     using System.Reflection;
+    using System.Threading;
     using System.Threading.Tasks;
     using Dfe.Spi.Common.Models;
     using Dfe.Spi.Common.UnitTesting;
@@ -64,13 +65,15 @@
         {
             // Arrange
             GetSquashedEntityRequest getSquashedEntityRequest = null;
+            CancellationToken cancellationToken = CancellationToken.None;
 
             AsyncTestDelegate asyncTestDelegate =
                 async () =>
                 {
                     // Act
                     await this.getSquashedEntityProcessor.GetSquashedEntityAsync(
-                        getSquashedEntityRequest);
+                        getSquashedEntityRequest,
+                        cancellationToken);
                 };
 
             // Assert
@@ -87,6 +90,7 @@
             GetSquashedEntityRequest getSquashedEntityRequest =
                 JsonConvert.DeserializeObject<GetSquashedEntityRequest>(
                     getSquashedEntityRequestStr);
+            CancellationToken cancellationToken = CancellationToken.None;    
 
             HttpStatusCode httpStatusCode = HttpStatusCode.AlreadyReported;
 
@@ -125,7 +129,7 @@
                     });
 
             this.mockEntityAdapterInvoker
-                .Setup(x => x.InvokeEntityAdapters(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<IEnumerable<string>>(), It.IsAny<EntityReference>()))
+                .Setup(x => x.InvokeEntityAdaptersAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<IEnumerable<string>>(), It.IsAny<EntityReference>(), It.IsAny<CancellationToken>()))
                 .Throws(allAdaptersUnavailableException);
 
             Spi.Models.ModelsBase modelsBase = null;
@@ -137,7 +141,8 @@
             // Act
             getSquashedEntityResponse =
                 await this.getSquashedEntityProcessor.GetSquashedEntityAsync(
-                    getSquashedEntityRequest);
+                    getSquashedEntityRequest,
+                    cancellationToken);
 
             // Assert
             squashedEntityResult =
@@ -171,6 +176,7 @@
             GetSquashedEntityRequest getSquashedEntityRequest =
                 JsonConvert.DeserializeObject<GetSquashedEntityRequest>(
                     getSquashedEntityRequestStr);
+            CancellationToken cancellationToken = CancellationToken.None;
 
             string actualGetSquashedEntityResponseStr =
                 this.assembly.GetSample(
@@ -213,7 +219,7 @@
                     httpErrorBody);
 
             this.mockEntityAdapterInvoker
-                .Setup(x => x.InvokeEntityAdapters(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<IEnumerable<string>>(), It.IsAny<EntityReference>()))
+                .Setup(x => x.InvokeEntityAdaptersAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<IEnumerable<string>>(), It.IsAny<EntityReference>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(invokeEntityAdaptersResult);
 
             Spi.Models.LearningProvider learningProvider =
@@ -221,15 +227,15 @@
                 {
                     Name = "squashed thing",
                 };
-            Action<string, string, IEnumerable<GetEntityAsyncResult>> callback =
-                (x, y, z) =>
+            Action<string, string, IEnumerable<GetEntityAsyncResult>, CancellationToken> callback =
+                (w, x, y, z) =>
                 {
                     // Enumerate the collection, to provide coverage.
-                    z.ToArray();
+                    y.ToArray();
                 };
 
             this.mockResultSquasher
-                .Setup(x => x.SquashAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<IEnumerable<GetEntityAsyncResult>>()))
+                .Setup(x => x.SquashAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<IEnumerable<GetEntityAsyncResult>>(), It.IsAny<CancellationToken>()))
                 .Callback(callback)
                 .ReturnsAsync(learningProvider);
 
@@ -243,7 +249,8 @@
             // Act
             getSquashedEntityResponse =
                 await this.getSquashedEntityProcessor.GetSquashedEntityAsync(
-                    getSquashedEntityRequest);
+                    getSquashedEntityRequest,
+                    cancellationToken);
 
             // Assert
             squashedEntityResult = getSquashedEntityResponse

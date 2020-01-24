@@ -120,7 +120,8 @@ namespace Dfe.Spi.EntitySquasher.FunctionApp.Functions
 
                 GetSquashedEntityResponse getSquashedEntityResponse =
                     await this.getSquashedEntityProcessor.GetSquashedEntityAsync(
-                        getSquashedEntityRequest)
+                        getSquashedEntityRequest,
+                        cancellationToken)
                         .ConfigureAwait(false);
 
                 this.loggerWrapper.Info(

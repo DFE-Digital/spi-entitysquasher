@@ -3,6 +3,7 @@
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Threading;
     using System.Threading.Tasks;
     using Dfe.Spi.Common.Logging.Definitions;
     using Dfe.Spi.EntitySquasher.Application.Definitions;
@@ -54,7 +55,8 @@
 
         /// <inheritdoc />
         public async Task<GetSquashedEntityResponse> GetSquashedEntityAsync(
-            GetSquashedEntityRequest getSquashedEntityRequest)
+            GetSquashedEntityRequest getSquashedEntityRequest,
+            CancellationToken cancellationToken)
         {
             GetSquashedEntityResponse toReturn = null;
 
@@ -90,7 +92,8 @@
                         algorithm,
                         entityName,
                         fields,
-                        entityReference)
+                        entityReference,
+                        cancellationToken)
                         .ConfigureAwait(false);
 
                 squashedEntityResults.Add(squashedEntityResult);
@@ -108,7 +111,8 @@
             string algorithm,
             string entityName,
             IEnumerable<string> fields,
-            EntityReference entityReference)
+            EntityReference entityReference,
+            CancellationToken cancellationToken)
         {
             SquashedEntityResult toReturn = null;
 
@@ -120,11 +124,12 @@
             try
             {
                 InvokeEntityAdaptersResult adaptersLookupResult =
-                    await this.entityAdapterInvoker.InvokeEntityAdapters(
+                    await this.entityAdapterInvoker.InvokeEntityAdaptersAsync(
                         algorithm,
                         entityName,
                         fields,
-                        entityReference)
+                        entityReference,
+                        cancellationToken)
                         .ConfigureAwait(false);
 
                 IEnumerable<GetEntityAsyncResult> getEntityAsyncResults =
@@ -145,7 +150,8 @@
                     await this.resultSquasher.SquashAsync(
                         algorithm,
                         entityName,
-                        toSquash)
+                        toSquash,
+                        cancellationToken)
                         .ConfigureAwait(false);
             }
             catch (AllAdaptersUnavailableException allAdaptersUnavailableException)

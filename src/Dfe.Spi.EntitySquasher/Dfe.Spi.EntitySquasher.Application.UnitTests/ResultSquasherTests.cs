@@ -1,10 +1,13 @@
 ﻿namespace Dfe.Spi.EntitySquasher.Application.UnitTests
 {
+    using System;
     using System.Reflection;
+    using System.Threading;
     using System.Threading.Tasks;
+    using Dfe.Spi.Common.Caching.Definitions.Managers;
     using Dfe.Spi.Common.UnitTesting;
     using Dfe.Spi.Common.UnitTesting.Infrastructure;
-    using Dfe.Spi.EntitySquasher.Application.Definitions.Managers;
+    using Dfe.Spi.EntitySquasher.Application.Definitions.Factories;
     using Dfe.Spi.EntitySquasher.Application.Models;
     using Dfe.Spi.EntitySquasher.Application.Models.Result;
     using Dfe.Spi.EntitySquasher.Domain.Models.Acdf;
@@ -16,10 +19,9 @@
     [TestFixture]
     public class ResultSquasherTests
     {
-        private Mock<IAlgorithmConfigurationDeclarationFileManager> mockAlgorithmConfigurationDeclarationFileManager;
+        private Mock<ICacheManager> mockCacheManager;
 
         private LoggerWrapper loggerWrapper;
-
         private ResultSquasher resultSquasher;
 
         [SetUp]
@@ -27,15 +29,42 @@
         {
             this.loggerWrapper = new LoggerWrapper();
 
-            this.mockAlgorithmConfigurationDeclarationFileManager =
-                new Mock<IAlgorithmConfigurationDeclarationFileManager>();
+            this.mockCacheManager = new Mock<ICacheManager>();
 
-            IAlgorithmConfigurationDeclarationFileManager algorithmConfigurationDeclarationFileManager =
-                mockAlgorithmConfigurationDeclarationFileManager.Object;
+            ICacheManager cacheManager = mockCacheManager.Object;
+
+            Mock<IAlgorithmConfigurationDeclarationFileCacheManagerFactory> mockAlgorithmConfigurationDeclarationFileCacheManagerFactory =
+                new Mock<IAlgorithmConfigurationDeclarationFileCacheManagerFactory>();
+
+            mockAlgorithmConfigurationDeclarationFileCacheManagerFactory
+                .Setup(x => x.Create())
+                .Returns(cacheManager);
+
+            IAlgorithmConfigurationDeclarationFileCacheManagerFactory algorithmConfigurationDeclarationFileCacheManagerFactory =
+                mockAlgorithmConfigurationDeclarationFileCacheManagerFactory.Object;
 
             this.resultSquasher = new ResultSquasher(
-                algorithmConfigurationDeclarationFileManager,
+                algorithmConfigurationDeclarationFileCacheManagerFactory,
                 this.loggerWrapper);
+        }
+
+        [Test]
+        public void Ctor_PostWithoutEntityAdapterClientCacheManagerFactory_ThrowsArgumentNullException()
+        {
+            // Arrange
+            IAlgorithmConfigurationDeclarationFileCacheManagerFactory algorithmConfigurationDeclarationFileCacheManagerFactory = null;
+
+            TestDelegate testDelegate =
+                () =>
+                {
+                    // Act
+                    new ResultSquasher(
+                        algorithmConfigurationDeclarationFileCacheManagerFactory,
+                        this.loggerWrapper);
+                };
+
+            // Assert
+            Assert.Throws<ArgumentNullException>(testDelegate);
         }
 
         [Test]
@@ -49,6 +78,7 @@
                 {
                     // Empty - don't actually need anything for the purposes of this test.
                 };
+            CancellationToken cancellationToken = CancellationToken.None;
 
             this.ConfigureAlgorithmConfigurationDeclarationFileManager(
                 "acdf-example.json");
@@ -60,7 +90,8 @@
                     await this.resultSquasher.SquashAsync(
                         algorithm,
                         entityName,
-                        getEntityAsyncResults);
+                        getEntityAsyncResults,
+                        cancellationToken);
                 };
 
             // Assert
@@ -81,6 +112,7 @@
                 {
                     // Empty - don't actually need anything for the purposes of this test.
                 };
+            CancellationToken cancellationToken = CancellationToken.None;
 
             this.ConfigureAlgorithmConfigurationDeclarationFileManager(
                 "acdf-nosources.json");
@@ -92,7 +124,8 @@
                     await this.resultSquasher.SquashAsync(
                         algorithm,
                         entityName,
-                        getEntityAsyncResults);
+                        getEntityAsyncResults,
+                        cancellationToken);
                 };
 
             // Assert
@@ -160,6 +193,8 @@
                 },
             };
 
+            CancellationToken cancellationToken = CancellationToken.None;
+
             this.ConfigureAlgorithmConfigurationDeclarationFileManager(
                 "acdf-example.json");
 
@@ -167,11 +202,11 @@
             Spi.Models.LearningProvider learningProvider = null;
 
             // Act
-            modelsBase =
-                await this.resultSquasher.SquashAsync(
-                    algorithm,
-                    entityName,
-                    toSquash);
+            modelsBase = await this.resultSquasher.SquashAsync(
+                algorithm,
+                entityName,
+                toSquash,
+                cancellationToken);
 
             // Assert
             Assert.IsInstanceOf<LearningProvider>(modelsBase);
@@ -210,8 +245,8 @@
                 JsonConvert.DeserializeObject<AlgorithmConfigurationDeclarationFile>(
                     algorithmConfigurationDeclarationFileStr);
 
-            this.mockAlgorithmConfigurationDeclarationFileManager
-                .Setup(x => x.GetAsync(It.IsAny<string>()))
+            this.mockCacheManager
+                .Setup(x => x.GetAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(algorithmConfigurationDeclarationFile);
         }
     }

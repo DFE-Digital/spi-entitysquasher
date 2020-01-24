@@ -1,5 +1,8 @@
 ﻿namespace Dfe.Spi.EntitySquasher.Application.Models
 {
+    using System;
+    using System.Linq;
+    using System.Text;
     using Dfe.Spi.EntitySquasher.Application.Definitions.Caches;
 
     /// <summary>
@@ -8,6 +11,8 @@
     /// </summary>
     public class EntityAdapterClientKey : ModelsBase
     {
+        private const char StringRepresentationDelimiter = '.';
+
         /// <summary>
         /// Gets or sets the algorithm containing the entity
         /// adapter configuration.
@@ -27,44 +32,96 @@
             set;
         }
 
-        /// <inheritdoc />
-        public override bool Equals(object obj)
+        /// <summary>
+        /// Parses an instance of <see cref="EntityAdapterClientKey" /> from
+        /// its <see cref="string" /> representation.
+        /// </summary>
+        /// <param name="value">
+        /// The <see cref="string" /> representation of an
+        /// <see cref="EntityAdapterClientKey" />.
+        /// </param>
+        /// <returns>
+        /// An instance of <see cref="EntityAdapterClientKey" />.
+        /// </returns>
+        public static EntityAdapterClientKey Parse(string value)
         {
-            bool toReturn = false;
+            EntityAdapterClientKey toReturn = null;
 
-            EntityAdapterClientKey entityAdapterClientKey =
-                obj as EntityAdapterClientKey;
-
-            if (entityAdapterClientKey != null)
+            if (!string.IsNullOrEmpty(value))
             {
-                string algorithm =
-                    entityAdapterClientKey.Algorithm;
-                string name = entityAdapterClientKey.Name;
+                string[] parts = value.Split(
+                    new char[] { StringRepresentationDelimiter },
+                    StringSplitOptions.RemoveEmptyEntries);
 
-                toReturn =
-                    (this.Algorithm == algorithm)
-                        &&
-                    (this.Name == name);
+                if (parts.Length == 2)
+                {
+                    string algorithm = parts.First();
+                    algorithm = Base64Decode(algorithm);
+
+                    string name = parts.Last();
+                    name = Base64Decode(name);
+
+                    toReturn = new EntityAdapterClientKey()
+                    {
+                        Algorithm = algorithm,
+                        Name = name,
+                    };
+                }
+            }
+
+            if (toReturn == null)
+            {
+                throw new FormatException(
+                    $"Could not parse the string \"{value}\" into an " +
+                    $"instance of {nameof(EntityAdapterClientKey)}.");
             }
 
             return toReturn;
         }
 
-        /// <inheritdoc />
-        public override int GetHashCode()
+        /// <summary>
+        /// This instance to a <see cref="string" /> value. This
+        /// <see cref="string" /> value can then be used to create an instance
+        /// of <see cref="EntityAdapterClientKey" /> via
+        /// <see cref="Parse(string)" />.
+        /// </summary>
+        /// <returns>
+        /// The exported <see cref="string" /> representation of this instance.
+        /// </returns>
+        public string ExportToString()
         {
-            // Method of coming up with a good hashcode
-            // taken from the following article:
-            // https://www.loganfranken.com/blog/692/overriding-equals-in-c-part-2/
-            unchecked
-            {
-                int toReturn = 13;
+            string toReturn = null;
 
-                toReturn = (toReturn * 7) + (!object.ReferenceEquals(null, this.Algorithm) ? this.Algorithm.GetHashCode() : 0);
-                toReturn = (toReturn * 7) + (!object.ReferenceEquals(null, this.Name) ? this.Name.GetHashCode() : 0);
+            string encodedAlgorithm = Base64Encode(this.Algorithm);
+            string encodedName = Base64Encode(this.Name);
 
-                return toReturn;
-            }
+            toReturn =
+                encodedAlgorithm + StringRepresentationDelimiter + encodedName;
+
+            return toReturn;
+        }
+
+        private static string Base64Decode(string base64EncodedData)
+        {
+            string toReturn = null;
+
+            byte[] base64EncodedBytes = Convert.FromBase64String(
+                base64EncodedData);
+
+            toReturn = Encoding.UTF8.GetString(base64EncodedBytes);
+
+            return toReturn;
+        }
+
+        private static string Base64Encode(string plainText)
+        {
+            string toReturn = null;
+
+            byte[] plainTextBytes = Encoding.UTF8.GetBytes(plainText);
+
+            toReturn = Convert.ToBase64String(plainTextBytes);
+
+            return toReturn;
         }
     }
 }

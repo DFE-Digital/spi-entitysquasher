@@ -10,9 +10,9 @@
     using Dfe.Spi.EntitySquasher.Application.Caches;
     using Dfe.Spi.EntitySquasher.Application.Definitions;
     using Dfe.Spi.EntitySquasher.Application.Definitions.Caches;
-    using Dfe.Spi.EntitySquasher.Application.Definitions.Managers;
+    using Dfe.Spi.EntitySquasher.Application.Definitions.Factories;
     using Dfe.Spi.EntitySquasher.Application.Definitions.SettingsProviders;
-    using Dfe.Spi.EntitySquasher.Application.Managers;
+    using Dfe.Spi.EntitySquasher.Application.Factories;
     using Dfe.Spi.EntitySquasher.Application.Processors;
     using Dfe.Spi.EntitySquasher.Application.Processors.Definitions;
     using Dfe.Spi.EntitySquasher.Domain.Definitions;
@@ -59,7 +59,6 @@
             AddSettingsProviders(serviceCollection);
             AddFactories(serviceCollection);
             AddCaches(serviceCollection);
-            AddManagers(serviceCollection);
 
             HttpErrorBodyResultProvider httpErrorBodyResultProvider =
                 new HttpErrorBodyResultProvider(
@@ -93,6 +92,8 @@
             IServiceCollection serviceCollection)
         {
             serviceCollection
+                .AddScoped<IAlgorithmConfigurationDeclarationFileCacheManagerFactory, AlgorithmConfigurationDeclarationFileManagerFactory>()
+                .AddScoped<IEntityAdapterClientCacheManagerFactory, EntityAdapterClientManagerFactory>()
                 .AddScoped<IEntityAdapterClientFactory, EntityAdapterClientFactory>();
         }
 
@@ -101,13 +102,6 @@
             serviceCollection
                 .AddSingleton<IAlgorithmConfigurationDeclarationFileCache, AlgorithmConfigurationDeclarationFileCache>()
                 .AddSingleton<IEntityAdapterClientCache, EntityAdapterClientCache>();
-        }
-
-        private static void AddManagers(IServiceCollection serviceCollection)
-        {
-            serviceCollection
-                .AddScoped<IAlgorithmConfigurationDeclarationFileManager, AlgorithmConfigurationDeclarationFileManager>()
-                .AddScoped<IEntityAdapterClientManager, EntityAdapterClientManager>();
         }
 
         private static ILogger CreateILogger(IServiceProvider serviceProvider)

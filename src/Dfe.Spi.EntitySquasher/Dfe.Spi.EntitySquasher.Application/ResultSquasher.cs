@@ -4,10 +4,12 @@
     using System.Collections.Generic;
     using System.Linq;
     using System.Reflection;
+    using System.Threading;
     using System.Threading.Tasks;
+    using Dfe.Spi.Common.Caching.Definitions.Managers;
     using Dfe.Spi.Common.Logging.Definitions;
     using Dfe.Spi.EntitySquasher.Application.Definitions;
-    using Dfe.Spi.EntitySquasher.Application.Definitions.Managers;
+    using Dfe.Spi.EntitySquasher.Application.Definitions.Factories;
     using Dfe.Spi.EntitySquasher.Application.Models.Result;
     using Dfe.Spi.EntitySquasher.Domain.Models.Acdf;
 
@@ -16,33 +18,42 @@
     /// </summary>
     public class ResultSquasher : IResultSquasher
     {
-        private readonly IAlgorithmConfigurationDeclarationFileManager algorithmConfigurationDeclarationFileManager;
+        private readonly ICacheManager cacheManager;
         private readonly ILoggerWrapper loggerWrapper;
 
         /// <summary>
         /// Initialises a new instance of the <see cref="ResultSquasher" />
         /// class.
         /// </summary>
-        /// <param name="algorithmConfigurationDeclarationFileManager">
+        /// <param name="algorithmConfigurationDeclarationFileCacheManagerFactory">
         /// An instance of type
-        /// <see cref="IAlgorithmConfigurationDeclarationFileManager" />.
+        /// <see cref="IAlgorithmConfigurationDeclarationFileCacheManagerFactory" />.
         /// </param>
         /// <param name="loggerWrapper">
         /// An instance of type <see cref="ILoggerWrapper" />.
         /// </param>
         public ResultSquasher(
-            IAlgorithmConfigurationDeclarationFileManager algorithmConfigurationDeclarationFileManager,
+            IAlgorithmConfigurationDeclarationFileCacheManagerFactory algorithmConfigurationDeclarationFileCacheManagerFactory,
             ILoggerWrapper loggerWrapper)
         {
-            this.algorithmConfigurationDeclarationFileManager = algorithmConfigurationDeclarationFileManager;
+            if (algorithmConfigurationDeclarationFileCacheManagerFactory == null)
+            {
+                throw new ArgumentNullException(
+                    nameof(algorithmConfigurationDeclarationFileCacheManagerFactory));
+            }
+
             this.loggerWrapper = loggerWrapper;
+
+            this.cacheManager =
+                algorithmConfigurationDeclarationFileCacheManagerFactory.Create();
         }
 
         /// <inheritdoc />
         public async Task<Spi.Models.ModelsBase> SquashAsync(
             string algorithm,
             string entityName,
-            IEnumerable<GetEntityAsyncResult> toSquash)
+            IEnumerable<GetEntityAsyncResult> toSquash,
+            CancellationToken cancellationToken)
         {
             Spi.Models.ModelsBase toReturn = null;
 
@@ -53,10 +64,14 @@
 
             // algorithmConfigurationDeclarationFile will always get populated
             // here, or throw an exception back up (FileNotFound).
-            AlgorithmConfigurationDeclarationFile algorithmConfigurationDeclarationFile =
-                await this.algorithmConfigurationDeclarationFileManager.GetAsync(
-                    algorithm)
+            object unboxedAlgorithmConfigurationDeclarationFile =
+                await this.cacheManager.GetAsync(
+                    algorithm,
+                    cancellationToken)
                     .ConfigureAwait(false);
+
+            AlgorithmConfigurationDeclarationFile algorithmConfigurationDeclarationFile =
+                unboxedAlgorithmConfigurationDeclarationFile as AlgorithmConfigurationDeclarationFile;
 
             this.loggerWrapper.Info(
                 $"{nameof(algorithm)} = \"{algorithm}\" returned: " +
@@ -306,7 +321,8 @@
                     if (toReturn)
                     {
                         this.loggerWrapper.Debug(
-                            $"Value for field \"{name}\" is empty or whitespace.");
+                            $"Value for field \"{name}\" is empty or " +
+                            $"whitespace.");
                     }
                 }
                 else

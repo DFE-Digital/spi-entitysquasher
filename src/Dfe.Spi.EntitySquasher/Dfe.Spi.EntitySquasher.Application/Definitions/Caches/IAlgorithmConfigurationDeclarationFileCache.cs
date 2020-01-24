@@ -1,5 +1,6 @@
 ﻿namespace Dfe.Spi.EntitySquasher.Application.Definitions.Caches
 {
+    using Dfe.Spi.Common.Caching.Definitions;
     using Dfe.Spi.EntitySquasher.Domain.Models.Acdf;
 
     /// <summary>
@@ -7,7 +8,7 @@
     /// <see cref="AlgorithmConfigurationDeclarationFile" /> cache.
     /// </summary>
     public interface IAlgorithmConfigurationDeclarationFileCache
-        : ICacheBase<string, AlgorithmConfigurationDeclarationFile>
+        : ICacheProvider
     {
         // Nothing, inherits what it needs.
     }

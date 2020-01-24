@@ -4,9 +4,11 @@
     using System.Collections.Generic;
     using System.Linq;
     using System.Net;
+    using System.Threading;
     using System.Threading.Tasks;
+    using Dfe.Spi.Common.Caching.Definitions.Managers;
     using Dfe.Spi.Common.UnitTesting.Infrastructure;
-    using Dfe.Spi.EntitySquasher.Application.Definitions.Managers;
+    using Dfe.Spi.EntitySquasher.Application.Definitions.Factories;
     using Dfe.Spi.EntitySquasher.Application.Models;
     using Dfe.Spi.EntitySquasher.Application.Models.Result;
     using Dfe.Spi.EntitySquasher.Domain;
@@ -21,42 +23,71 @@
     {
         private EntityAdapterInvoker entityAdapterInvoker;
         private LoggerWrapper loggerWrapper;
-        private Mock<IEntityAdapterClientManager> mockEntityAdapterClientManager;
+        private Mock<ICacheManager> mockCacheManager;
 
         [SetUp]
         public void Arrange()
         {
-            this.mockEntityAdapterClientManager =
-                new Mock<IEntityAdapterClientManager>();
+            this.mockCacheManager = new Mock<ICacheManager>();
 
-            IEntityAdapterClientManager entityAdapterClientManager =
-                mockEntityAdapterClientManager.Object;
+            ICacheManager cacheManager = mockCacheManager.Object;
+
+            Mock<IEntityAdapterClientCacheManagerFactory> mockEntityAdapterClientCacheManagerFactory =
+                new Mock<IEntityAdapterClientCacheManagerFactory>();
+
+            mockEntityAdapterClientCacheManagerFactory
+                .Setup(x => x.Create())
+                .Returns(cacheManager);
+
+            IEntityAdapterClientCacheManagerFactory entityAdapterClientCacheManagerFactory =
+                mockEntityAdapterClientCacheManagerFactory.Object;
 
             this.loggerWrapper = new LoggerWrapper();
 
             this.entityAdapterInvoker = new EntityAdapterInvoker(
-                entityAdapterClientManager,
+                entityAdapterClientCacheManagerFactory,
                 this.loggerWrapper);
         }
 
         [Test]
-        public void InvokeEntityAdapters_PostWithoutEntityReference_ThrowsArgumentNullException()
+        public void Ctor_PostWithoutEntityAdapterClientCacheManagerFactory_ThrowsArgumentNullException()
+        {
+            // Arrange
+            IEntityAdapterClientCacheManagerFactory entityAdapterClientCacheManagerFactory = null;
+
+            TestDelegate testDelegate =
+                () =>
+                {
+                    // Act
+                    new EntityAdapterInvoker(
+                        entityAdapterClientCacheManagerFactory,
+                        this.loggerWrapper);
+                };
+
+            // Assert
+            Assert.Throws<ArgumentNullException>(testDelegate);
+        }
+
+        [Test]
+        public void InvokeEntityAdaptersAsync_PostWithoutEntityReference_ThrowsArgumentNullException()
         {
             // Arrange
             string algorithm = null;
             string entityName = null;
             string[] fields = null;
             EntityReference entityReference = null;
+            CancellationToken cancellationToken = CancellationToken.None;
 
             AsyncTestDelegate asyncTestDelegate =
                 async () =>
                 {
                     // Act
-                    await this.entityAdapterInvoker.InvokeEntityAdapters(
+                    await this.entityAdapterInvoker.InvokeEntityAdaptersAsync(
                         algorithm,
                         entityName,
                         fields,
-                        entityReference);
+                        entityReference,
+                        cancellationToken);
                 };
 
             // Assert
@@ -64,7 +95,7 @@
         }
 
         [Test]
-        public async Task InvokeEntityAdapters_2AdaptersSucceed1Fails_OutputIsAsExpected()
+        public async Task InvokeEntityAdaptersAsync_2AdaptersSucceed1Fails_OutputIsAsExpected()
         {
             // Arrange
             string algorithm = "some-algorithm";
@@ -116,9 +147,9 @@
             Dictionary<string, IEntityAdapterClient> adapters =
                 new Dictionary<string, IEntityAdapterClient>()
                 {
-                    { mockAdapter1Id, adapter1 },
-                    { mockAdapter2Id, adapter2 },
-                    { mockAdapter3Id, adapter3 },
+                    { "c29tZS1hbGdvcml0aG0=.d29ya2luZy1hZGFwdGVyLSMx", adapter1 },
+                    { "c29tZS1hbGdvcml0aG0=.ZmFpbGluZy1hZGFwdGVyLSMy", adapter2 },
+                    { "c29tZS1hbGdvcml0aG0=.d29ya2luZy1hZGFwdGVyLSMz", adapter3 },
                 };
 
             AdapterRecordReference[] adapterRecordReferences =
@@ -146,17 +177,18 @@
                 AdapterRecordReferences = adapterRecordReferences,
             };
 
-            Func<EntityAdapterClientKey, IEntityAdapterClient> getAsyncCallback =
-                entityAdapterClientKey =>
+            CancellationToken cancellationToken = CancellationToken.None;
+
+            Func<string, CancellationToken, IEntityAdapterClient> getAsyncCallback =
+                (x, y) =>
                 {
-                    IEntityAdapterClient entityAdapterClient =
-                        adapters[entityAdapterClientKey.Name];
+                    IEntityAdapterClient entityAdapterClient = adapters[x];
 
                     return entityAdapterClient;
                 };
 
-            this.mockEntityAdapterClientManager
-                .Setup(x => x.GetAsync(It.IsAny<EntityAdapterClientKey>()))
+            this.mockCacheManager
+                .Setup(x => x.GetAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(getAsyncCallback);
 
             int expectedSuccessfulTasks = 2;
@@ -166,11 +198,12 @@
 
             // Act
             InvokeEntityAdaptersResult invokeEntityAdaptersResult =
-                await this.entityAdapterInvoker.InvokeEntityAdapters(
+                await this.entityAdapterInvoker.InvokeEntityAdaptersAsync(
                     algorithm,
                     entityName,
                     fields,
-                    entityReference);
+                    entityReference,
+                    cancellationToken);
 
             // Assert
             // We should have 2 successful results, and one unsuccessful
@@ -202,7 +235,7 @@
         }
 
         [Test]
-        public void InvokeEntityAdapters_OnlyAdapterFails_ThrowsAllAdaptersUnavailableException()
+        public void InvokeEntityAdaptersAsync_OnlyAdapterFails_ThrowsAllAdaptersUnavailableException()
         {
             // Arrange
             string algorithm = "some-algorithm";
@@ -246,7 +279,7 @@
             Dictionary<string, IEntityAdapterClient> adapters =
                 new Dictionary<string, IEntityAdapterClient>()
                 {
-                    { mockAdapter2Id, adapter2 },
+                    { "c29tZS1hbGdvcml0aG0=.ZmFpbGluZy1hZGFwdGVyLSMy", adapter2 },
                 };
 
 
@@ -265,28 +298,30 @@
                 AdapterRecordReferences = adapterRecordReferences,
             };
 
-            Func<EntityAdapterClientKey, IEntityAdapterClient> getAsyncCallback =
-                entityAdapterClientKey =>
+            CancellationToken cancellationToken = CancellationToken.None;
+
+            Func<string, CancellationToken, IEntityAdapterClient> getAsyncCallback =
+                (x, y) =>
                 {
-                    IEntityAdapterClient entityAdapterClient =
-                        adapters[entityAdapterClientKey.Name];
+                    IEntityAdapterClient entityAdapterClient = adapters[x];
 
                     return entityAdapterClient;
                 };
 
-            this.mockEntityAdapterClientManager
-                .Setup(x => x.GetAsync(It.IsAny<EntityAdapterClientKey>()))
+            this.mockCacheManager
+                .Setup(x => x.GetAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(getAsyncCallback);
 
             AsyncTestDelegate asyncTestDelegate =
                 async () =>
                 {
                     // Act
-                    await this.entityAdapterInvoker.InvokeEntityAdapters(
+                    await this.entityAdapterInvoker.InvokeEntityAdaptersAsync(
                         algorithm,
                         entityName,
                         fields,
-                        entityReference);
+                        entityReference,
+                        cancellationToken);
                 };
 
             // Assert
@@ -297,7 +332,7 @@
         }
 
         [Test]
-        public void InvokeEntityAdapters_UnhandledExceptionOccursInTask_ExceptionsSurfaced()
+        public void InvokeEntityAdaptersAsync_UnhandledExceptionOccursInTask_ExceptionsSurfaced()
         {
             // Arrange
             string algorithm = "some-algorithm";
@@ -322,7 +357,7 @@
             Dictionary<string, IEntityAdapterClient> adapters =
                 new Dictionary<string, IEntityAdapterClient>()
                 {
-                    { mockAdapter2Id, adapter2 },
+                    { "c29tZS1hbGdvcml0aG0=.ZmFpbGluZy1hZGFwdGVyLSMy", adapter2 },
                 };
 
 
@@ -341,28 +376,30 @@
                 AdapterRecordReferences = adapterRecordReferences,
             };
 
-            Func<EntityAdapterClientKey, IEntityAdapterClient> getAsyncCallback =
-                entityAdapterClientKey =>
+            CancellationToken cancellationToken = CancellationToken.None;
+
+            Func<string, CancellationToken, IEntityAdapterClient> getAsyncCallback =
+                (x, y) =>
                 {
-                    IEntityAdapterClient entityAdapterClient =
-                        adapters[entityAdapterClientKey.Name];
+                    IEntityAdapterClient entityAdapterClient = adapters[x];
 
                     return entityAdapterClient;
                 };
 
-            this.mockEntityAdapterClientManager
-                .Setup(x => x.GetAsync(It.IsAny<EntityAdapterClientKey>()))
+            this.mockCacheManager
+                .Setup(x => x.GetAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(getAsyncCallback);
 
             AsyncTestDelegate asyncTestDelegate =
                 async () =>
                 {
                     // Act
-                    await this.entityAdapterInvoker.InvokeEntityAdapters(
+                    await this.entityAdapterInvoker.InvokeEntityAdaptersAsync(
                         algorithm,
                         entityName,
                         fields,
-                        entityReference);
+                        entityReference,
+                        cancellationToken);
                 };
 
             // Assert
