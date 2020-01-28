@@ -2,18 +2,10 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
+    <DocumentationFile>Dfe.Spi.EntitySquasher.AcdfGen.Application.xml</DocumentationFile>
   </PropertyGroup>
 
   <ItemGroup>
-    <!-- Dfe.Spi.* -->
-    <!--
-      TODO: Remember to remove this dependency - it's only here to not 
-            interfere with the main domain lib. Ideally, though, we want to
-            pick up the version FROM the domain lib. I just need this version
-            for the abstract class.
-    -->
-    <PackageReference Include="Dfe.Spi.Models" Version="1.0.6" />
-
     <!-- Development/Non-Runtime -->
     <PackageReference Include="StyleCop.Analyzers" Version="1.1.118" PrivateAssets="All" />
     <PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="2.9.8" PrivateAssets="All" />
@@ -29,10 +21,6 @@
 
   <PropertyGroup>
     <CodeAnalysisRuleSet>..\ca.ruleset</CodeAnalysisRuleSet>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <DocumentationFile>Dfe.Spi.EntitySquasher.AcdfGen.Application.xml</DocumentationFile>
   </PropertyGroup>
 
 </Project>

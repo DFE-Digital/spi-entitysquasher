@@ -80,7 +80,7 @@
         }
 
         /// <summary>
-        /// This instance to a <see cref="string" /> value. This
+        /// Exports this instance to a <see cref="string" /> value. This
         /// <see cref="string" /> value can then be used to create an instance
         /// of <see cref="EntityAdapterClientKey" /> via
         /// <see cref="Parse(string)" />.

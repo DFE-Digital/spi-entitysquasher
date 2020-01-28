@@ -4,6 +4,7 @@
     <TargetFramework>netcoreapp2.2</TargetFramework>
     <AzureFunctionsVersion>v2</AzureFunctionsVersion>
     <NeutralLanguage>en-GB</NeutralLanguage>
+    <DocumentationFile>Dfe.Spi.EntitySquasher.FunctionApp.xml</DocumentationFile>
   </PropertyGroup>
   
   <ItemGroup>
@@ -29,10 +30,6 @@
 
   <PropertyGroup>
     <CodeAnalysisRuleSet>..\ca.ruleset</CodeAnalysisRuleSet>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <DocumentationFile>Dfe.Spi.EntitySquasher.FunctionApp.xml</DocumentationFile>
   </PropertyGroup>
 
   <ItemGroup>

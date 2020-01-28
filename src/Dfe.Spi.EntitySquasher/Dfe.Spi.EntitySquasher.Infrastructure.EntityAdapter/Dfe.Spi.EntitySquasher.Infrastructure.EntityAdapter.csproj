@@ -2,6 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
+    <DocumentationFile>Dfe.Spi.EntitySquasher.Infrastructure.EntityAdapter.xml</DocumentationFile>
   </PropertyGroup>
 
   <ItemGroup>
@@ -27,10 +28,6 @@
 
   <PropertyGroup>
     <CodeAnalysisRuleSet>..\ca.ruleset</CodeAnalysisRuleSet>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <DocumentationFile>Dfe.Spi.EntitySquasher.Infrastructure.EntityAdapter.xml</DocumentationFile>
   </PropertyGroup>
 
 </Project>
