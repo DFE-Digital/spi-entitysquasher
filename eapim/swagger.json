@@ -1,0 +1,111 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "Entity Squasher API",
+    "version": "2.0",
+    "description": "SPI middleware component: provides entity squashing services."
+  },
+  "basePath": "/api",
+  "host": "__function_app_host__",
+  "paths": {
+    "/get-squashed-entity": {
+      "post": {
+        "description": "Pulls common entities from a set of adapters, and squashes them together, based on the supplied algorithm.",
+        "operationId": "get-squashed-entity",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "Squasher Request",
+            "description": "A JSON payload containing entity references, the required entity and the fields.",
+            "required": true,
+            "schema": {
+              "type": "object"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Internal-Request-Id",
+            "description": "An internal request id. Required for logging purposes.",
+            "type": "string",
+            "required": true
+          },
+          {
+            "in": "header",
+            "name": "X-External-Request-Id",
+            "description": "An optional external request id. Used in logging.",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The squashing was a success.",
+            "schema": {
+              "$ref": "#/definitions/get-squashed-entity-response"
+            }
+          },
+          "206": {
+            "description": "The squashing was a partial success - one or more requested adapters threw a non-successful response.",
+            "schema": {
+              "$ref": "#/definitions/get-squashed-entity-response"
+            }
+          },
+          "404": {
+            "description": "The specified algorithm could not be found.",
+            "schema": {
+              "$ref": "#/definitions/http-error-body"
+            }
+          },
+          "424": {
+            "description": "The squashing was a failure, due to all of the requested adapters throwing non-successful responses.",
+            "schema": {
+              "$ref": "#/definitions/http-error-body"
+            }
+          },
+          "500": {
+            "description": "There was a problem with the request - and this could be different things depending on the context. See body of response for more detail.",
+            "schema": {
+              "$ref": "#/definitions/http-error-body"
+            }
+          }
+        }
+      }
+    },
+    "/HeartBeat": {
+      "get": {
+        "description": "Standard diagnostics method, used to test the health of the facade's underlying system.",
+        "operationId": "heart-beat",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "The standard/only response from the method."
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "http-error-body": {
+      "type": "object",
+      "properties": {
+        "errorIdentifier": {
+          "type": "string",
+          "description": "An error identifier.",
+          "example": "SPI-ESQ-4"
+        },
+        "message": {
+          "type": "string",
+          "description": "A message describing the error.",
+          "example": "Unable to serve any requests - all adapters are unavailable."
+        },
+        "statusCode": {
+          "type": "integer",
+          "description": "The status code thrown with the error.",
+          "example": 424
+        }
+      }
+    },
+    "get-squashed-entity-response": {
+      "type": "object"
+    }
+  }
+}
