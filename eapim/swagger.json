@@ -70,7 +70,7 @@
         }
       }
     },
-    "/heart-beat": {
+    "/HeartBeat": {
       "get": {
         "description": "Standard diagnostics method, used to test the health of the facade's underlying system.",
         "operationId": "heart-beat",
