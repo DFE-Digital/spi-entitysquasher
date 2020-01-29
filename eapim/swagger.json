@@ -25,7 +25,7 @@
           {
             "in": "header",
             "name": "X-Internal-Request-Id",
-            "description": "An internal request id. Required for logging purposes.",
+            "description": "An internal request id. Should be a vaild guid. Required for logging purposes.",
             "type": "string",
             "required": true
           },
