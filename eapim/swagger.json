@@ -6,6 +6,7 @@
     "description": "SPI middleware component: provides entity squashing services."
   },
   "basePath": "/v1/spi/entity-squasher",
+  "host": "__function_app_host__",
   "paths": {
     "/get-squashed-entity": {
       "post": {

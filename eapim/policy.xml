@@ -1,6 +1,9 @@
 <policies>
   
   <inbound>
+    <set-header name="X-Functions-Key" exists-action="skip">
+      <value>{{squasher-function-app-key}}</value>
+    </set-header>
     <base />
   </inbound>
   
