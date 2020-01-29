@@ -5,7 +5,7 @@
     "version": "2.0",
     "description": "SPI middleware component: provides entity squashing services."
   },
-  "basePath": "/v1/spi/entity-squasher",
+  "basePath": "/api",
   "host": "__function_app_host__",
   "paths": {
     "/get-squashed-entity": {
@@ -74,7 +74,21 @@
       "get": {
         "description": "Standard diagnostics method, used to test the health of the facade's underlying system.",
         "operationId": "heart-beat",
-        "parameters": [],
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Internal-Request-Id",
+            "description": "An internal request id. Required for logging purposes.",
+            "type": "string",
+            "required": true
+          },
+          {
+            "in": "header",
+            "name": "X-External-Request-Id",
+            "description": "An optional external request id. Used in logging.",
+            "type": "string"
+          }
+        ],
         "responses": {
           "200": {
             "description": "The standard/only response from the method."
