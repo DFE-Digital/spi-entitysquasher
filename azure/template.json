@@ -168,6 +168,10 @@
     "functionAppKey": {
       "value": "[listkeys(concat(variables('functionAppId'), '/host/default/'),'2016-08-01').functionKeys.default]",
       "type": "string"
+    },
+    "functionAppName": {
+      "value": "[variables('functionAppName')]",
+      "type": "string"
     }
   }
 }
