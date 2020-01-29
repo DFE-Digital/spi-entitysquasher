@@ -1,7 +1,5 @@
 ﻿namespace Dfe.Spi.EntitySquasher.FunctionApp.Functions
 {
-    using System;
-    using Dfe.Spi.Common.Logging.Definitions;
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.Azure.WebJobs;
@@ -12,22 +10,8 @@
     /// Note: EAPIM's health check is *not* looking for kebab-case.
     ///       So, this is a one-off.
     /// </summary>
-    public class HeartBeat
+    public static class HeartBeat
     {
-        private readonly ILoggerWrapper loggerWrapper;
-
-        /// <summary>
-        /// Initialises a new instance of the <see cref="HeartBeat" />
-        /// class.
-        /// </summary>
-        /// <param name="loggerWrapper">
-        /// An instance of type <see cref="ILoggerWrapper" />.
-        /// </param>
-        public HeartBeat(ILoggerWrapper loggerWrapper)
-        {
-            this.loggerWrapper = loggerWrapper;
-        }
-
         /// <summary>
         /// Entry method for the <c>HeartBeat</c> function.
         /// </summary>
@@ -38,25 +22,13 @@
         /// An instance of type <see cref="IActionResult" />.
         /// </returns>
         [FunctionName(nameof(HeartBeat))]
-        public IActionResult Run(
+        public static IActionResult Run(
             [HttpTrigger(AuthorizationLevel.Function, "GET", Route = null)]
             HttpRequest httpRequest)
         {
-            OkResult toReturn = null;
+            OkResult toReturn = new OkResult();
 
-            if (httpRequest == null)
-            {
-                throw new ArgumentNullException(nameof(httpRequest));
-            }
-
-            IHeaderDictionary headers = httpRequest.Headers;
-
-            this.loggerWrapper.SetContext(headers);
-
-            this.loggerWrapper.Debug("Heart-beat function invoked.");
-
-            toReturn = new OkResult();
-
+            // Just needs to return 200/OK.
             return toReturn;
         }
     }
