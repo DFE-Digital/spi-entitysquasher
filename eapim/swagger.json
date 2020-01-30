@@ -25,7 +25,7 @@
           {
             "in": "header",
             "name": "Authoziation",
-            "description": "Bear token authentication.",
+            "description": "Bearer token authentication.",
             "type": "string",
             "required": true
           },
@@ -85,7 +85,7 @@
           {
             "in": "header",
             "name": "Authoziation",
-            "description": "Bear token authentication.",
+            "description": "Bearer token authentication.",
             "type": "string",
             "required": true
           }
