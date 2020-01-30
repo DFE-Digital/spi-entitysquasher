@@ -24,8 +24,8 @@
           },
           {
             "in": "header",
-            "name": "Authoziation",
-            "description": "Bear token authentication.",
+            "name": "Authorization",
+            "description": "Bearer token authentication.",
             "type": "string",
             "required": true
           },
@@ -84,8 +84,8 @@
         "parameters": [
           {
             "in": "header",
-            "name": "Authoziation",
-            "description": "Bear token authentication.",
+            "name": "Authorization",
+            "description": "Bearer token authentication.",
             "type": "string",
             "required": true
           }
