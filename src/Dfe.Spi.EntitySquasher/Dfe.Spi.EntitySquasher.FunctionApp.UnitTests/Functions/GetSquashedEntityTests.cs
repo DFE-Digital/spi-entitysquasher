@@ -45,17 +45,22 @@
                 new Mock<IGetSquashedEntityProcessor>();
             this.mockHttpErrorBodyResultProvider =
                 new Mock<IHttpErrorBodyResultProvider>();
+            Mock<IHttpSpiExecutionContextManager> mockHttpSpiExecutionContextManager =
+                new Mock<IHttpSpiExecutionContextManager>();
 
             IGetSquashedEntityProcessor getSquashedEntityProcessor =
                 mockGetSquashedEntityProcessor.Object;
             IHttpErrorBodyResultProvider httpErrorBodyResultProvider =
                 mockHttpErrorBodyResultProvider.Object;
+            IHttpSpiExecutionContextManager httpSpiExecutionContextManager =
+                mockHttpSpiExecutionContextManager.Object;
 
             this.loggerWrapper = new LoggerWrapper();
 
             this.getSquashedEntity = new GetSquashedEntity(
                 getSquashedEntityProcessor,
                 httpErrorBodyResultProvider,
+                httpSpiExecutionContextManager,
                 loggerWrapper);
         }
 

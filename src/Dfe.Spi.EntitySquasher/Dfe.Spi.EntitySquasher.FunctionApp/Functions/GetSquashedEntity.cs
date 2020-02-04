@@ -36,14 +36,20 @@ namespace Dfe.Spi.EntitySquasher.FunctionApp.Functions
         /// <param name="httpErrorBodyResultProvider">
         /// An instance of type <see cref="IHttpErrorBodyResultProvider" />.
         /// </param>
+        /// <param name="httpSpiExecutionContextManager">
+        /// An instance of type <see cref="IHttpSpiExecutionContextManager" />.
+        /// </param>
         /// <param name="loggerWrapper">
         /// An instance of type <see cref="ILoggerWrapper" />.
         /// </param>
         public GetSquashedEntity(
             IGetSquashedEntityProcessor getSquashedEntityProcessor,
             IHttpErrorBodyResultProvider httpErrorBodyResultProvider,
+            IHttpSpiExecutionContextManager httpSpiExecutionContextManager,
             ILoggerWrapper loggerWrapper)
-            : base(loggerWrapper)
+            : base(
+                  httpSpiExecutionContextManager,
+                  loggerWrapper)
         {
             this.getSquashedEntityProcessor = getSquashedEntityProcessor;
             this.httpErrorBodyResultProvider = httpErrorBodyResultProvider;
