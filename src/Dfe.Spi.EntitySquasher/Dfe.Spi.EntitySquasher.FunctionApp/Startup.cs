@@ -66,13 +66,10 @@
                     SystemErrorIdentifier,
                     HttpErrorMessages.ResourceManager);
 
-            HttpSpiExecutionContextManager httpSpiExecutionContextManager =
-                new HttpSpiExecutionContextManager();
-
             serviceCollection
-                .AddSingleton<ISpiExecutionContextManager>(httpSpiExecutionContextManager)
-                .AddSingleton<IHttpSpiExecutionContextManager>(httpSpiExecutionContextManager)
                 .AddSingleton<IHttpErrorBodyResultProvider>(httpErrorBodyResultProvider)
+                .AddScoped<IHttpSpiExecutionContextManager, HttpSpiExecutionContextManager>()
+                .AddScoped<ISpiExecutionContextManager>(x => x.GetService<IHttpSpiExecutionContextManager>())
                 .AddScoped<IResultSquasher, ResultSquasher>()
                 .AddScoped<IEntityAdapterInvoker, EntityAdapterInvoker>()
                 .AddScoped<IGetSquashedEntityProcessor, GetSquashedEntityProcessor>()
