@@ -3,7 +3,6 @@
     using System;
     using System.Diagnostics.CodeAnalysis;
     using Dfe.Spi.Common.Logging.Definitions;
-    using Microsoft.AspNetCore.Http;
 
     /// <summary>
     /// Implements <see cref="ILoggerWrapper" />.
@@ -36,18 +35,6 @@
         public void Info(string message, Exception exception = null)
         {
             this.WriteConsole(ConsoleColor.Blue, message, exception);
-        }
-
-        /// <inheritdoc />
-        public void SetContext(IHeaderDictionary headerDictionary)
-        {
-            throw new NotImplementedException();
-        }
-
-        /// <inheritdoc />
-        public void SetInternalRequestId(Guid internalRequestId)
-        {
-            throw new NotImplementedException();
         }
 
         /// <inheritdoc />
