@@ -3,6 +3,7 @@
     using System;
     using System.Collections.Generic;
     using System.Diagnostics.CodeAnalysis;
+    using Dfe.Spi.Common.Context.Definitions;
     using Dfe.Spi.Common.Logging.Definitions;
     using Dfe.Spi.EntitySquasher.Domain.Definitions;
     using Dfe.Spi.EntitySquasher.Domain.Definitions.Factories;
@@ -15,6 +16,7 @@
     public class EntityAdapterClientFactory : IEntityAdapterClientFactory
     {
         private readonly ILoggerWrapper loggerWrapper;
+        private readonly ISpiExecutionContextManager spiExecutionContextManager;
 
         /// <summary>
         /// Initialises a new instance of the
@@ -23,9 +25,15 @@
         /// <param name="loggerWrapper">
         /// An instance of type <see cref="ILoggerWrapper" />.
         /// </param>
-        public EntityAdapterClientFactory(ILoggerWrapper loggerWrapper)
+        /// <param name="spiExecutionContextManager">
+        /// An instance of type <see cref="ISpiExecutionContextManager" />.
+        /// </param>
+        public EntityAdapterClientFactory(
+            ILoggerWrapper loggerWrapper,
+            ISpiExecutionContextManager spiExecutionContextManager)
         {
             this.loggerWrapper = loggerWrapper;
+            this.spiExecutionContextManager = spiExecutionContextManager;
         }
 
         /// <inheritdoc />
@@ -49,6 +57,7 @@
             toReturn = new EntityAdapterClient(
                 this.loggerWrapper,
                 restClient,
+                this.spiExecutionContextManager,
                 entityAdapterName);
 
             return toReturn;
