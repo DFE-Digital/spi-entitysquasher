@@ -9,12 +9,12 @@
     using Dfe.Spi.Common.Context.Definitions;
     using Dfe.Spi.Common.Context.Models;
     using Dfe.Spi.Common.Extensions;
+    using Dfe.Spi.Common.Http.Client;
     using Dfe.Spi.Common.Logging.Definitions;
     using Dfe.Spi.Common.Models;
     using Dfe.Spi.EntitySquasher.Domain;
     using Dfe.Spi.EntitySquasher.Domain.Definitions;
     using Dfe.Spi.EntitySquasher.Domain.Models;
-    using Microsoft.Net.Http.Headers;
     using Newtonsoft.Json;
     using RestSharp;
     using ModelsBase = Dfe.Spi.Models.ModelsBase;
@@ -24,7 +24,6 @@
     /// </summary>
     public class EntityAdapterClient : IEntityAdapterClient
     {
-        private const string BearerAuthorizationFormat = "Bearer {0}";
         private const string RelativeResourceUriFormat =
             "./{0}/{1}?fields={2}";
 
@@ -81,23 +80,7 @@
             SpiExecutionContext spiExecutionContext =
                 this.spiExecutionContextManager.SpiExecutionContext;
 
-            string identityToken = null;
-            if (spiExecutionContext != null)
-            {
-                identityToken = spiExecutionContext.IdentityToken;
-            }
-
-            if (!string.IsNullOrEmpty(identityToken))
-            {
-                string authorizationValue = string.Format(
-                    CultureInfo.InvariantCulture,
-                    BearerAuthorizationFormat,
-                    identityToken);
-
-                restRequest.AddHeader(
-                    HeaderNames.Authorization,
-                    authorizationValue);
-            }
+            restRequest.AppendContext(spiExecutionContext);
 
             this.loggerWrapper.Debug($"Executing {restRequest}...");
 
