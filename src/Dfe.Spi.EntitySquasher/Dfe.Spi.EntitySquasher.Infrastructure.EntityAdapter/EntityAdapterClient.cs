@@ -3,6 +3,7 @@
     using System;
     using System.Collections.Generic;
     using System.Globalization;
+    using System.Linq;
     using System.Net;
     using System.Reflection;
     using System.Threading.Tasks;
@@ -81,6 +82,15 @@
                 this.spiExecutionContextManager.SpiExecutionContext;
 
             restRequest.AppendContext(spiExecutionContext);
+
+            IEnumerable<string> outgoingHeaders = restRequest.Parameters
+                .Where(x => x.Type == ParameterType.HttpHeader)
+                .Select(x => $"{x.Name} = \"{x.Value}\"");
+
+            string outgoingHeadersDesc = string.Join(", ", outgoingHeaders);
+
+            this.loggerWrapper.Info(
+                $"Outgoing headers: {outgoingHeadersDesc}");
 
             this.loggerWrapper.Debug($"Executing {restRequest}...");
 
