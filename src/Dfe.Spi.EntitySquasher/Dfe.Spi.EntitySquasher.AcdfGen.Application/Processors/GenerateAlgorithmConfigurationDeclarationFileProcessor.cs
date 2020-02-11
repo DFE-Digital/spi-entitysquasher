@@ -198,13 +198,7 @@
             {
                 Name = type.Name,
                 Fields = fields,
-                Sources = new string[]
-                {
-                    // Explicitly set this to null, so that it serialises
-                    // out and can be fleshed out by whoever it is setting
-                    // it up.
-                    null,
-                },
+                Sources = null,
             };
 
             this.loggerWrapper.Info(
@@ -223,13 +217,7 @@
                 // Treat false as a default value - doesn't have to be
                 // explicitly specified, but may as well.
                 TreatWhitespaceAsNull = false,
-                Sources = new string[]
-                {
-                    // Explicitly set this to null, so that it serialises
-                    // out and can be fleshed out by whoever it is setting
-                    // it up.
-                    null,
-                },
+                Sources = null,
             };
 
             this.loggerWrapper.Info(
