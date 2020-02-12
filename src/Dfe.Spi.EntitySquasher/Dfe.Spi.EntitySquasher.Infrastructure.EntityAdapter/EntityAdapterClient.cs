@@ -3,6 +3,7 @@
     using System;
     using System.Collections.Generic;
     using System.Globalization;
+    using System.Linq;
     using System.Net;
     using System.Reflection;
     using System.Threading.Tasks;
@@ -82,12 +83,20 @@
 
             restRequest.AppendContext(spiExecutionContext);
 
+            restRequest.AddHeader("Ocp-Apim-Trace", "true");
+
             this.loggerWrapper.Debug($"Executing {restRequest}...");
 
             IRestResponse restResponse =
                 await this.restClient.ExecuteTaskAsync(
                     restRequest)
                     .ConfigureAwait(false);
+
+            Parameter parameter = restResponse.Headers
+                .Single(x => x.Name == "Ocp-Apim-Trace-Location");
+
+            this.loggerWrapper.Info(
+                $"{parameter.Name}: \"{parameter.Value}\"");
 
             if (restResponse.IsSuccessful)
             {
