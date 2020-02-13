@@ -92,11 +92,31 @@
                     restRequest)
                     .ConfigureAwait(false);
 
-            Parameter parameter = restResponse.Headers
-                .Single(x => x.Name == "Ocp-Apim-Trace-Location");
+            string[] headersAndValues = restResponse.Request
+                .Parameters
+                .Where(x => x.Type == ParameterType.HttpHeader)
+                .Select(x => $"{x.Name} = \"{x.Value}\"")
+                .ToArray();
+
+            string headersAndValuesDesc = string.Join(", ", headersAndValues);
 
             this.loggerWrapper.Info(
-                $"{parameter.Name}: \"{parameter.Value}\"");
+                $"Response URI: {restResponse.ResponseUri}.");
+
+            this.loggerWrapper.Info(
+                $"Request headers sent were: {headersAndValuesDesc}.");
+
+            this.loggerWrapper.Info(
+                $"Response code: {restResponse.StatusCode}.");
+
+            headersAndValues = restResponse.Headers
+                .Select(x => $"{x.Name} = \"{x.Value}\"")
+                .ToArray();
+
+            headersAndValuesDesc = string.Join(", ", headersAndValues);
+
+            this.loggerWrapper.Info(
+                $"Response headers are: {headersAndValuesDesc}.");
 
             if (restResponse.IsSuccessful)
             {
