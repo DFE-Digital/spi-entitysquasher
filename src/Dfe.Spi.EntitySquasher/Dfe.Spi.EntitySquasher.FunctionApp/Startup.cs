@@ -104,7 +104,7 @@
         {
             serviceCollection
                 .AddSingleton<IAlgorithmConfigurationDeclarationFileCache, AlgorithmConfigurationDeclarationFileCache>()
-                .AddSingleton<IEntityAdapterClientCache, EntityAdapterClientCache>();
+                .AddScoped<IEntityAdapterClientCache, EntityAdapterClientCache>();
         }
 
         private static ILogger CreateILogger(IServiceProvider serviceProvider)
