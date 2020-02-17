@@ -118,6 +118,14 @@
             this.loggerWrapper.Info(
                 $"Response headers are: {headersAndValuesDesc}.");
 
+            if (restResponse.ErrorException != null)
+            {
+                this.loggerWrapper.Info(
+                    $"The {nameof(restResponse.ErrorException)} property " +
+                    $"was not null.",
+                    restResponse.ErrorException);
+            }
+
             if (restResponse.IsSuccessful)
             {
                 string content = restResponse.Content;
