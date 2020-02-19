@@ -19,6 +19,9 @@
     /// </summary>
     public class ResultSquasher : IResultSquasher
     {
+        private static readonly Dictionary<Type, PropertyInfo[]> PropertyInfos =
+            new Dictionary<Type, PropertyInfo[]>();
+
         private readonly ICacheManager cacheManager;
         private readonly ILoggerWrapper loggerWrapper;
 
@@ -121,7 +124,18 @@
             // Now (attempt to) populate each property in turn.
             Type typeToReturn = modelsAssembly.GetType(typeNamespace);
 
-            PropertyInfo[] propertiesToPopulate = typeToReturn.GetProperties();
+            // Little bit of caching.
+            PropertyInfo[] propertiesToPopulate = null;
+            if (PropertyInfos.ContainsKey(typeToReturn))
+            {
+                propertiesToPopulate = PropertyInfos[typeToReturn];
+            }
+            else
+            {
+                propertiesToPopulate = typeToReturn.GetProperties();
+
+                PropertyInfos.Add(typeToReturn, propertiesToPopulate);
+            }
 
             this.loggerWrapper.Debug(
                 $"Cycling through {entityName}'s " +
