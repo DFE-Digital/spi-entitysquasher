@@ -26,7 +26,10 @@
     public class EntityAdapterClient : IEntityAdapterClient
     {
         private const string RelativeResourceUriFormat =
-            "./{0}/{1}?fields={2}";
+            "./{0}/{1}{2}";
+
+        private const string RelativeResourceQueryStringFormat =
+            "?fields={0}";
 
         private readonly ILoggerWrapper loggerWrapper;
         private readonly IRestClient restClient;
@@ -234,16 +237,25 @@
             this.loggerWrapper.Debug(
                 $"{nameof(entityName)} converted: \"{entityName}\".");
 
-            // The id can remain the same.
-            // Build up the fields list, comma seperated.
-            string fieldsList = string.Join(",", fields);
+            string queryString = null;
+            if (fields != null)
+            {
+                // The id can remain the same.
+                // Build up the fields list, comma seperated.
+                string fieldsList = string.Join(",", fields);
+
+                queryString = string.Format(
+                    CultureInfo.InvariantCulture,
+                    RelativeResourceQueryStringFormat,
+                    fieldsList);
+            }
 
             string toReturnStr = string.Format(
                 CultureInfo.InvariantCulture,
                 RelativeResourceUriFormat,
                 entityName,
                 id,
-                fieldsList);
+                queryString);
 
             toReturn = new Uri(toReturnStr, UriKind.Relative);
 

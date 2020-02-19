@@ -41,15 +41,17 @@
       }
     },
     "fields": {
-      "type": "array",
-      "items": {
-        "type": "string"
-      }
+      "type": [
+          "array",
+          "null"
+        ],
+        "items": {
+          "type": "string"
+        }
     }
   },
   "required": [
     "entityName",
-    "entityReferences",
-    "fields"
+    "entityReferences"
   ]
 }
