@@ -14,7 +14,7 @@
     using Dfe.Spi.EntitySquasher.Domain;
     using Dfe.Spi.EntitySquasher.Domain.Definitions;
     using Dfe.Spi.EntitySquasher.Domain.Models;
-    using Dfe.Spi.Models;
+    using Dfe.Spi.Models.Entities;
     using Moq;
     using NUnit.Framework;
 
@@ -211,7 +211,7 @@
             // First, assert the successful ones:
             actualSuccessfulTasks = invokeEntityAdaptersResult
                 .GetEntityAsyncResults
-                .Count(x => x.ModelsBase != null);
+                .Count(x => x.EntityBase != null);
 
             Assert.AreEqual(expectedSuccessfulTasks, actualSuccessfulTasks);
 
@@ -417,10 +417,10 @@
             Mock<IEntityAdapterClient> mockEntityAdapterClient =
                 new Mock<IEntityAdapterClient>();
 
-            Func<Task<Spi.Models.ModelsBase>> getEntityAsyncCallback =
+            Func<Task<EntityBase>> getEntityAsyncCallback =
                 () =>
                 {
-                    Task<Spi.Models.ModelsBase> taskToReturn =
+                    Task<EntityBase> taskToReturn =
                         this.FakeTaskCreator(delay, toThrow);
 
                     return taskToReturn;
@@ -435,11 +435,11 @@
             return toReturn;
         }
 
-        private async Task<Spi.Models.ModelsBase> FakeTaskCreator(
+        private async Task<EntityBase> FakeTaskCreator(
             TimeSpan delay,
             Exception toThrow)
         {
-            Spi.Models.ModelsBase toReturn = null;
+            EntityBase toReturn = null;
 
             await Task.Delay(delay);
 

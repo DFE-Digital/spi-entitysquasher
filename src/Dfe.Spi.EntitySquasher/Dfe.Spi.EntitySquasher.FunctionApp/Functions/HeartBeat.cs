@@ -1,5 +1,6 @@
 ﻿namespace Dfe.Spi.EntitySquasher.FunctionApp.Functions
 {
+    using System.Diagnostics.CodeAnalysis;
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.Azure.WebJobs;
@@ -21,6 +22,10 @@
         /// <returns>
         /// An instance of type <see cref="IActionResult" />.
         /// </returns>
+        [SuppressMessage(
+            "Microsoft.Usage",
+            "CA1801",
+            Justification = "The functions runtime requires the argument.")]
         [FunctionName(nameof(HeartBeat))]
         public static IActionResult Run(
             [HttpTrigger(AuthorizationLevel.Function, "GET", Route = null)]

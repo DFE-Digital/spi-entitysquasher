@@ -14,6 +14,7 @@
     using Dfe.Spi.EntitySquasher.Application.Models.Result;
     using Dfe.Spi.EntitySquasher.Domain;
     using Dfe.Spi.EntitySquasher.Domain.Definitions;
+    using Dfe.Spi.Models.Entities;
 
     /// <summary>
     /// Implements <see cref="IEntityAdapterInvoker" />.
@@ -76,9 +77,9 @@
 
             this.loggerWrapper.Debug(
                 $"Fetching from the appropriate adapters the " +
-                $"{nameof(Task)}s to fetch the {nameof(ModelsBase)}s...");
+                $"{nameof(Task)}s to fetch the {nameof(EntityBase)}s...");
 
-            Task<Spi.Models.ModelsBase> task = null;
+            Task<EntityBase> task = null;
             GetEntityAsyncTaskContainer getEntityTaskContainer = null;
             foreach (AdapterRecordReference adapterRecordReference in adapterRecordReferences)
             {
@@ -141,11 +142,11 @@
                 .Select(x => new GetEntityAsyncResult()
                 {
                     AdapterRecordReference = x.AdapterRecordReference,
-                    ModelsBase = x.Task.Result,
+                    EntityBase = x.Task.Result,
                 });
 
             this.loggerWrapper.Debug(
-                $"Number of {nameof(ModelsBase)}s (successfully) returned: " +
+                $"Number of {nameof(EntityBase)}s (successfully) returned: " +
                 $"{successfulTasks.Count()}.");
 
             this.AssertExceptionsAreHandled(fetchTasks);
@@ -226,14 +227,14 @@
             }
         }
 
-        private async Task<Task<Spi.Models.ModelsBase>> GetEntityAsyncTaskAsync(
+        private async Task<Task<EntityBase>> GetEntityAsyncTaskAsync(
             string algorithm,
             string entityName,
             IEnumerable<string> fields,
             AdapterRecordReference adapterRecordReference,
             CancellationToken cancellationToken)
         {
-            Task<Spi.Models.ModelsBase> toReturn = null;
+            Task<EntityBase> toReturn = null;
 
             string source = adapterRecordReference.Source;
 

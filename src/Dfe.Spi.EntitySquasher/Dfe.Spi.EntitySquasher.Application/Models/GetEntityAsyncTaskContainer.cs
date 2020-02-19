@@ -4,6 +4,7 @@
     using System.Diagnostics.CodeAnalysis;
     using System.Threading.Tasks;
     using Dfe.Spi.EntitySquasher.Domain.Definitions;
+    using Dfe.Spi.Models.Entities;
 
     /// <summary>
     /// A container class for tasks returned from
@@ -16,7 +17,7 @@
         /// Gets or sets an instance of
         /// <see cref="System.Threading.Tasks.Task "/>.
         /// </summary>
-        public Task<Spi.Models.ModelsBase> Task
+        public Task<EntityBase> Task
         {
             get;
             set;

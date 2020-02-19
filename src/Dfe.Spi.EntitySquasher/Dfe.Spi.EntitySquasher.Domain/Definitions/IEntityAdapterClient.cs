@@ -2,7 +2,7 @@
 {
     using System.Collections.Generic;
     using System.Threading.Tasks;
-    using Dfe.Spi.Models;
+    using Dfe.Spi.Models.Entities;
 
     /// <summary>
     /// Describes the operations of the entity adapter client.
@@ -22,9 +22,9 @@
         /// The fields to return from the adapter.
         /// </param>
         /// <returns>
-        /// An instance of type <see cref="ModelsBase" />.
+        /// An instance of type <see cref="EntityBase" />.
         /// </returns>
-        Task<ModelsBase> GetEntityAsync(
+        Task<EntityBase> GetEntityAsync(
             string entityName,
             string id,
             IEnumerable<string> fields);

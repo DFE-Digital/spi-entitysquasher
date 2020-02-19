@@ -4,6 +4,7 @@
     using Dfe.Spi.EntitySquasher.AcdfGen.Application.Processors;
     using Dfe.Spi.EntitySquasher.AcdfGen.Domain.Definitions;
     using Dfe.Spi.EntitySquasher.Domain.Models.Acdf;
+    using Dfe.Spi.Models.Entities;
     using Moq;
     using NUnit.Framework;
     using System;
@@ -125,7 +126,7 @@
             Assert.IsTrue(entities.Count() > 1);
 
             modelsBaseEntity = entities
-                .SingleOrDefault(x => x.Name == nameof(Spi.Models.ModelsBase));
+                .SingleOrDefault(x => x.Name == nameof(EntityBase));
 
             Assert.IsNull(modelsBaseEntity);
 

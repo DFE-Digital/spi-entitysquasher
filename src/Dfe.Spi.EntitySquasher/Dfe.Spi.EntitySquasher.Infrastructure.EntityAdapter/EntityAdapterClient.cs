@@ -16,9 +16,9 @@
     using Dfe.Spi.EntitySquasher.Domain;
     using Dfe.Spi.EntitySquasher.Domain.Definitions;
     using Dfe.Spi.EntitySquasher.Domain.Models;
+    using Dfe.Spi.Models.Entities;
     using Newtonsoft.Json;
     using RestSharp;
-    using ModelsBase = Dfe.Spi.Models.ModelsBase;
 
     /// <summary>
     /// Implements <see cref="IEntityAdapterClient" />.
@@ -64,12 +64,12 @@
         }
 
         /// <inheritdoc />
-        public async Task<ModelsBase> GetEntityAsync(
+        public async Task<EntityBase> GetEntityAsync(
             string entityName,
             string id,
             IEnumerable<string> fields)
         {
-            ModelsBase toReturn = null;
+            EntityBase toReturn = null;
 
             Uri resourceUri = this.CreateRelativeResourceUri(
                 entityName,
@@ -100,13 +100,13 @@
 
             string headersAndValuesDesc = string.Join(", ", headersAndValues);
 
-            this.loggerWrapper.Info(
+            this.loggerWrapper.Debug(
                 $"Response URI: {restResponse.ResponseUri}.");
 
-            this.loggerWrapper.Info(
+            this.loggerWrapper.Debug(
                 $"Request headers sent were: {headersAndValuesDesc}.");
 
-            this.loggerWrapper.Info(
+            this.loggerWrapper.Debug(
                 $"Response code: {restResponse.StatusCode}.");
 
             headersAndValues = restResponse.Headers
@@ -115,8 +115,16 @@
 
             headersAndValuesDesc = string.Join(", ", headersAndValues);
 
-            this.loggerWrapper.Info(
+            this.loggerWrapper.Debug(
                 $"Response headers are: {headersAndValuesDesc}.");
+
+            if (restResponse.ErrorException != null)
+            {
+                this.loggerWrapper.Warning(
+                    $"The {nameof(restResponse.ErrorException)} property " +
+                    $"was not null.",
+                    restResponse.ErrorException);
+            }
 
             if (restResponse.IsSuccessful)
             {
@@ -125,7 +133,7 @@
                 Type type = this.GetActualUnboxingType(entityName);
 
                 toReturn =
-                    JsonConvert.DeserializeObject(content, type) as ModelsBase;
+                    JsonConvert.DeserializeObject(content, type) as EntityBase;
 
                 this.loggerWrapper.Info(
                     $"Request executed with success: {restResponse}.");
@@ -188,7 +196,7 @@
             Type toReturn = null;
 
             // Use ModelsBase as a starting point...
-            toReturn = typeof(ModelsBase);
+            toReturn = typeof(EntityBase);
 
             string requiredConcreteType = toReturn.FullName;
 

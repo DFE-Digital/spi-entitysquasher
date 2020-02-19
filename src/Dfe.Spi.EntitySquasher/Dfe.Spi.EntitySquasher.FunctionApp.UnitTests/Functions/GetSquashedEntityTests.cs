@@ -11,7 +11,7 @@
     using Dfe.Spi.EntitySquasher.Application.Processors.Definitions;
     using Dfe.Spi.EntitySquasher.Domain.Models;
     using Dfe.Spi.EntitySquasher.FunctionApp.Functions;
-    using Dfe.Spi.Models;
+    using Dfe.Spi.Models.Entities;
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Http.Internal;
     using Microsoft.AspNetCore.Mvc;

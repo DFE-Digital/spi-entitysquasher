@@ -13,6 +13,7 @@
     using Dfe.Spi.EntitySquasher.Application.Models.Result;
     using Dfe.Spi.EntitySquasher.Application.Processors.Definitions;
     using Dfe.Spi.EntitySquasher.Domain.Models;
+    using Dfe.Spi.Models.Entities;
 
     /// <summary>
     /// Implements <see cref="IGetSquashedEntityProcessor" />.
@@ -118,9 +119,9 @@
 
             // 1) Call all adapters specified in the entity reference
             //    at the same time. First, get the tasks to pull back the
-            //    ModelsBases.
+            //    EntityBase.
             IEnumerable<EntityAdapterErrorDetail> entityAdapterErrorDetails = null;
-            Spi.Models.ModelsBase squashedEntity = null;
+            EntityBase squashedEntity = null;
             try
             {
                 InvokeEntityAdaptersResult adaptersLookupResult =
@@ -144,7 +145,7 @@
                 //    *these* guys.
                 IEnumerable<GetEntityAsyncResult> toSquash =
                     getEntityAsyncResults
-                        .Where(x => x.ModelsBase != null);
+                        .Where(x => x.EntityBase != null);
 
                 squashedEntity =
                     await this.resultSquasher.SquashAsync(

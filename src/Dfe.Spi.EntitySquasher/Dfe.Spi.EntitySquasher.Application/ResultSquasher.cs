@@ -12,6 +12,7 @@
     using Dfe.Spi.EntitySquasher.Application.Definitions.Factories;
     using Dfe.Spi.EntitySquasher.Application.Models.Result;
     using Dfe.Spi.EntitySquasher.Domain.Models.Acdf;
+    using Dfe.Spi.Models.Entities;
 
     /// <summary>
     /// Implements <see cref="IResultSquasher" />.
@@ -49,13 +50,13 @@
         }
 
         /// <inheritdoc />
-        public async Task<Spi.Models.ModelsBase> SquashAsync(
+        public async Task<EntityBase> SquashAsync(
             string algorithm,
             string entityName,
             IEnumerable<GetEntityAsyncResult> toSquash,
             CancellationToken cancellationToken)
         {
-            Spi.Models.ModelsBase toReturn = null;
+            EntityBase toReturn = null;
 
             this.loggerWrapper.Debug(
                 $"Pulling back " +
@@ -99,18 +100,18 @@
                 $"{nameof(Entity)} found for \"{entityName}\": {entity}.");
 
             // Create a new instance of the requested model.
-            Type modelsBaseType = typeof(Spi.Models.ModelsBase);
+            Type entityBaseType = typeof(EntityBase);
 
-            string typeNamespace = modelsBaseType.FullName.Replace(
-                modelsBaseType.Name,
+            string typeNamespace = entityBaseType.FullName.Replace(
+                entityBaseType.Name,
                 entityName);
 
             this.loggerWrapper.Debug(
                 $"{nameof(typeNamespace)} = \"{typeNamespace}\"");
 
-            Assembly modelsAssembly = modelsBaseType.Assembly;
+            Assembly modelsAssembly = entityBaseType.Assembly;
 
-            toReturn = (Spi.Models.ModelsBase)modelsAssembly.CreateInstance(
+            toReturn = (EntityBase)modelsAssembly.CreateInstance(
                 typeNamespace);
 
             this.loggerWrapper.Info(
@@ -143,7 +144,7 @@
         }
 
         private void PopulateProperty(
-            Spi.Models.ModelsBase modelsBase,
+            EntityBase entityBase,
             PropertyInfo propertyToPopulate,
             IEnumerable<GetEntityAsyncResult> toSquash,
             Entity entity)
@@ -251,7 +252,7 @@
                         // We have one!
                         // Now use reflection to get the correpsonding value.
                         value = propertyToPopulate.GetValue(
-                            getEntityAsyncResult.ModelsBase);
+                            getEntityAsyncResult.EntityBase);
 
                         if (this.IsFieldValueEmpty(field, value))
                         {
@@ -284,7 +285,7 @@
 
                 // value now has the value we need...
                 // So use reflection to update our squashed model...
-                propertyToPopulate.SetValue(modelsBase, value);
+                propertyToPopulate.SetValue(entityBase, value);
 
                 this.loggerWrapper.Info(
                     $"\"{name}\" was updated to \"{value}\" using " +

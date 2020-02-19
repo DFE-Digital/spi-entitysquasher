@@ -12,6 +12,7 @@
     using Dfe.Spi.EntitySquasher.Application.Models.Result;
     using Dfe.Spi.EntitySquasher.Domain.Models.Acdf;
     using Dfe.Spi.Models;
+    using Dfe.Spi.Models.Entities;
     using Moq;
     using Newtonsoft.Json;
     using NUnit.Framework;
@@ -166,7 +167,7 @@
                          Id = "123",
                          Source = "someother-adapter"
                      },
-                     ModelsBase = new LearningProvider()
+                     EntityBase = new LearningProvider()
                      {
                          Name = "  ",
                          Postcode = "LE1 1ST",
@@ -182,7 +183,7 @@
                         Id = "abc",
                         Source = "some-adapter",
                     },
-                    ModelsBase = new LearningProvider()
+                    EntityBase = new LearningProvider()
                     {
                         LegalName = expectedLegalNameVariation,
                         Postcode = expectedPostcode,
@@ -198,20 +199,20 @@
             this.ConfigureAlgorithmConfigurationDeclarationFileManager(
                 "acdf-example.json");
 
-            Spi.Models.ModelsBase modelsBase = null;
-            Spi.Models.LearningProvider learningProvider = null;
+            EntityBase entityBase = null;
+            LearningProvider learningProvider = null;
 
             // Act
-            modelsBase = await this.resultSquasher.SquashAsync(
+            entityBase = await this.resultSquasher.SquashAsync(
                 algorithm,
                 entityName,
                 toSquash,
                 cancellationToken);
 
             // Assert
-            Assert.IsInstanceOf<LearningProvider>(modelsBase);
+            Assert.IsInstanceOf<LearningProvider>(entityBase);
 
-            learningProvider = modelsBase as LearningProvider;
+            learningProvider = entityBase as LearningProvider;
 
             actualNameVariation = learningProvider.Name;
             Assert.AreEqual(expectedNameVariation, actualNameVariation);
