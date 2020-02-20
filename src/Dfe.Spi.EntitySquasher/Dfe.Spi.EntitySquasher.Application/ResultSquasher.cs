@@ -198,6 +198,9 @@
             // So, let's see if we have any...
             if (withSubLineage.Any())
             {
+                this.loggerWrapper.Info(
+                    "Lineage was specified on the records being squashed.");
+
                 string nameCamelCase = this.camelCasePropertyNamesContractResolver
                     .GetResolvedPropertyName(name);
 
@@ -208,6 +211,11 @@
                 // We do... but... do we have lineage for *this property*?
                 if (withAlternatviesInSubLineage.Any())
                 {
+                    this.loggerWrapper.Info(
+                        $"Lineage was specified, and " +
+                        $"{withAlternatviesInSubLineage.Count()} record(s) " +
+                        $"contain alternatives for \"{name}\".");
+
                     // We do!
                     // So populate the alternatives with everything...
                     // Then we'll pick out the one that was chosen, and remove
@@ -237,7 +245,23 @@
                     {
                         Alternatives = lineageEntries,
                     };
+
+                    this.loggerWrapper.Info(
+                        $"{toReturn.Alternatives.Count()} alternative " +
+                        $"{nameof(LineageEntry)}s were created.");
                 }
+                else
+                {
+                    this.loggerWrapper.Debug(
+                        $"Lineage was present/specified, but it wasn't " +
+                        $"available for \"{name}\".");
+                }
+            }
+            else
+            {
+                this.loggerWrapper.Debug(
+                    "Lineage was not specified on any records pulled back " +
+                    "from the adapter.");
             }
 
             return toReturn;
@@ -249,36 +273,9 @@
             IEnumerable<GetEntityAsyncResult> toSquash,
             Entity entity)
         {
-            LineageEntry toReturn = this.CreatePropertyLineageEntry(
-                toSquash,
-                propertyToPopulate);
+            LineageEntry toReturn = null;
 
             string name = propertyToPopulate.Name;
-
-            // Get an entity-level list of sources, if available.
-            // This will either be null, or be populated.
-            string[] sources = null;
-            if (entity.Sources != null)
-            {
-                sources = entity.Sources.ToArray();
-            }
-
-            string entityName = entity.Name;
-
-            string sourcesCsl = null;
-            if (sources != null)
-            {
-                sourcesCsl = string.Join(", ", sources);
-                this.loggerWrapper.Info(
-                    $"{nameof(Entity)} level sources specified for " +
-                    $"{entityName}: {sourcesCsl}.");
-            }
-            else
-            {
-                this.loggerWrapper.Debug(
-                    $"No {nameof(Entity)} level sources specified for " +
-                    $"{entityName}.");
-            }
 
             this.loggerWrapper.Debug(
                 $"Pulling back {nameof(Field)} configuration for " +
@@ -289,6 +286,35 @@
 
             if (field != null)
             {
+                toReturn = this.CreatePropertyLineageEntry(
+                    toSquash,
+                    propertyToPopulate);
+
+                // Get an entity-level list of sources, if available.
+                // This will either be null, or be populated.
+                string[] sources = null;
+                if (entity.Sources != null)
+                {
+                    sources = entity.Sources.ToArray();
+                }
+
+                string entityName = entity.Name;
+
+                string sourcesCsl = null;
+                if (sources != null)
+                {
+                    sourcesCsl = string.Join(", ", sources);
+                    this.loggerWrapper.Info(
+                        $"{nameof(Entity)} level sources specified for " +
+                        $"{entityName}: {sourcesCsl}.");
+                }
+                else
+                {
+                    this.loggerWrapper.Debug(
+                        $"No {nameof(Entity)} level sources specified for " +
+                        $"{entityName}.");
+                }
+
                 this.loggerWrapper.Info(
                     $"{nameof(Field)} configuration for \"{name}\": {field}.");
 
@@ -372,6 +398,10 @@
                                 $"Value for \"{name}\" is not considered " +
                                 $"empty, and will be used to populate our " +
                                 $"result model.");
+
+                            toReturn = this.UpdatePropertyLineageEntry(
+                                toReturn,
+                                currentSource);
                         }
                     }
                     else
@@ -444,6 +474,62 @@
             {
                 this.loggerWrapper.Debug(
                     $"Value for field \"{name}\" is null.");
+            }
+
+            return toReturn;
+        }
+
+        private LineageEntry UpdatePropertyLineageEntry(
+            LineageEntry currentLineage,
+            string adapterName)
+        {
+            LineageEntry toReturn = null;
+
+            // Take out the alternative for this source -
+            // And 'stick' it to the top.
+            // (Only if lineage is available, of course).
+            if (currentLineage != null)
+            {
+                this.loggerWrapper.Info(
+                    $"Setting the top level {nameof(LineageEntry)} to be " +
+                    $"from \"{adapterName}\". Taking this " +
+                    $"{nameof(LineageEntry)} from the " +
+                    $"{nameof(currentLineage.Alternatives)}...");
+
+                LineageEntry lineageEntry = currentLineage.Alternatives
+                    .SingleOrDefault(x => x.AdapterName == adapterName);
+
+                if (lineageEntry != null)
+                {
+                    this.loggerWrapper.Debug(
+                        $"{lineageEntry} chosen. Removing from " +
+                        $"alternatives...");
+
+                    // lineageEntry is the one we want to
+                    // remove from the alternatives, and 
+                    // 'move' to the 'top'.
+                    LineageEntry[] prunedAlternatives = currentLineage
+                        .Alternatives
+                        .SkipWhile(x => x.AdapterName == lineageEntry.AdapterName)
+                        .ToArray();
+
+                    this.loggerWrapper.Info(
+                        $"Removed from alternatives, leaving " +
+                        $"{prunedAlternatives} alternative " +
+                        $"{nameof(LineageEntry)}s.");
+
+                    toReturn = new LineageEntry()
+                    {
+                        AdapterName = lineageEntry.AdapterName,
+                        Alternatives = prunedAlternatives,
+                        ReadDate = lineageEntry.ReadDate,
+                        Value = lineageEntry.Value,
+                    };
+
+                    this.loggerWrapper.Info(
+                        $"Returning {toReturn} as top-level " +
+                        $"{nameof(LineageEntry)}.");
+                }
             }
 
             return toReturn;
