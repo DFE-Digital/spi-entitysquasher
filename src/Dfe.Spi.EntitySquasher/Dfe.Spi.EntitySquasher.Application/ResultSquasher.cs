@@ -177,11 +177,9 @@
             return toReturn;
         }
 
-        private LineageEntry PopulateProperty(
-            EntityBase entityBase,
-            PropertyInfo propertyToPopulate,
+        private LineageEntry CreatePropertyLineageEntry(
             IEnumerable<GetEntityAsyncResult> toSquash,
-            Entity entity)
+            PropertyInfo propertyToPopulate)
         {
             LineageEntry toReturn = null;
 
@@ -200,8 +198,8 @@
             // So, let's see if we have any...
             if (withSubLineage.Any())
             {
-                string nameCamelCase =
-                    this.camelCasePropertyNamesContractResolver.GetResolvedPropertyName(name);
+                string nameCamelCase = this.camelCasePropertyNamesContractResolver
+                    .GetResolvedPropertyName(name);
 
                 IEnumerable<GetEntityAsyncResult> withAlternatviesInSubLineage =
                     withSubLineage
@@ -241,6 +239,21 @@
                     };
                 }
             }
+
+            return toReturn;
+        }
+
+        private LineageEntry PopulateProperty(
+            EntityBase entityBase,
+            PropertyInfo propertyToPopulate,
+            IEnumerable<GetEntityAsyncResult> toSquash,
+            Entity entity)
+        {
+            LineageEntry toReturn = this.CreatePropertyLineageEntry(
+                toSquash,
+                propertyToPopulate);
+
+            string name = propertyToPopulate.Name;
 
             // Get an entity-level list of sources, if available.
             // This will either be null, or be populated.
