@@ -12,7 +12,9 @@
     using Dfe.Spi.EntitySquasher.Application.Definitions.Factories;
     using Dfe.Spi.EntitySquasher.Application.Models.Result;
     using Dfe.Spi.EntitySquasher.Domain.Models.Acdf;
+    using Dfe.Spi.Models;
     using Dfe.Spi.Models.Entities;
+    using Newtonsoft.Json.Serialization;
 
     /// <summary>
     /// Implements <see cref="IResultSquasher" />.
@@ -24,6 +26,8 @@
 
         private readonly ICacheManager cacheManager;
         private readonly ILoggerWrapper loggerWrapper;
+
+        private readonly CamelCasePropertyNamesContractResolver camelCasePropertyNamesContractResolver;
 
         /// <summary>
         /// Initialises a new instance of the <see cref="ResultSquasher" />
@@ -50,6 +54,9 @@
 
             this.cacheManager =
                 algorithmConfigurationDeclarationFileCacheManagerFactory.Create();
+
+            this.camelCasePropertyNamesContractResolver =
+                new CamelCasePropertyNamesContractResolver();
         }
 
         /// <inheritdoc />
@@ -141,13 +148,26 @@
                 $"Cycling through {entityName}'s " +
                 $"{propertiesToPopulate.Length} properties...");
 
+            Dictionary<string, LineageEntry> lineage =
+                new Dictionary<string, LineageEntry>();
+            LineageEntry lineageEntry = null;
             foreach (PropertyInfo propertyToPopulate in propertiesToPopulate)
             {
-                this.PopulateProperty(
+                lineageEntry = this.PopulateProperty(
                     toReturn,
                     propertyToPopulate,
                     toSquash,
                     entity);
+
+                if (lineageEntry != null)
+                {
+                    lineage.Add(propertyToPopulate.Name, lineageEntry);
+                }
+            }
+
+            if (lineage.Count > 0)
+            {
+                toReturn._Lineage = lineage;
             }
 
             this.loggerWrapper.Info(
@@ -157,12 +177,71 @@
             return toReturn;
         }
 
-        private void PopulateProperty(
+        private LineageEntry PopulateProperty(
             EntityBase entityBase,
             PropertyInfo propertyToPopulate,
             IEnumerable<GetEntityAsyncResult> toSquash,
             Entity entity)
         {
+            LineageEntry toReturn = null;
+
+            string name = propertyToPopulate.Name;
+
+            // Remember, EntityBases can be null if the adapter fails, and
+            // _lineage will be null if it wasn't requested at the adapter
+            // level.
+            // So...
+            // First get all the results where the calls were a success, and
+            // where lineage is provided.
+            IEnumerable<GetEntityAsyncResult> withSubLineage = toSquash
+                .Where(x => x.EntityBase != null && x.EntityBase._Lineage != null);
+
+            // We want to return null when no lineage has been provided.
+            // So, let's see if we have any...
+            if (withSubLineage.Any())
+            {
+                string nameCamelCase =
+                    this.camelCasePropertyNamesContractResolver.GetResolvedPropertyName(name);
+
+                IEnumerable<GetEntityAsyncResult> withAlternatviesInSubLineage =
+                    withSubLineage
+                        .Where(x => x.EntityBase._Lineage.ContainsKey(nameCamelCase));
+
+                // We do... but... do we have lineage for *this property*?
+                if (withAlternatviesInSubLineage.Any())
+                {
+                    // We do!
+                    // So populate the alternatives with everything...
+                    // Then we'll pick out the one that was chosen, and remove
+                    // it from the alternatives down the road, and populate the
+                    // top level with the actual chosen one.
+                    LineageEntry[] lineageEntries =
+                        withAlternatviesInSubLineage
+                            .Select(x =>
+                            {
+                                LineageEntry lineageEntry =
+                                    x.EntityBase._Lineage[nameCamelCase];
+
+                                // The LineageEntry will come from the adapter
+                                // with just a date, and not much else. It's up
+                                // to us to flesh out the model a little.
+                                lineageEntry.AdapterName =
+                                    x.AdapterRecordReference.Source;
+
+                                lineageEntry.Value = propertyToPopulate
+                                    .GetValue(x.EntityBase);
+
+                                return lineageEntry;
+                            })
+                            .ToArray();
+
+                    toReturn = new LineageEntry()
+                    {
+                        Alternatives = lineageEntries,
+                    };
+                }
+            }
+
             // Get an entity-level list of sources, if available.
             // This will either be null, or be populated.
             string[] sources = null;
@@ -187,8 +266,6 @@
                     $"No {nameof(Entity)} level sources specified for " +
                     $"{entityName}.");
             }
-
-            string name = propertyToPopulate.Name;
 
             this.loggerWrapper.Debug(
                 $"Pulling back {nameof(Field)} configuration for " +
@@ -311,6 +388,8 @@
                     $"No field entry found in {entity}! This field will not " +
                     $"be populated.");
             }
+
+            return toReturn;
         }
 
         private bool IsFieldValueEmpty(
