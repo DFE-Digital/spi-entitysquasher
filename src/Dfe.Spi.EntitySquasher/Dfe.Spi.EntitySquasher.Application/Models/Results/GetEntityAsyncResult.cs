@@ -4,6 +4,7 @@
     using System.Diagnostics.CodeAnalysis;
     using Dfe.Spi.EntitySquasher.Domain;
     using Dfe.Spi.EntitySquasher.Domain.Definitions;
+    using Dfe.Spi.Models.Entities;
 
     /// <summary>
     /// Result object for
@@ -14,11 +15,11 @@
     {
         /// <summary>
         /// Gets or sets an instance of type
-        /// <see cref="Spi.Models.ModelsBase" />, if the underlying
+        /// <see cref="Spi.Models.Entities.EntityBase" />, if the underlying
         /// <see cref="GetEntityAsyncTaskContainer.Task" /> is successful.
         /// Otherwise, this is null.
         /// </summary>
-        public Spi.Models.ModelsBase ModelsBase
+        public EntityBase EntityBase
         {
             get;
             set;

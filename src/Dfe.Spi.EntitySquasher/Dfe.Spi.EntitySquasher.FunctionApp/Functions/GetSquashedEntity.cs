@@ -16,6 +16,7 @@ namespace Dfe.Spi.EntitySquasher.FunctionApp.Functions
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.Azure.WebJobs;
     using Microsoft.Azure.WebJobs.Extensions.Http;
+    using Newtonsoft.Json;
 
     /// <summary>
     /// Entry class for the <c>get-squashed-entity</c> function.
@@ -134,7 +135,16 @@ namespace Dfe.Spi.EntitySquasher.FunctionApp.Functions
                     $"{nameof(IGetSquashedEntityProcessor)} invoked with " +
                     $"success.");
 
-                toReturn = new JsonResult(getSquashedEntityResponse);
+                if (JsonConvert.DefaultSettings != null)
+                {
+                    toReturn = new JsonResult(
+                        getSquashedEntityResponse,
+                        JsonConvert.DefaultSettings());
+                }
+                else
+                {
+                    toReturn = new JsonResult(getSquashedEntityResponse);
+                }
 
                 // Did one or more errors occur?
                 bool adapterErrorHappened = getSquashedEntityResponse

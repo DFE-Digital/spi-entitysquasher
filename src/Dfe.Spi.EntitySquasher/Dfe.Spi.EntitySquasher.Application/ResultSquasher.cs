@@ -12,14 +12,22 @@
     using Dfe.Spi.EntitySquasher.Application.Definitions.Factories;
     using Dfe.Spi.EntitySquasher.Application.Models.Result;
     using Dfe.Spi.EntitySquasher.Domain.Models.Acdf;
+    using Dfe.Spi.Models;
+    using Dfe.Spi.Models.Entities;
+    using Newtonsoft.Json.Serialization;
 
     /// <summary>
     /// Implements <see cref="IResultSquasher" />.
     /// </summary>
     public class ResultSquasher : IResultSquasher
     {
+        private static readonly Dictionary<Type, PropertyInfo[]> PropertyInfos =
+            new Dictionary<Type, PropertyInfo[]>();
+
         private readonly ICacheManager cacheManager;
         private readonly ILoggerWrapper loggerWrapper;
+
+        private readonly CamelCasePropertyNamesContractResolver camelCasePropertyNamesContractResolver;
 
         /// <summary>
         /// Initialises a new instance of the <see cref="ResultSquasher" />
@@ -46,16 +54,19 @@
 
             this.cacheManager =
                 algorithmConfigurationDeclarationFileCacheManagerFactory.Create();
+
+            this.camelCasePropertyNamesContractResolver =
+                new CamelCasePropertyNamesContractResolver();
         }
 
         /// <inheritdoc />
-        public async Task<Spi.Models.ModelsBase> SquashAsync(
+        public async Task<EntityBase> SquashAsync(
             string algorithm,
             string entityName,
             IEnumerable<GetEntityAsyncResult> toSquash,
             CancellationToken cancellationToken)
         {
-            Spi.Models.ModelsBase toReturn = null;
+            EntityBase toReturn = null;
 
             this.loggerWrapper.Debug(
                 $"Pulling back " +
@@ -99,18 +110,18 @@
                 $"{nameof(Entity)} found for \"{entityName}\": {entity}.");
 
             // Create a new instance of the requested model.
-            Type modelsBaseType = typeof(Spi.Models.ModelsBase);
+            Type entityBaseType = typeof(EntityBase);
 
-            string typeNamespace = modelsBaseType.FullName.Replace(
-                modelsBaseType.Name,
+            string typeNamespace = entityBaseType.FullName.Replace(
+                entityBaseType.Name,
                 entityName);
 
             this.loggerWrapper.Debug(
                 $"{nameof(typeNamespace)} = \"{typeNamespace}\"");
 
-            Assembly modelsAssembly = modelsBaseType.Assembly;
+            Assembly modelsAssembly = entityBaseType.Assembly;
 
-            toReturn = (Spi.Models.ModelsBase)modelsAssembly.CreateInstance(
+            toReturn = (EntityBase)modelsAssembly.CreateInstance(
                 typeNamespace);
 
             this.loggerWrapper.Info(
@@ -120,19 +131,43 @@
             // Now (attempt to) populate each property in turn.
             Type typeToReturn = modelsAssembly.GetType(typeNamespace);
 
-            PropertyInfo[] propertiesToPopulate = typeToReturn.GetProperties();
+            // Little bit of caching.
+            PropertyInfo[] propertiesToPopulate = null;
+            if (PropertyInfos.ContainsKey(typeToReturn))
+            {
+                propertiesToPopulate = PropertyInfos[typeToReturn];
+            }
+            else
+            {
+                propertiesToPopulate = typeToReturn.GetProperties();
+
+                PropertyInfos.Add(typeToReturn, propertiesToPopulate);
+            }
 
             this.loggerWrapper.Debug(
                 $"Cycling through {entityName}'s " +
                 $"{propertiesToPopulate.Length} properties...");
 
+            Dictionary<string, LineageEntry> lineage =
+                new Dictionary<string, LineageEntry>();
+            LineageEntry lineageEntry = null;
             foreach (PropertyInfo propertyToPopulate in propertiesToPopulate)
             {
-                this.PopulateProperty(
+                lineageEntry = this.PopulateProperty(
                     toReturn,
                     propertyToPopulate,
                     toSquash,
                     entity);
+
+                if (lineageEntry != null)
+                {
+                    lineage.Add(propertyToPopulate.Name, lineageEntry);
+                }
+            }
+
+            if (lineage.Count > 0)
+            {
+                toReturn._Lineage = lineage;
             }
 
             this.loggerWrapper.Info(
@@ -142,36 +177,103 @@
             return toReturn;
         }
 
-        private void PopulateProperty(
-            Spi.Models.ModelsBase modelsBase,
-            PropertyInfo propertyToPopulate,
+        private LineageEntry CreatePropertyLineageEntry(
             IEnumerable<GetEntityAsyncResult> toSquash,
-            Entity entity)
+            PropertyInfo propertyToPopulate)
         {
-            // Get an entity-level list of sources, if available.
-            // This will either be null, or be populated.
-            string[] sources = null;
-            if (entity.Sources != null)
-            {
-                sources = entity.Sources.ToArray();
-            }
+            LineageEntry toReturn = null;
 
-            string entityName = entity.Name;
+            string name = propertyToPopulate.Name;
 
-            string sourcesCsl = null;
-            if (sources != null)
+            // Remember, EntityBases can be null if the adapter fails, and
+            // _lineage will be null if it wasn't requested at the adapter
+            // level.
+            // So...
+            // First get all the results where the calls were a success, and
+            // where lineage is provided.
+            IEnumerable<GetEntityAsyncResult> withSubLineage = toSquash
+                .Where(x => x.EntityBase != null && x.EntityBase._Lineage != null);
+
+            // We want to return null when no lineage has been provided.
+            // So, let's see if we have any...
+            if (withSubLineage.Any())
             {
-                sourcesCsl = string.Join(", ", sources);
                 this.loggerWrapper.Info(
-                    $"{nameof(Entity)} level sources specified for " +
-                    $"{entityName}: {sourcesCsl}.");
+                    "Lineage was specified on the records being squashed.");
+
+                string nameCamelCase = this.camelCasePropertyNamesContractResolver
+                    .GetResolvedPropertyName(name);
+
+                IEnumerable<GetEntityAsyncResult> withAlternatviesInSubLineage =
+                    withSubLineage
+                        .Where(x => x.EntityBase._Lineage.ContainsKey(nameCamelCase));
+
+                // We do... but... do we have lineage for *this property*?
+                if (withAlternatviesInSubLineage.Any())
+                {
+                    this.loggerWrapper.Info(
+                        $"Lineage was specified, and " +
+                        $"{withAlternatviesInSubLineage.Count()} record(s) " +
+                        $"contain alternatives for \"{name}\".");
+
+                    // We do!
+                    // So populate the alternatives with everything...
+                    // Then we'll pick out the one that was chosen, and remove
+                    // it from the alternatives down the road, and populate the
+                    // top level with the actual chosen one.
+                    LineageEntry[] lineageEntries =
+                        withAlternatviesInSubLineage
+                            .Select(x =>
+                            {
+                                LineageEntry lineageEntry =
+                                    x.EntityBase._Lineage[nameCamelCase];
+
+                                // The LineageEntry will come from the adapter
+                                // with just a date, and not much else. It's up
+                                // to us to flesh out the model a little.
+                                lineageEntry.AdapterName =
+                                    x.AdapterRecordReference.Source;
+
+                                lineageEntry.Value = propertyToPopulate
+                                    .GetValue(x.EntityBase);
+
+                                return lineageEntry;
+                            })
+                            .ToArray();
+
+                    toReturn = new LineageEntry()
+                    {
+                        Alternatives = lineageEntries,
+                    };
+
+                    this.loggerWrapper.Info(
+                        $"{toReturn.Alternatives.Count()} alternative " +
+                        $"{nameof(LineageEntry)}s were created.");
+                }
+                else
+                {
+                    this.loggerWrapper.Debug(
+                        $"Lineage was present/specified, but it wasn't " +
+                        $"available for \"{name}\".");
+                }
             }
             else
             {
                 this.loggerWrapper.Debug(
-                    $"No {nameof(Entity)} level sources specified for " +
-                    $"{entityName}.");
+                    "Lineage was not specified on any records pulled back " +
+                    "from the adapter.");
             }
+
+            return toReturn;
+        }
+
+        private LineageEntry PopulateProperty(
+            EntityBase entityBase,
+            PropertyInfo propertyToPopulate,
+            IEnumerable<GetEntityAsyncResult> toSquash,
+            Entity entity)
+        {
+            LineageEntry toReturn = null;
 
             string name = propertyToPopulate.Name;
 
@@ -184,6 +286,35 @@
 
             if (field != null)
             {
+                toReturn = this.CreatePropertyLineageEntry(
+                    toSquash,
+                    propertyToPopulate);
+
+                // Get an entity-level list of sources, if available.
+                // This will either be null, or be populated.
+                string[] sources = null;
+                if (entity.Sources != null)
+                {
+                    sources = entity.Sources.ToArray();
+                }
+
+                string entityName = entity.Name;
+
+                string sourcesCsl = null;
+                if (sources != null)
+                {
+                    sourcesCsl = string.Join(", ", sources);
+                    this.loggerWrapper.Info(
+                        $"{nameof(Entity)} level sources specified for " +
+                        $"{entityName}: {sourcesCsl}.");
+                }
+                else
+                {
+                    this.loggerWrapper.Debug(
+                        $"No {nameof(Entity)} level sources specified for " +
+                        $"{entityName}.");
+                }
+
                 this.loggerWrapper.Info(
                     $"{nameof(Field)} configuration for \"{name}\": {field}.");
 
@@ -251,7 +382,7 @@
                         // We have one!
                         // Now use reflection to get the correpsonding value.
                         value = propertyToPopulate.GetValue(
-                            getEntityAsyncResult.ModelsBase);
+                            getEntityAsyncResult.EntityBase);
 
                         if (this.IsFieldValueEmpty(field, value))
                         {
@@ -267,6 +398,10 @@
                                 $"Value for \"{name}\" is not considered " +
                                 $"empty, and will be used to populate our " +
                                 $"result model.");
+
+                            toReturn = this.UpdatePropertyLineageEntry(
+                                toReturn,
+                                currentSource);
                         }
                     }
                     else
@@ -284,7 +419,7 @@
 
                 // value now has the value we need...
                 // So use reflection to update our squashed model...
-                propertyToPopulate.SetValue(modelsBase, value);
+                propertyToPopulate.SetValue(entityBase, value);
 
                 this.loggerWrapper.Info(
                     $"\"{name}\" was updated to \"{value}\" using " +
@@ -296,6 +431,8 @@
                     $"No field entry found in {entity}! This field will not " +
                     $"be populated.");
             }
+
+            return toReturn;
         }
 
         private bool IsFieldValueEmpty(
@@ -337,6 +474,62 @@
             {
                 this.loggerWrapper.Debug(
                     $"Value for field \"{name}\" is null.");
+            }
+
+            return toReturn;
+        }
+
+        private LineageEntry UpdatePropertyLineageEntry(
+            LineageEntry currentLineage,
+            string adapterName)
+        {
+            LineageEntry toReturn = null;
+
+            // Take out the alternative for this source -
+            // And 'stick' it to the top.
+            // (Only if lineage is available, of course).
+            if (currentLineage != null)
+            {
+                this.loggerWrapper.Info(
+                    $"Setting the top level {nameof(LineageEntry)} to be " +
+                    $"from \"{adapterName}\". Taking this " +
+                    $"{nameof(LineageEntry)} from the " +
+                    $"{nameof(currentLineage.Alternatives)}...");
+
+                LineageEntry lineageEntry = currentLineage.Alternatives
+                    .SingleOrDefault(x => x.AdapterName == adapterName);
+
+                if (lineageEntry != null)
+                {
+                    this.loggerWrapper.Debug(
+                        $"{lineageEntry} chosen. Removing from " +
+                        $"alternatives...");
+
+                    // lineageEntry is the one we want to
+                    // remove from the alternatives, and 
+                    // 'move' to the 'top'.
+                    LineageEntry[] prunedAlternatives = currentLineage
+                        .Alternatives
+                        .SkipWhile(x => x.AdapterName == lineageEntry.AdapterName)
+                        .ToArray();
+
+                    this.loggerWrapper.Info(
+                        $"Removed from alternatives, leaving " +
+                        $"{prunedAlternatives} alternative " +
+                        $"{nameof(LineageEntry)}s.");
+
+                    toReturn = new LineageEntry()
+                    {
+                        AdapterName = lineageEntry.AdapterName,
+                        Alternatives = prunedAlternatives,
+                        ReadDate = lineageEntry.ReadDate,
+                        Value = lineageEntry.Value,
+                    };
+
+                    this.loggerWrapper.Info(
+                        $"Returning {toReturn} as top-level " +
+                        $"{nameof(LineageEntry)}.");
+                }
             }
 
             return toReturn;

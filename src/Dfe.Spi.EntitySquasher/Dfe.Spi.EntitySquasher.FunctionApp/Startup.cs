@@ -51,6 +51,7 @@
                 () => new JsonSerializerSettings()
                 {
                     ContractResolver = new CamelCasePropertyNamesContractResolver(),
+                    NullValueHandling = NullValueHandling.Ignore,
                 };
 
             IServiceCollection serviceCollection =

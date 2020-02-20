@@ -9,6 +9,7 @@
     using Dfe.Spi.EntitySquasher.AcdfGen.Application.Models;
     using Dfe.Spi.EntitySquasher.AcdfGen.Domain.Definitions;
     using Dfe.Spi.EntitySquasher.Domain.Models.Acdf;
+    using Dfe.Spi.Models.Entities;
 
     /// <summary>
     /// Implements
@@ -127,7 +128,7 @@
 
             // Use ModelsBase as a means to getting a reference to the
             // assembly.
-            Type modelsBaseType = typeof(Spi.Models.ModelsBase);
+            Type modelsBaseType = typeof(EntityBase);
 
             Assembly assembly = modelsBaseType.Assembly;
 

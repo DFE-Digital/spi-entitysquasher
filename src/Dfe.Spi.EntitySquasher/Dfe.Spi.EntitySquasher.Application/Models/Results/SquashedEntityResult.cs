@@ -3,6 +3,7 @@
     using System.Collections.Generic;
     using System.Diagnostics.CodeAnalysis;
     using Dfe.Spi.EntitySquasher.Domain.Models;
+    using Dfe.Spi.Models.Entities;
 
     /// <summary>
     /// Represents the result of a squash operation for a given
@@ -24,7 +25,7 @@
         /// <summary>
         /// Gets or sets the requested squashed entity.
         /// </summary>
-        public Spi.Models.ModelsBase SquashedEntity
+        public EntityBase SquashedEntity
         {
             get;
             set;

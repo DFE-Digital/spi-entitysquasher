@@ -18,6 +18,7 @@
     using Dfe.Spi.EntitySquasher.Application.Processors;
     using Dfe.Spi.EntitySquasher.Domain;
     using Dfe.Spi.EntitySquasher.Domain.Models;
+    using Dfe.Spi.Models.Entities;
     using Moq;
     using Newtonsoft.Json;
     using NUnit.Framework;
@@ -132,7 +133,7 @@
                 .Setup(x => x.InvokeEntityAdaptersAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<IEnumerable<string>>(), It.IsAny<EntityReference>(), It.IsAny<CancellationToken>()))
                 .Throws(allAdaptersUnavailableException);
 
-            Spi.Models.ModelsBase modelsBase = null;
+            EntityBase entityBase = null;
 
             SquashedEntityResult squashedEntityResult = null;
             GetSquashedEntityResponse getSquashedEntityResponse = null;
@@ -155,9 +156,9 @@
                 expectedEntityAdapterErrorDetail,
                 actualEntityAdapterErrorDetail);
 
-            modelsBase = squashedEntityResult.SquashedEntity;
+            entityBase = squashedEntityResult.SquashedEntity;
 
-            Assert.IsNull(modelsBase);
+            Assert.IsNull(entityBase);
         }
 
         [Test]
@@ -222,8 +223,8 @@
                 .Setup(x => x.InvokeEntityAdaptersAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<IEnumerable<string>>(), It.IsAny<EntityReference>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(invokeEntityAdaptersResult);
 
-            Spi.Models.LearningProvider learningProvider =
-                new Spi.Models.LearningProvider()
+            Spi.Models.Entities.LearningProvider learningProvider =
+                new Spi.Models.Entities.LearningProvider()
                 {
                     Name = "squashed thing",
                 };
@@ -244,7 +245,7 @@
             SquashedEntityResult squashedEntityResult = null;
             EntityAdapterErrorDetail actualEntityAdapterErrorDetail = null;
 
-            Spi.Models.ModelsBase squashedEntity = null;
+            EntityBase entityBase = null;
 
             // Act
             getSquashedEntityResponse =
@@ -269,9 +270,9 @@
                 .SquashedEntityResults
                 .Last();
 
-            squashedEntity = squashedEntityResult.SquashedEntity;
+            entityBase = squashedEntityResult.SquashedEntity;
 
-            Assert.IsNotNull(squashedEntity);
+            Assert.IsNotNull(entityBase);
         }
     }
 }
