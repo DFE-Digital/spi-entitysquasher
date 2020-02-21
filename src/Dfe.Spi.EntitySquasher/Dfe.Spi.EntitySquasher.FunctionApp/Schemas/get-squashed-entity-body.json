@@ -8,7 +8,7 @@
       "type": "string",
       "enum": [
         "LearningProvider",
-        "Governor"
+        "ManagementGroup"
       ]
     },
     "entityReferences": {
