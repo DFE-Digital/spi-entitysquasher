@@ -164,8 +164,8 @@
           ],
           "ipSecurityRestrictions": [
             {
-              "ipAddress": "[parameters('eapimIp')]",
-              "subnetMask": "255.255.255.255",
+              "ipAddress": "[concat(parameters('eapimIp'), '/32')]",
+              "action": "Allow",
               "name": "EAPIM Restriction",
               "priority": 1
             }
