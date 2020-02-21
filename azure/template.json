@@ -164,7 +164,7 @@
           ],
           "ipSecurityRestrictions": [
             {
-              "ipAddress": "[concat(parameters['eapimIp'], '/32')]",
+              "ipAddress": "[concat(parameters('eapimIp'), '/32')]",
               "name": "EAPIM Restriction",
               "priority": 1
             }
