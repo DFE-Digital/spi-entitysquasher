@@ -100,7 +100,7 @@
       }
     },
     {
-      "apiVersion": "2016-08-01",
+      "apiVersion": "2018-11-01",
       "type": "Microsoft.Web/sites",
       "name": "[variables('functionAppName')]",
       "location": "[resourceGroup().location]",
@@ -166,7 +166,7 @@
             {
               "ipAddress": "[concat(parameters('eapimIp'), '/32')]",
               "action": "Allow",
-              "name": "EAPIM Restriction",
+              "name": "Allow EAPIM",
               "priority": 1
             }
           ]
@@ -175,7 +175,7 @@
       "tags": {
         "environment": "[parameters('environmentName')]",
         "app": "[parameters('appName')]"
-      } 
+      }
     }
   ],
   "outputs": {
