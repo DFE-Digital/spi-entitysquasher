@@ -32,6 +32,12 @@
       "minLength": 2,
       "maxLength": 2,
       "defaultValue": "01"
+    },
+    "eapimIp": {
+      "type": "string",
+      "minLength": 7,
+      "maxLength": 15,
+      "defaultValue": "13.95.234.228"
     }
   },
   "variables": {
@@ -154,6 +160,13 @@
             {
               "name": "DefaultAlgorithm",
               "value": "default"
+            }
+          ],
+          "ipSecurityRestrictions": [
+            {
+              "ipAddress": "[concat(parameters['eapimIp'], '/32')]",
+              "name": "EAPIM Restriction",
+              "priority": 1
             }
           ]
         }
