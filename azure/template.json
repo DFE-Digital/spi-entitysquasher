@@ -36,8 +36,7 @@
     "eapimIp": {
       "type": "string",
       "minLength": 7,
-      "maxLength": 15,
-      "defaultValue": "13.95.234.228"
+      "maxLength": 15
     }
   },
   "variables": {
