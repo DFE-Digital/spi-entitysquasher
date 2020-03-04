@@ -505,9 +505,8 @@
                         $"{lineageEntry} chosen. Removing from " +
                         $"alternatives...");
 
-                    // lineageEntry is the one we want to
-                    // remove from the alternatives, and 
-                    // 'move' to the 'top'.
+                    // lineageEntry is the one we want to remove from the
+                    // alternatives, and 'move' to the 'top'.
                     LineageEntry[] prunedAlternatives = currentLineage
                         .Alternatives
                         .SkipWhile(x => x.AdapterName == lineageEntry.AdapterName)
