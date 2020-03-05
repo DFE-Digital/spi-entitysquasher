@@ -130,7 +130,7 @@
                     });
 
             this.mockEntityAdapterInvoker
-                .Setup(x => x.InvokeEntityAdaptersAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<IEnumerable<string>>(), It.IsAny<EntityReference>(), It.IsAny<CancellationToken>()))
+                .Setup(x => x.InvokeEntityAdaptersAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<IEnumerable<string>>(), It.IsAny<AggregatesRequest>(), It.IsAny<EntityReference>(), It.IsAny<CancellationToken>()))
                 .Throws(allAdaptersUnavailableException);
 
             EntityBase entityBase = null;
@@ -220,7 +220,7 @@
                     httpErrorBody);
 
             this.mockEntityAdapterInvoker
-                .Setup(x => x.InvokeEntityAdaptersAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<IEnumerable<string>>(), It.IsAny<EntityReference>(), It.IsAny<CancellationToken>()))
+                .Setup(x => x.InvokeEntityAdaptersAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<IEnumerable<string>>(), It.IsAny<AggregatesRequest>(), It.IsAny<EntityReference>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(invokeEntityAdaptersResult);
 
             Spi.Models.Entities.LearningProvider learningProvider =

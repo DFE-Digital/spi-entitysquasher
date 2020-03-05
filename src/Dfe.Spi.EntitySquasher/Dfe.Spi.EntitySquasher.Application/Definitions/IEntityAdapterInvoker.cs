@@ -5,6 +5,7 @@
     using System.Threading.Tasks;
     using Dfe.Spi.EntitySquasher.Application.Models;
     using Dfe.Spi.EntitySquasher.Application.Models.Result;
+    using Dfe.Spi.EntitySquasher.Domain.Models;
 
     /// <summary>
     /// Describes the operations of the entity adapter invoker.
@@ -25,6 +26,9 @@
         /// <param name="fields">
         /// A list of fields to include in the response.
         /// </param>
+        /// <param name="aggregatesRequest">
+        /// An instance of <see cref="AggregatesRequest" />. Optional.
+        /// </param>
         /// <param name="entityReference">
         /// An instance of <see cref="EntityReference" />.
         /// </param>
@@ -38,6 +42,7 @@
             string algorithm,
             string entityName,
             IEnumerable<string> fields,
+            AggregatesRequest aggregatesRequest,
             EntityReference entityReference,
             CancellationToken cancellationToken);
     }

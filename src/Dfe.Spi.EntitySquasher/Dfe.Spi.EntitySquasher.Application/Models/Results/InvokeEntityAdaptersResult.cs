@@ -4,10 +4,11 @@
     using System.Diagnostics.CodeAnalysis;
     using System.Threading;
     using Dfe.Spi.EntitySquasher.Application.Definitions;
+    using Dfe.Spi.EntitySquasher.Domain.Models;
 
     /// <summary>
     /// Result object for
-    /// <see cref="IEntityAdapterInvoker.InvokeEntityAdaptersAsync(string, string, IEnumerable{string}, EntityReference, CancellationToken)" />.
+    /// <see cref="IEntityAdapterInvoker.InvokeEntityAdaptersAsync(string, string, IEnumerable{string}, AggregatesRequest, EntityReference, CancellationToken)" />.
     /// </summary>
     [ExcludeFromCodeCoverage]
     public class InvokeEntityAdaptersResult : ModelsBase

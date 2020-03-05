@@ -36,6 +36,7 @@
         private readonly ISpiExecutionContextManager spiExecutionContextManager;
 
         private readonly string entityAdapterName;
+        private readonly JsonSerializerSettings jsonSerializerSettings;
 
         /// <summary>
         /// Initialises a new instance of the
@@ -64,13 +65,16 @@
             this.spiExecutionContextManager = spiExecutionContextManager;
 
             this.entityAdapterName = entityAdapterName;
+
+            this.jsonSerializerSettings = JsonConvert.DefaultSettings();
         }
 
         /// <inheritdoc />
         public async Task<EntityBase> GetEntityAsync(
             string entityName,
             string id,
-            IEnumerable<string> fields)
+            IEnumerable<string> fields,
+            AggregatesRequest aggregatesRequest)
         {
             EntityBase toReturn = null;
 
@@ -79,7 +83,28 @@
                 id,
                 fields);
 
-            RestRequest restRequest = new RestRequest(resourceUri, Method.GET);
+            bool includeAggregatesRequest = aggregatesRequest != null;
+
+            Method method =
+                !includeAggregatesRequest ? Method.GET : Method.POST;
+
+            RestRequest restRequest = new RestRequest(resourceUri, method);
+
+            if (includeAggregatesRequest)
+            {
+                restRequest.AddHeader("Content-Type", "application/json");
+
+                string body = JsonConvert.SerializeObject(
+                    aggregatesRequest,
+                    this.jsonSerializerSettings);
+
+                Parameter parameter = new Parameter(
+                    nameof(body),
+                    body,
+                    ParameterType.RequestBody);
+
+                restRequest.AddParameter(parameter);
+            }
 
             SpiExecutionContext spiExecutionContext =
                 this.spiExecutionContextManager.SpiExecutionContext;
@@ -232,7 +257,13 @@
             entityName = entityName.PascalToKebabCase();
 
             // Don't forget to plural-ise.
-            entityName = $"{entityName}s";
+            string pluraliser = "s";
+            if (entityName.EndsWith("s", StringComparison.InvariantCulture))
+            {
+                pluraliser = $"e{pluraliser}";
+            }
+
+            entityName = $"{entityName}{pluraliser}";
 
             this.loggerWrapper.Debug(
                 $"{nameof(entityName)} converted: \"{entityName}\".");

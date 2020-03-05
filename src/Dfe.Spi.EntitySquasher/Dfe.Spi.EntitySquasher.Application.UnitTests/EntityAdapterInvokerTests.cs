@@ -75,6 +75,7 @@
             string algorithm = null;
             string entityName = null;
             string[] fields = null;
+            AggregatesRequest aggregatesRequest = null;
             EntityReference entityReference = null;
             CancellationToken cancellationToken = CancellationToken.None;
 
@@ -86,6 +87,7 @@
                         algorithm,
                         entityName,
                         fields,
+                        aggregatesRequest,
                         entityReference,
                         cancellationToken);
                 };
@@ -105,6 +107,7 @@
                 "SomeFieldOne",
                 "SomeFieldTwo",
             };
+            AggregatesRequest aggregatesRequest = null;
 
             const string mockAdapter1Id = "working-adapter-#1";
             const string mockAdapter2Id = "failing-adapter-#2";
@@ -202,6 +205,7 @@
                     algorithm,
                     entityName,
                     fields,
+                    aggregatesRequest,
                     entityReference,
                     cancellationToken);
 
@@ -245,6 +249,7 @@
                 "SomeFieldOne",
                 "SomeFieldTwo",
             };
+            AggregatesRequest aggregatesRequest = null;
 
             const string mockAdapter2Id = "failing-adapter-#2";
 
@@ -320,6 +325,7 @@
                         algorithm,
                         entityName,
                         fields,
+                        aggregatesRequest,
                         entityReference,
                         cancellationToken);
                 };
@@ -342,6 +348,7 @@
                 "SomeFieldOne",
                 "SomeFieldTwo",
             };
+            AggregatesRequest aggregatesRequest = null;
 
             const string mockAdapter2Id = "failing-adapter-#2";
 
@@ -398,6 +405,7 @@
                         algorithm,
                         entityName,
                         fields,
+                        aggregatesRequest,
                         entityReference,
                         cancellationToken);
                 };
@@ -427,7 +435,7 @@
                 };
 
             mockEntityAdapterClient
-                .Setup(x => x.GetEntityAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<IEnumerable<string>>()))
+                .Setup(x => x.GetEntityAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<IEnumerable<string>>(), It.IsAny<AggregatesRequest>()))
                 .Returns(getEntityAsyncCallback);
 
             toReturn = mockEntityAdapterClient.Object;

@@ -4,6 +4,7 @@
     using System.Diagnostics.CodeAnalysis;
     using System.Threading;
     using Dfe.Spi.EntitySquasher.Application.Processors.Definitions;
+    using Dfe.Spi.EntitySquasher.Domain.Models;
 
     /// <summary>
     /// Request object for
@@ -44,6 +45,16 @@
         /// Gets or sets a list of fields to include in the response.
         /// </summary>
         public IEnumerable<string> Fields
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// Gets or sets an instance of
+        /// <see cref="Domain.Models.AggregatesRequest" />. Optional.
+        /// </summary>
+        public AggregatesRequest AggregatesRequest
         {
             get;
             set;

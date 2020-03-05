@@ -14,6 +14,7 @@
     using Dfe.Spi.EntitySquasher.Application.Models.Result;
     using Dfe.Spi.EntitySquasher.Domain;
     using Dfe.Spi.EntitySquasher.Domain.Definitions;
+    using Dfe.Spi.EntitySquasher.Domain.Models;
     using Dfe.Spi.Models.Entities;
 
     /// <summary>
@@ -59,6 +60,7 @@
             string algorithm,
             string entityName,
             IEnumerable<string> fields,
+            AggregatesRequest aggregatesRequest,
             EntityReference entityReference,
             CancellationToken cancellationToken)
         {
@@ -87,6 +89,7 @@
                     algorithm,
                     entityName,
                     fields,
+                    aggregatesRequest,
                     adapterRecordReference,
                     cancellationToken)
                     .ConfigureAwait(false);
@@ -231,6 +234,7 @@
             string algorithm,
             string entityName,
             IEnumerable<string> fields,
+            AggregatesRequest aggregatesRequest,
             AdapterRecordReference adapterRecordReference,
             CancellationToken cancellationToken)
         {
@@ -279,7 +283,8 @@
             toReturn = entityAdapterClient.GetEntityAsync(
                 entityName,
                 id,
-                fields);
+                fields,
+                aggregatesRequest);
 
             this.loggerWrapper.Info($"{nameof(Task)} obtained. Returning...");
 
