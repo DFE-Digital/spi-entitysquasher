@@ -6,6 +6,7 @@
     using System.IO;
     using System.Linq;
     using System.Threading.Tasks;
+    using Dfe.Spi.Common.AzureStorage;
     using Dfe.Spi.Common.Logging.Definitions;
     using Dfe.Spi.EntitySquasher.Domain.Definitions;
     using Dfe.Spi.EntitySquasher.Domain.Definitions.SettingsProviders;
