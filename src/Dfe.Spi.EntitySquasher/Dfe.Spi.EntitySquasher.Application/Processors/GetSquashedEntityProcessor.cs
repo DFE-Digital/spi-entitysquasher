@@ -73,6 +73,9 @@
             string entityName = getSquashedEntityRequest.EntityName;
             IEnumerable<string> fields = getSquashedEntityRequest.Fields;
 
+            AggregatesRequest aggregatesRequest =
+                getSquashedEntityRequest.AggregatesRequest;
+
             IEnumerable<EntityReference> entityReferences =
                 getSquashedEntityRequest.EntityReferences;
 
@@ -93,6 +96,7 @@
                         algorithm,
                         entityName,
                         fields,
+                        aggregatesRequest,
                         entityReference,
                         cancellationToken)
                         .ConfigureAwait(false);
@@ -112,6 +116,7 @@
             string algorithm,
             string entityName,
             IEnumerable<string> fields,
+            AggregatesRequest aggregatesRequest,
             EntityReference entityReference,
             CancellationToken cancellationToken)
         {
@@ -129,6 +134,7 @@
                         algorithm,
                         entityName,
                         fields,
+                        aggregatesRequest,
                         entityReference,
                         cancellationToken)
                         .ConfigureAwait(false);

@@ -9,7 +9,7 @@
     /// Contains error detail, to be returned to the caller.
     /// </summary>
     [ExcludeFromCodeCoverage]
-    public class EntityAdapterErrorDetail
+    public class EntityAdapterErrorDetail : ModelsBase
     {
         /// <summary>
         /// Gets or sets the originating adapter name.

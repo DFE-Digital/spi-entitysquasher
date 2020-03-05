@@ -4,11 +4,12 @@
     using System.Diagnostics.CodeAnalysis;
     using Dfe.Spi.EntitySquasher.Domain;
     using Dfe.Spi.EntitySquasher.Domain.Definitions;
+    using Dfe.Spi.EntitySquasher.Domain.Models;
     using Dfe.Spi.Models.Entities;
 
     /// <summary>
     /// Result object for
-    /// <see cref="IEntityAdapterClient.GetEntityAsync(string, string, IEnumerable{string})" />.
+    /// <see cref="IEntityAdapterClient.GetEntityAsync(string, string, IEnumerable{string}, AggregatesRequest)" />.
     /// </summary>
     [ExcludeFromCodeCoverage]
     public class GetEntityAsyncResult : GetEntityAsyncBase
