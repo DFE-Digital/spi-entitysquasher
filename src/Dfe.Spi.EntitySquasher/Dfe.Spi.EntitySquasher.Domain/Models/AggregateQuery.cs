@@ -16,5 +16,7 @@
             get;
             set;
         }
+
+        public string AggregateType { get; set; } = "Count";
     }
 }
