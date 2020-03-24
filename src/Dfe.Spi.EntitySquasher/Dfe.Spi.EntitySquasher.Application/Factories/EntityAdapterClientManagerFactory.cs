@@ -126,7 +126,7 @@
 
             EntityAdapter entityAdapter =
                 algorithmConfigurationDeclarationFile.EntityAdapters
-                    .SingleOrDefault(x => x.Name == name);
+                    .SingleOrDefault(x => x.Name.Equals(name, StringComparison.InvariantCultureIgnoreCase));
 
             // 2) Create the EntityAdapterClient via the
             //    factory and return it.
