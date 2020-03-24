@@ -254,14 +254,14 @@
         {
             Uri toReturn = null;
 
-            entityName = entityName.PascalToKebabCase();
+            string pluraliser = null;
 
             // TODO: Need something configurable here. This is getting silly.
             // Don't forget to plural-ise.
             // Annoyingly, this depends on the type.
             if (entityName == nameof(Census))
             {
-                entityName = $"{entityName}es";
+                pluraliser = "es";
             }
             else if (entityName == nameof(Rates))
             {
@@ -269,8 +269,12 @@
             }
             else
             {
-                entityName = $"{entityName}s";
+                pluraliser = "s";
             }
+
+            entityName = entityName.PascalToKebabCase();
+
+            entityName = $"{entityName}{pluraliser}";
 
             this.loggerWrapper.Debug(
                 $"{nameof(entityName)} converted: \"{entityName}\".");
