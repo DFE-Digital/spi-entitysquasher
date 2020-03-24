@@ -256,14 +256,21 @@
 
             entityName = entityName.PascalToKebabCase();
 
+            // TODO: Need something configurable here. This is getting silly.
             // Don't forget to plural-ise.
-            string pluraliser = "s";
-            if (entityName.EndsWith("s", StringComparison.InvariantCulture))
+            // Annoyingly, this depends on the type.
+            if (entityName == nameof(Census))
             {
-                pluraliser = $"e{pluraliser}";
+                entityName = $"{entityName}es";
             }
-
-            entityName = $"{entityName}{pluraliser}";
+            else if (entityName == nameof(Rates))
+            {
+                // Do nothing - it's already correct.
+            }
+            else
+            {
+                entityName = $"{entityName}s";
+            }
 
             this.loggerWrapper.Debug(
                 $"{nameof(entityName)} converted: \"{entityName}\".");
