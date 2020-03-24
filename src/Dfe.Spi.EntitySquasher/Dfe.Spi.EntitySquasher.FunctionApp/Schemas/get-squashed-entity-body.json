@@ -9,7 +9,8 @@
       "enum": [
         "LearningProvider",
         "ManagementGroup",
-        "Census"
+        "Census",
+        "Rates"
       ]
     },
     "entityReferences": {
