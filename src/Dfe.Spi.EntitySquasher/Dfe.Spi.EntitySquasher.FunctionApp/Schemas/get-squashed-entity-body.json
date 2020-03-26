@@ -10,7 +10,8 @@
         "LearningProvider",
         "ManagementGroup",
         "Census",
-        "Rates"
+        "LearningProviderRates",
+        "ManagementGroupRates"
       ]
     },
     "entityReferences": {
