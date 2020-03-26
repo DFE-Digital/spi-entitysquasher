@@ -263,7 +263,7 @@
             {
                 pluraliser = "es";
             }
-            else if (entityName == nameof(Rates))
+            else if (entityName == nameof(LearningProviderRates) || entityName == nameof(ManagementGroupRates))
             {
                 // Do nothing - it's already correct.
             }
