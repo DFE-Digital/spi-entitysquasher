@@ -348,6 +348,7 @@
                 // *Only* keep looping whilst we *don't* have a value.
                 object value = null;
 
+                GetEntityAsyncResult[] getEntityAsyncResults = null;
                 GetEntityAsyncResult getEntityAsyncResult = null;
 
                 this.loggerWrapper.Debug(
@@ -363,17 +364,23 @@
                     // Get the corresponding GetEntityAsyncResult (if it
                     // exists)...
                     this.loggerWrapper.Debug(
-                        $"Checking for result that came from " +
+                        $"Checking for all results that came from " +
                         $"\"{currentSource}\"...");
 
-                    getEntityAsyncResult = toSquash
-                        .SingleOrDefault(x => x.AdapterRecordReference.Source == currentSource);
+                    getEntityAsyncResults = toSquash
+                        .Where(x => x.AdapterRecordReference.Source == currentSource)
+                        .ToArray();
 
-                    if (getEntityAsyncResult != null)
+                    this.loggerWrapper.Info(
+                        $"Found {getEntityAsyncResults.Length} result(s).");
+
+                    for (int j = 0; (j < getEntityAsyncResults.Length) && this.IsFieldValueEmpty(field, value); j++)
                     {
+                        getEntityAsyncResult = getEntityAsyncResults[j];
+
                         this.loggerWrapper.Info(
-                            $"Result found for \"{currentSource}\": " +
-                            $"{getEntityAsyncResult}.");
+                            $"Searching for value on result " +
+                            $"{j + 1}/{getEntityAsyncResults.Length}...");
 
                         this.loggerWrapper.Debug(
                             $"Using reflection to get property value for " +
@@ -401,16 +408,18 @@
 
                             toReturn = this.UpdatePropertyLineageEntry(
                                 toReturn,
-                                currentSource);
+                                currentSource,
+                                value);
                         }
                     }
-                    else
-                    {
-                        this.loggerWrapper.Info(
-                            $"\"{currentSource}\" was specified as a " +
-                            $"preference, but this preference did not " +
-                            $"exist in {nameof(toSquash)} to pick from.");
-                    }
+                }
+
+                if (getEntityAsyncResults.Length <= 0)
+                {
+                    this.loggerWrapper.Info(
+                        $"\"{currentSource}\" was specified as a " +
+                        $"preference, but this preference did not " +
+                        $"exist in the results to pick from.");
                 }
 
                 this.loggerWrapper.Debug(
@@ -481,7 +490,8 @@
 
         private LineageEntry UpdatePropertyLineageEntry(
             LineageEntry currentLineage,
-            string adapterName)
+            string adapterName,
+            object value)
         {
             LineageEntry toReturn = null;
 
@@ -497,7 +507,7 @@
                     $"{nameof(currentLineage.Alternatives)}...");
 
                 LineageEntry lineageEntry = currentLineage.Alternatives
-                    .SingleOrDefault(x => x.AdapterName == adapterName);
+                    .SingleOrDefault(x => x.AdapterName == adapterName && x.Value.Equals(value));
 
                 if (lineageEntry != null)
                 {
@@ -509,7 +519,7 @@
                     // alternatives, and 'move' to the 'top'.
                     LineageEntry[] prunedAlternatives = currentLineage
                         .Alternatives
-                        .SkipWhile(x => x.AdapterName == lineageEntry.AdapterName)
+                        .SkipWhile(x => x.AdapterName == lineageEntry.AdapterName && x.Value.Equals(value))
                         .ToArray();
 
                     this.loggerWrapper.Info(
