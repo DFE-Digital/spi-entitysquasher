@@ -158,6 +158,7 @@
                         algorithm,
                         entityName,
                         toSquash,
+                        aggregatesRequest,
                         cancellationToken)
                         .ConfigureAwait(false);
             }

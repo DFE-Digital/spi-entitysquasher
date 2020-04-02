@@ -92,6 +92,7 @@
                         algorithm,
                         entityName,
                         getEntityAsyncResults,
+                        null,
                         cancellationToken);
                 };
 
@@ -126,6 +127,7 @@
                         algorithm,
                         entityName,
                         getEntityAsyncResults,
+                        null,
                         cancellationToken);
                 };
 
@@ -207,6 +209,7 @@
                 algorithm,
                 entityName,
                 toSquash,
+                null,
                 cancellationToken);
 
             // Assert

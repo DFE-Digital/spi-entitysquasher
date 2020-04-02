@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Globalization;
     using System.Linq;
     using System.Reflection;
     using System.Threading;
@@ -11,6 +12,7 @@
     using Dfe.Spi.EntitySquasher.Application.Definitions;
     using Dfe.Spi.EntitySquasher.Application.Definitions.Factories;
     using Dfe.Spi.EntitySquasher.Application.Models.Result;
+    using Dfe.Spi.EntitySquasher.Domain.Models;
     using Dfe.Spi.EntitySquasher.Domain.Models.Acdf;
     using Dfe.Spi.Models;
     using Dfe.Spi.Models.Entities;
@@ -64,6 +66,7 @@
             string algorithm,
             string entityName,
             IEnumerable<GetEntityAsyncResult> toSquash,
+            AggregatesRequest aggregatesRequest,
             CancellationToken cancellationToken)
         {
             EntityBase toReturn = null;
@@ -170,9 +173,145 @@
                 toReturn._Lineage = lineage;
             }
 
+            // Do we have aggregations to aggregate? This has to be a Census,
+            // too (as this is the only thing that supports aggregates).
+            if (aggregatesRequest != null && entityName == nameof(Census))
+            {
+                this.loggerWrapper.Debug(
+                    $"{nameof(Census._Aggregations)} were requested, and " +
+                    $"this is a {nameof(Census)}. The returned " +
+                    $"{nameof(Census._Aggregations)} need to be squashed.");
+
+                // Get all the aggregation results where...
+                // The results are not null...
+                IEnumerable<Aggregation[]> aggregations = toSquash
+                    .Where(x => x.EntityBase is Census)
+                    .Select(x => x.EntityBase)
+                    .Cast<Census>()
+                    .Where(x => x._Aggregations != null)
+                    .Select(x => x._Aggregations);
+
+                this.loggerWrapper.Debug(
+                    $"{aggregations.Count()} sets of {nameof(Aggregation)}s " +
+                    $"were extracted from the results to squash.");
+
+                // And aggregate the aggregates:
+                Census squashedCensus = toReturn as Census;
+
+                squashedCensus._Aggregations = this.AggregateTheAggregates(
+                    aggregatesRequest,
+                    aggregations);
+
+                this.loggerWrapper.Info(
+                    $"{nameof(Census._Aggregations)} = " +
+                    $"{squashedCensus._Aggregations}.");
+            }
+
             this.loggerWrapper.Info(
                 $"Completed cycling through {entityName}'s " +
                 $"{propertiesToPopulate.Length} properties.");
+
+            return toReturn;
+        }
+
+        private Aggregation[] AggregateTheAggregates(
+            AggregatesRequest aggregatesRequest,
+            IEnumerable<Aggregation[]> aggregationsToSquash)
+        {
+            Aggregation[] toReturn = null;
+
+            List<Aggregation> aggregations = new List<Aggregation>();
+
+            // Use the original request to build up our aggregates aggregate.
+            string key = null;
+            Aggregation aggregation = null;
+            foreach (KeyValuePair<string, AggregateQuery> aggregateQuery in aggregatesRequest.AggregateQueries)
+            {
+                key = aggregateQuery.Key;
+
+                this.loggerWrapper.Debug(
+                    $"Aggregating {nameof(AggregateQuery)} named " +
+                    $"\"{key}\"...");
+
+                aggregation = this.AggregateAggregate(
+                    aggregateQuery,
+                    aggregationsToSquash);
+
+                this.loggerWrapper.Info(
+                    $"{nameof(Aggregation)} created for query \"{key}\": " +
+                    $"{aggregation}.");
+
+                aggregations.Add(aggregation);
+            }
+
+            toReturn = aggregations.ToArray();
+
+            return toReturn;
+        }
+
+        private Aggregation AggregateAggregate(
+            KeyValuePair<string, AggregateQuery> namedAggregateQuery,
+            IEnumerable<Aggregation[]> aggregationsToSquash)
+        {
+            Aggregation toReturn = null;
+
+            string name = namedAggregateQuery.Key;
+
+            this.loggerWrapper.Debug(
+                $"Extracting aggregation values for aggregation query " +
+                $"\"{name}\"...");
+
+            IEnumerable<decimal> aggregationValues = aggregationsToSquash
+                .Select(x =>
+                {
+                    decimal aggregationValue;
+
+                    Aggregation aggregation =
+                        x.SingleOrDefault(y => y.Name == name);
+
+                    aggregationValue = aggregation.Value;
+
+                    return aggregationValue;
+                });
+
+            string aggregationValuesStr = string.Join(
+                ", ",
+                aggregationValues.Select(x => x.ToString(CultureInfo.InvariantCulture)));
+
+            this.loggerWrapper.Info(
+                $"Aggregation values to be aggregated: " +
+                $"{aggregationValuesStr}.");
+
+            AggregateQuery aggregateQuery = namedAggregateQuery.Value;
+            AggregateType aggregateType = aggregateQuery.AggregateType;
+
+            this.loggerWrapper.Debug(
+                $"{nameof(aggregateType)} = {aggregateType}");
+
+            decimal value;
+            switch (aggregateType)
+            {
+                case AggregateType.Count:
+                    this.loggerWrapper.Debug("Summing all the values...");
+
+                    // Don't get to use this LINQ operator much!
+                    value = aggregationValues.Sum();
+
+                    this.loggerWrapper.Debug($"{nameof(value)} = {value}");
+
+                    break;
+
+                default:
+                    throw new NotImplementedException(
+                        $"Aggregation type {aggregateType} is not " +
+                        $"supported. Please implement this!");
+            }
+
+            toReturn = new Aggregation()
+            {
+                Name = namedAggregateQuery.Key,
+                Value = value,
+            };
 
             return toReturn;
         }
