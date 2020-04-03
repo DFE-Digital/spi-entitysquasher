@@ -646,7 +646,7 @@
                     $"{nameof(currentLineage.Alternatives)}...");
 
                 LineageEntry lineageEntry = currentLineage.Alternatives
-                    .SingleOrDefault(x => x.AdapterName == adapterName && x.Value.Equals(value));
+                    .FirstOrDefault(x => x.AdapterName == adapterName && x.Value.Equals(value));
 
                 if (lineageEntry != null)
                 {
@@ -656,14 +656,17 @@
 
                     // lineageEntry is the one we want to remove from the
                     // alternatives, and 'move' to the 'top'.
-                    LineageEntry[] prunedAlternatives = currentLineage
-                        .Alternatives
-                        .SkipWhile(x => x.AdapterName == lineageEntry.AdapterName && x.Value.Equals(value))
-                        .ToArray();
+                    List<LineageEntry> prunedAlternatives =
+                        new List<LineageEntry>(currentLineage.Alternatives);
+
+                    prunedAlternatives.Remove(lineageEntry);
+
+                    currentLineage.Alternatives =
+                        prunedAlternatives.ToArray();
 
                     this.loggerWrapper.Info(
                         $"Removed from alternatives, leaving " +
-                        $"{prunedAlternatives} alternative " +
+                        $"{nameof(prunedAlternatives)} alternative " +
                         $"{nameof(LineageEntry)}s.");
 
                     toReturn = new LineageEntry()
