@@ -228,15 +228,15 @@
                 {
                     Name = "squashed thing",
                 };
-            Action<string, string, IEnumerable<GetEntityAsyncResult>, CancellationToken> callback =
-                (w, x, y, z) =>
+            Action<string, string, IEnumerable<GetEntityAsyncResult>, AggregatesRequest, CancellationToken> callback =
+                (v, w, x, y, z) =>
                 {
                     // Enumerate the collection, to provide coverage.
-                    y.ToArray();
+                    x.ToArray();
                 };
 
             this.mockResultSquasher
-                .Setup(x => x.SquashAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<IEnumerable<GetEntityAsyncResult>>(), It.IsAny<CancellationToken>()))
+                .Setup(x => x.SquashAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<IEnumerable<GetEntityAsyncResult>>(), It.IsAny<AggregatesRequest>(), It.IsAny<CancellationToken>()))
                 .Callback(callback)
                 .ReturnsAsync(learningProvider);
 

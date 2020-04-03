@@ -8,6 +8,10 @@
     /// </summary>
     public class AggregateQuery : ModelsBase
     {
+        private const AggregateType DefaultAggregateType = AggregateType.Count;
+
+        private AggregateType? aggregateType;
+
         /// <summary>
         /// Gets or sets a set of <see cref="DataFilter" /> instances.
         /// </summary>
@@ -17,6 +21,32 @@
             set;
         }
 
-        public string AggregateType { get; set; } = "Count";
+        /// <summary>
+        /// Gets or sets the aggregate type. If not explicitly set, then
+        /// <see cref="AggregateType.Count" /> is returned.
+        /// </summary>
+        public AggregateType AggregateType
+        {
+            get
+            {
+                AggregateType toReturn;
+
+                if (this.aggregateType.HasValue)
+                {
+                    toReturn = this.aggregateType.Value;
+                }
+                else
+                {
+                    toReturn = DefaultAggregateType;
+                }
+
+                return toReturn;
+            }
+
+            set
+            {
+                this.aggregateType = value;
+            }
+        }
     }
 }

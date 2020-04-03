@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Globalization;
     using System.Linq;
     using System.Reflection;
     using System.Threading;
@@ -11,6 +12,7 @@
     using Dfe.Spi.EntitySquasher.Application.Definitions;
     using Dfe.Spi.EntitySquasher.Application.Definitions.Factories;
     using Dfe.Spi.EntitySquasher.Application.Models.Result;
+    using Dfe.Spi.EntitySquasher.Domain.Models;
     using Dfe.Spi.EntitySquasher.Domain.Models.Acdf;
     using Dfe.Spi.Models;
     using Dfe.Spi.Models.Entities;
@@ -64,6 +66,7 @@
             string algorithm,
             string entityName,
             IEnumerable<GetEntityAsyncResult> toSquash,
+            AggregatesRequest aggregatesRequest,
             CancellationToken cancellationToken)
         {
             EntityBase toReturn = null;
@@ -170,9 +173,145 @@
                 toReturn._Lineage = lineage;
             }
 
+            // Do we have aggregations to aggregate? This has to be a Census,
+            // too (as this is the only thing that supports aggregates).
+            if (aggregatesRequest != null && entityName == nameof(Census))
+            {
+                this.loggerWrapper.Debug(
+                    $"{nameof(Census._Aggregations)} were requested, and " +
+                    $"this is a {nameof(Census)}. The returned " +
+                    $"{nameof(Census._Aggregations)} need to be squashed.");
+
+                // Get all the aggregation results where...
+                // The results are not null...
+                IEnumerable<Aggregation[]> aggregations = toSquash
+                    .Where(x => x.EntityBase is Census)
+                    .Select(x => x.EntityBase)
+                    .Cast<Census>()
+                    .Where(x => x._Aggregations != null)
+                    .Select(x => x._Aggregations);
+
+                this.loggerWrapper.Debug(
+                    $"{aggregations.Count()} sets of {nameof(Aggregation)}s " +
+                    $"were extracted from the results to squash.");
+
+                // And aggregate the aggregates:
+                Census squashedCensus = toReturn as Census;
+
+                squashedCensus._Aggregations = this.AggregateTheAggregates(
+                    aggregatesRequest,
+                    aggregations);
+
+                this.loggerWrapper.Info(
+                    $"{nameof(Census._Aggregations)} = " +
+                    $"{squashedCensus._Aggregations}.");
+            }
+
             this.loggerWrapper.Info(
                 $"Completed cycling through {entityName}'s " +
                 $"{propertiesToPopulate.Length} properties.");
+
+            return toReturn;
+        }
+
+        private Aggregation[] AggregateTheAggregates(
+            AggregatesRequest aggregatesRequest,
+            IEnumerable<Aggregation[]> aggregationsToSquash)
+        {
+            Aggregation[] toReturn = null;
+
+            List<Aggregation> aggregations = new List<Aggregation>();
+
+            // Use the original request to build up our aggregates aggregate.
+            string key = null;
+            Aggregation aggregation = null;
+            foreach (KeyValuePair<string, AggregateQuery> aggregateQuery in aggregatesRequest.AggregateQueries)
+            {
+                key = aggregateQuery.Key;
+
+                this.loggerWrapper.Debug(
+                    $"Aggregating {nameof(AggregateQuery)} named " +
+                    $"\"{key}\"...");
+
+                aggregation = this.AggregateAggregate(
+                    aggregateQuery,
+                    aggregationsToSquash);
+
+                this.loggerWrapper.Info(
+                    $"{nameof(Aggregation)} created for query \"{key}\": " +
+                    $"{aggregation}.");
+
+                aggregations.Add(aggregation);
+            }
+
+            toReturn = aggregations.ToArray();
+
+            return toReturn;
+        }
+
+        private Aggregation AggregateAggregate(
+            KeyValuePair<string, AggregateQuery> namedAggregateQuery,
+            IEnumerable<Aggregation[]> aggregationsToSquash)
+        {
+            Aggregation toReturn = null;
+
+            string name = namedAggregateQuery.Key;
+
+            this.loggerWrapper.Debug(
+                $"Extracting aggregation values for aggregation query " +
+                $"\"{name}\"...");
+
+            IEnumerable<decimal> aggregationValues = aggregationsToSquash
+                .Select(x =>
+                {
+                    decimal aggregationValue;
+
+                    Aggregation aggregation =
+                        x.SingleOrDefault(y => y.Name == name);
+
+                    aggregationValue = aggregation.Value;
+
+                    return aggregationValue;
+                });
+
+            string aggregationValuesStr = string.Join(
+                ", ",
+                aggregationValues.Select(x => x.ToString(CultureInfo.InvariantCulture)));
+
+            this.loggerWrapper.Info(
+                $"Aggregation values to be aggregated: " +
+                $"{aggregationValuesStr}.");
+
+            AggregateQuery aggregateQuery = namedAggregateQuery.Value;
+            AggregateType aggregateType = aggregateQuery.AggregateType;
+
+            this.loggerWrapper.Debug(
+                $"{nameof(aggregateType)} = {aggregateType}");
+
+            decimal value;
+            switch (aggregateType)
+            {
+                case AggregateType.Count:
+                    this.loggerWrapper.Debug("Summing all the values...");
+
+                    // Don't get to use this LINQ operator much!
+                    value = aggregationValues.Sum();
+
+                    this.loggerWrapper.Debug($"{nameof(value)} = {value}");
+
+                    break;
+
+                default:
+                    throw new NotImplementedException(
+                        $"Aggregation type {aggregateType} is not " +
+                        $"supported. Please implement this!");
+            }
+
+            toReturn = new Aggregation()
+            {
+                Name = namedAggregateQuery.Key,
+                Value = value,
+            };
 
             return toReturn;
         }
@@ -233,6 +372,9 @@
                                 // to us to flesh out the model a little.
                                 lineageEntry.AdapterName =
                                     x.AdapterRecordReference.Source;
+
+                                lineageEntry.EntityId =
+                                    x.AdapterRecordReference.Id;
 
                                 lineageEntry.Value = propertyToPopulate
                                     .GetValue(x.EntityBase);
@@ -348,6 +490,7 @@
                 // *Only* keep looping whilst we *don't* have a value.
                 object value = null;
 
+                GetEntityAsyncResult[] getEntityAsyncResults = null;
                 GetEntityAsyncResult getEntityAsyncResult = null;
 
                 this.loggerWrapper.Debug(
@@ -363,17 +506,23 @@
                     // Get the corresponding GetEntityAsyncResult (if it
                     // exists)...
                     this.loggerWrapper.Debug(
-                        $"Checking for result that came from " +
+                        $"Checking for all results that came from " +
                         $"\"{currentSource}\"...");
 
-                    getEntityAsyncResult = toSquash
-                        .SingleOrDefault(x => x.AdapterRecordReference.Source == currentSource);
+                    getEntityAsyncResults = toSquash
+                        .Where(x => x.AdapterRecordReference.Source == currentSource)
+                        .ToArray();
 
-                    if (getEntityAsyncResult != null)
+                    this.loggerWrapper.Info(
+                        $"Found {getEntityAsyncResults.Length} result(s).");
+
+                    for (int j = 0; (j < getEntityAsyncResults.Length) && this.IsFieldValueEmpty(field, value); j++)
                     {
+                        getEntityAsyncResult = getEntityAsyncResults[j];
+
                         this.loggerWrapper.Info(
-                            $"Result found for \"{currentSource}\": " +
-                            $"{getEntityAsyncResult}.");
+                            $"Searching for value on result " +
+                            $"{j + 1}/{getEntityAsyncResults.Length}...");
 
                         this.loggerWrapper.Debug(
                             $"Using reflection to get property value for " +
@@ -401,16 +550,18 @@
 
                             toReturn = this.UpdatePropertyLineageEntry(
                                 toReturn,
-                                currentSource);
+                                currentSource,
+                                value);
                         }
                     }
-                    else
-                    {
-                        this.loggerWrapper.Info(
-                            $"\"{currentSource}\" was specified as a " +
-                            $"preference, but this preference did not " +
-                            $"exist in {nameof(toSquash)} to pick from.");
-                    }
+                }
+
+                if (getEntityAsyncResults.Length <= 0)
+                {
+                    this.loggerWrapper.Info(
+                        $"\"{currentSource}\" was specified as a " +
+                        $"preference, but this preference did not " +
+                        $"exist in the results to pick from.");
                 }
 
                 this.loggerWrapper.Debug(
@@ -481,7 +632,8 @@
 
         private LineageEntry UpdatePropertyLineageEntry(
             LineageEntry currentLineage,
-            string adapterName)
+            string adapterName,
+            object value)
         {
             LineageEntry toReturn = null;
 
@@ -497,7 +649,7 @@
                     $"{nameof(currentLineage.Alternatives)}...");
 
                 LineageEntry lineageEntry = currentLineage.Alternatives
-                    .SingleOrDefault(x => x.AdapterName == adapterName);
+                    .FirstOrDefault(x => x.AdapterName == adapterName && x.Value.Equals(value));
 
                 if (lineageEntry != null)
                 {
@@ -507,20 +659,24 @@
 
                     // lineageEntry is the one we want to remove from the
                     // alternatives, and 'move' to the 'top'.
-                    LineageEntry[] prunedAlternatives = currentLineage
-                        .Alternatives
-                        .SkipWhile(x => x.AdapterName == lineageEntry.AdapterName)
-                        .ToArray();
+                    List<LineageEntry> prunedAlternatives =
+                        new List<LineageEntry>(currentLineage.Alternatives);
+
+                    prunedAlternatives.Remove(lineageEntry);
+
+                    currentLineage.Alternatives =
+                        prunedAlternatives.ToArray();
 
                     this.loggerWrapper.Info(
                         $"Removed from alternatives, leaving " +
-                        $"{prunedAlternatives} alternative " +
+                        $"{nameof(prunedAlternatives)} alternative " +
                         $"{nameof(LineageEntry)}s.");
 
                     toReturn = new LineageEntry()
                     {
                         AdapterName = lineageEntry.AdapterName,
                         Alternatives = prunedAlternatives,
+                        EntityId = lineageEntry.EntityId,
                         ReadDate = lineageEntry.ReadDate,
                         Value = lineageEntry.Value,
                     };

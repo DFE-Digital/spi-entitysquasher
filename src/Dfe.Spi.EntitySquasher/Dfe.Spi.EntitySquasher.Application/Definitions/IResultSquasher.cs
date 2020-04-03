@@ -4,6 +4,7 @@
     using System.Threading;
     using System.Threading.Tasks;
     using Dfe.Spi.EntitySquasher.Application.Models.Result;
+    using Dfe.Spi.EntitySquasher.Domain.Models;
     using Dfe.Spi.Models;
     using Dfe.Spi.Models.Entities;
 
@@ -28,6 +29,10 @@
         /// The <see cref="GetEntityAsyncResult" /> instances, containing the
         /// <see cref="EntityBase" />s to squash together.
         /// </param>
+        /// <param name="aggregatesRequest">
+        /// An instance of <see cref="AggregatesRequest" /> if aggregation
+        /// was requested, otherwise null.
+        /// </param>
         /// <param name="cancellationToken">
         /// An instance of <see cref="CancellationToken" />.
         /// </param>
@@ -38,6 +43,7 @@
             string algorithm,
             string entityName,
             IEnumerable<GetEntityAsyncResult> toSquash,
+            AggregatesRequest aggregatesRequest,
             CancellationToken cancellationToken);
     }
 }

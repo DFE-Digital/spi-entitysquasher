@@ -81,13 +81,29 @@
 
             int statusCode = (int)httpStatusCode;
 
+            IEnumerable<string> requestedFields =
+                entityAdapterErrorDetail.RequestedFields;
+
+            string fieldsCountStr = null;
+            if (requestedFields == null)
+            {
+                fieldsCountStr = "all";
+            }
+            else
+            {
+                int fieldsCount = requestedFields.Count();
+
+                fieldsCountStr = fieldsCount
+                    .ToString(CultureInfo.InvariantCulture);
+            }
+
             toReturn = string.Format(
                 CultureInfo.InvariantCulture,
                 Message,
                 entityAdapterErrorDetail.AdapterName,
                 statusCode,
                 entityAdapterErrorDetail.RequestedId,
-                entityAdapterErrorDetail.RequestedFields.Count());
+                fieldsCountStr);
 
             return toReturn;
         }
