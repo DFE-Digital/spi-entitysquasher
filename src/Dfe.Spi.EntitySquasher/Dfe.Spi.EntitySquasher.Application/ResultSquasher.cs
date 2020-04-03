@@ -373,6 +373,9 @@
                                 lineageEntry.AdapterName =
                                     x.AdapterRecordReference.Source;
 
+                                lineageEntry.EntityId =
+                                    x.AdapterRecordReference.Id;
+
                                 lineageEntry.Value = propertyToPopulate
                                     .GetValue(x.EntityBase);
 
@@ -673,6 +676,7 @@
                     {
                         AdapterName = lineageEntry.AdapterName,
                         Alternatives = prunedAlternatives,
+                        EntityId = lineageEntry.EntityId,
                         ReadDate = lineageEntry.ReadDate,
                         Value = lineageEntry.Value,
                     };
