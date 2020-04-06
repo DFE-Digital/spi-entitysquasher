@@ -127,9 +127,12 @@
     <value>Could not find an Algorithm Configuration Declaration File for the specified algorithm "{0}".</value>
   </data>
   <data name="_4" xml:space="preserve">
-    <value>Unable to serve any requests - all adapters are unavailable.</value>
+    <value>Unable to serve any requests; at least 1 response was not 404.</value>
   </data>
   <data name="_5" xml:space="preserve">
     <value>The Algorithm Configuration Declaration File was found for the specified algorithm, however it's incorrectly configured: {0}</value>
+  </data>
+  <data name="_6" xml:space="preserve">
+    <value>Unable to serve any requests; all responses were 404.</value>
   </data>
 </root>
