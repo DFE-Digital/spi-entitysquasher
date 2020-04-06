@@ -1,4 +1,4 @@
-﻿namespace Dfe.Spi.EntitySquasher.Application
+﻿namespace Dfe.Spi.EntitySquasher.Application.Exceptions
 {
     using System;
     using System.Diagnostics.CodeAnalysis;

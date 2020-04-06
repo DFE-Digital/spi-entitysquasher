@@ -189,12 +189,12 @@
                     this.loggerWrapper.Warning(
                         $"{nameof(httpErrorBody)} = {httpErrorBody}");
                 }
-                catch (JsonReaderException jsonReaderException)
+                catch (JsonException jsonException)
                 {
                     this.loggerWrapper.Warning(
                         $"Could not de-serialise error body to an instance " +
                         $"of {nameof(HttpErrorBody)}.",
-                        jsonReaderException);
+                        jsonException);
                 }
 
                 HttpStatusCode httpStatusCode = restResponse.StatusCode;

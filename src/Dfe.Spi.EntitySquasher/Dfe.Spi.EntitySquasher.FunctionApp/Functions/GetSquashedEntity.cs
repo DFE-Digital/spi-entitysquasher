@@ -9,7 +9,7 @@ namespace Dfe.Spi.EntitySquasher.FunctionApp.Functions
     using Dfe.Spi.Common.Http.Server;
     using Dfe.Spi.Common.Http.Server.Definitions;
     using Dfe.Spi.Common.Logging.Definitions;
-    using Dfe.Spi.EntitySquasher.Application;
+    using Dfe.Spi.EntitySquasher.Application.Exceptions;
     using Dfe.Spi.EntitySquasher.Application.Models.Processors;
     using Dfe.Spi.EntitySquasher.Application.Processors.Definitions;
     using Microsoft.AspNetCore.Http;
@@ -180,14 +180,37 @@ namespace Dfe.Spi.EntitySquasher.FunctionApp.Functions
                     }
                     else
                     {
-                        this.loggerWrapper.Error(
+                        this.loggerWrapper.Info(
                             "It seems that we were unable to serve ANY " +
-                            "requests. Returning an error back to the " +
-                            "client.");
+                            "requests. Are they *all* a 404 error?");
 
-                        toReturn = this.httpErrorBodyResultProvider.GetHttpErrorBodyResult(
-                            HttpStatusCode.FailedDependency,
-                            4);
+                        bool all404 =
+                            getSquashedEntityResponse.SquashedEntityResults
+                                .SelectMany(x => x.EntityAdapterErrorDetails)
+                                .All(x => x.HttpStatusCode == HttpStatusCode.NotFound);
+
+                        if (all404)
+                        {
+                            toReturn =
+                                this.httpErrorBodyResultProvider.GetHttpErrorBodyResult(
+                                    HttpStatusCode.NotFound,
+                                    6);
+
+                            this.loggerWrapper.Info(
+                                "Unable to serve any requests; all " +
+                                "responses were 404.");
+                        }
+                        else
+                        {
+                            toReturn =
+                                this.httpErrorBodyResultProvider.GetHttpErrorBodyResult(
+                                    HttpStatusCode.FailedDependency,
+                                    4);
+
+                            this.loggerWrapper.Error(
+                                "Unable to serve any requests; at least 1 " +
+                                "response was not 404.");
+                        }
                     }
                 }
             }

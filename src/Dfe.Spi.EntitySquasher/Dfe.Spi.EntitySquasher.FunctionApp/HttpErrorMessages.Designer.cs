@@ -88,7 +88,7 @@ namespace Dfe.Spi.EntitySquasher.FunctionApp {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Unable to serve any requests - all adapters are unavailable..
+        ///   Looks up a localized string similar to Unable to serve any requests; at least 1 response was not 404..
         /// </summary>
         internal static string _4 {
             get {
@@ -102,6 +102,15 @@ namespace Dfe.Spi.EntitySquasher.FunctionApp {
         internal static string _5 {
             get {
                 return ResourceManager.GetString("_5", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Unable to serve any requests; all responses were 404..
+        /// </summary>
+        internal static string _6 {
+            get {
+                return ResourceManager.GetString("_6", resourceCulture);
             }
         }
     }

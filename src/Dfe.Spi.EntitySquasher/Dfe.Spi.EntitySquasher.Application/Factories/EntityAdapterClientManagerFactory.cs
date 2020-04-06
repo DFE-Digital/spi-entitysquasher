@@ -10,6 +10,7 @@
     using Dfe.Spi.Common.Logging.Definitions;
     using Dfe.Spi.EntitySquasher.Application.Definitions.Caches;
     using Dfe.Spi.EntitySquasher.Application.Definitions.Factories;
+    using Dfe.Spi.EntitySquasher.Application.Exceptions;
     using Dfe.Spi.EntitySquasher.Application.Models;
     using Dfe.Spi.EntitySquasher.Domain.Definitions;
     using Dfe.Spi.EntitySquasher.Domain.Definitions.Factories;

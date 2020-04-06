@@ -57,7 +57,7 @@
             }
           },
           "404": {
-            "description": "The specified algorithm could not be found.",
+            "description": "The specified algorithm could not be found or no records were found for all adapters. See body of response for more detail.",
             "schema": {
               "$ref": "#/definitions/http-error-body"
             }

@@ -6,6 +6,7 @@
     using Dfe.Spi.Common.UnitTesting;
     using Dfe.Spi.Common.UnitTesting.Infrastructure;
     using Dfe.Spi.EntitySquasher.Application;
+    using Dfe.Spi.EntitySquasher.Application.Exceptions;
     using Dfe.Spi.EntitySquasher.Application.Models.Processors;
     using Dfe.Spi.EntitySquasher.Application.Models.Result;
     using Dfe.Spi.EntitySquasher.Application.Processors.Definitions;
