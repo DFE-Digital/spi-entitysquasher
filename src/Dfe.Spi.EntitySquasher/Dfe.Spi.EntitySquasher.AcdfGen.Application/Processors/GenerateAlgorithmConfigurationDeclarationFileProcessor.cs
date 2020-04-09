@@ -192,6 +192,7 @@
                 $"filtered.");
 
             IEnumerable<Field> fields = propertyInfos
+                .Where(x => x.Name != nameof(EntityBase._Lineage)) // Don't include lineage.
                 .Select(this.Map)
                 .OrderBy(x => x.Name)
                 .ToArray();
