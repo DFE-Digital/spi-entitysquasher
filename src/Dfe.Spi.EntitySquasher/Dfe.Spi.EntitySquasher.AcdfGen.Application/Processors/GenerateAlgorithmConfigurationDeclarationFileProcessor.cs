@@ -137,10 +137,11 @@
             this.loggerWrapper.Debug(
                 $"Enumerating non-abstract types from the " +
                 $"{nameof(Assembly)} \"{assembly.FullName}\" " +
-                $"({types.Length} {nameof(Type)}(s) in total)...");
+                $"({types.Length} {nameof(Type)}(s) in total) that inherit " +
+                $"from {nameof(EntityBase)}...");
 
             IEnumerable<Type> nonAbstractTypes = types
-                .Where(x => !x.IsAbstract);
+                .Where(x => !x.IsAbstract && x.BaseType == typeof(EntityBase));
 
             this.loggerWrapper.Info(
                 $"{nonAbstractTypes.Count()} {nameof(Type)}(s) enumerated. " +
@@ -191,6 +192,7 @@
                 $"filtered.");
 
             IEnumerable<Field> fields = propertyInfos
+                .Where(x => x.Name != nameof(EntityBase._Lineage)) // Don't include lineage.
                 .Select(this.Map)
                 .OrderBy(x => x.Name)
                 .ToArray();
