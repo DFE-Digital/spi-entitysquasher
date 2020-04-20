@@ -89,6 +89,7 @@
         {
             serviceCollection
                 .AddSingleton<IGetSquashedEntityProcessorSettingsProvider, GetSquashedEntityProcessorSettingsProvider>()
+                .AddSingleton<IEntityAdapterSettingsProvider, EntityAdapterSettingsProvider>()
                 .AddSingleton<IAlgorithmConfigurationDeclarationFileStorageAdapterSettingsProvider, AlgorithmConfigurationDeclarationFileStorageAdapterSettingsProvider>();
         }
 

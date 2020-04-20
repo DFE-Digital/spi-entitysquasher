@@ -1,4 +1,9 @@
-﻿namespace Dfe.Spi.EntitySquasher.Application.Processors
+﻿using System.Net;
+using Dfe.Spi.EntitySquasher.Domain;
+using Dfe.Spi.EntitySquasher.Domain.Definitions;
+using Dfe.Spi.EntitySquasher.Domain.Definitions.Factories;
+
+namespace Dfe.Spi.EntitySquasher.Application.Processors
 {
     using System;
     using System.Collections.Generic;
@@ -20,6 +25,7 @@
     /// </summary>
     public class GetSquashedEntityProcessor : IGetSquashedEntityProcessor
     {
+        private readonly IEntityAdapterClientFactory entityAdapterClientFactory;
         private readonly IEntityAdapterInvoker entityAdapterInvoker;
         private readonly IGetSquashedEntityProcessorSettingsProvider getSquashedEntityProcessorSettingsProvider;
         private readonly ILoggerWrapper loggerWrapper;
@@ -43,11 +49,13 @@
         /// An instance of type <see cref="IResultSquasher" />.
         /// </param>
         public GetSquashedEntityProcessor(
+            IEntityAdapterClientFactory entityAdapterClientFactory,
             IEntityAdapterInvoker entityAdapterInvoker,
             IGetSquashedEntityProcessorSettingsProvider getSquashedEntityProcessorSettingsProvider,
             ILoggerWrapper loggerWrapper,
             IResultSquasher resultSquasher)
         {
+            this.entityAdapterClientFactory = entityAdapterClientFactory;
             this.entityAdapterInvoker = entityAdapterInvoker;
             this.getSquashedEntityProcessorSettingsProvider = getSquashedEntityProcessorSettingsProvider;
             this.loggerWrapper = loggerWrapper;
@@ -76,33 +84,41 @@
             AggregatesRequest aggregatesRequest =
                 getSquashedEntityRequest.AggregatesRequest;
 
-            IEnumerable<EntityReference> entityReferences =
-                getSquashedEntityRequest.EntityReferences;
+            EntityReference[] entityReferences =
+                getSquashedEntityRequest.EntityReferences.ToArray();
 
-            List<SquashedEntityResult> squashedEntityResults =
-                new List<SquashedEntityResult>();
+            // List<SquashedEntityResult> squashedEntityResults =
+            //     new List<SquashedEntityResult>();
+            //
+            // // It would probably be sensible to populate each entity in turn,
+            // // rather than in parallel.
+            // // We can call the adapters in parallel, if we have lots in this
+            // // array, we don't want to bombard the adapters too much.
+            // SquashedEntityResult squashedEntityResult = null;
+            // foreach (EntityReference entityReference in entityReferences)
+            // {
+            //     // This can be done with LINQ, but looks messy AF with the
+            //     // async stuff going on.
+            //     squashedEntityResult =
+            //         await this.GetSquashedEntityResultAsync(
+            //             algorithm,
+            //             entityName,
+            //             fields,
+            //             aggregatesRequest,
+            //             entityReference,
+            //             cancellationToken)
+            //             .ConfigureAwait(false);
+            //
+            //     squashedEntityResults.Add(squashedEntityResult);
+            // }
 
-            // It would probably be sensible to populate each entity in turn,
-            // rather than in parallel.
-            // We can call the adapters in parallel, if we have lots in this
-            // array, we don't want to bombard the adapters too much.
-            SquashedEntityResult squashedEntityResult = null;
-            foreach (EntityReference entityReference in entityReferences)
-            {
-                // This can be done with LINQ, but looks messy AF with the
-                // async stuff going on.
-                squashedEntityResult =
-                    await this.GetSquashedEntityResultAsync(
-                        algorithm,
-                        entityName,
-                        fields,
-                        aggregatesRequest,
-                        entityReference,
-                        cancellationToken)
-                        .ConfigureAwait(false);
-
-                squashedEntityResults.Add(squashedEntityResult);
-            }
+            var squashedEntityResults = await GetSquashedEntitiesAsync(
+                algorithm,
+                entityName,
+                entityReferences,
+                fields,
+                aggregatesRequest,
+                cancellationToken);
 
             toReturn = new GetSquashedEntityResponse()
             {
@@ -110,6 +126,105 @@
             };
 
             return toReturn;
+        }
+
+        private async Task<SquashedEntityResult[]> GetSquashedEntitiesAsync(
+            string algorithm,
+            string entityName,
+            EntityReference[] entityReferences,
+            IEnumerable<string> fields,
+            AggregatesRequest aggregatesRequest,
+            CancellationToken cancellationToken)
+        {
+            var adapterData = await GetResultsFromAdaptersAsync(
+                entityName, entityReferences, fields, aggregatesRequest, cancellationToken);
+
+            var squashed = new SquashedEntityResult[entityReferences.Length];
+
+            for (var i = 0; i < entityReferences.Length; i++)
+            {
+                var entityReference = entityReferences[i];
+                var entityAdapterData = entityReference.AdapterRecordReferences
+                    .Select(x => adapterData[x])
+                    .Where(x => x.EntityBase != null)
+                    .ToArray();
+
+                var squashedEntity = entityAdapterData.Length > 0
+                    ? await this.resultSquasher.SquashAsync(
+                        algorithm,
+                        entityName,
+                        entityAdapterData,
+                        aggregatesRequest,
+                        cancellationToken)
+                    : null;
+
+                squashed[i] = new SquashedEntityResult
+                {
+                    EntityReference = entityReference,
+                    SquashedEntity = squashedEntity,
+                    EntityAdapterErrorDetails = new EntityAdapterErrorDetail[0], // TODO: Output errors
+                };
+            }
+
+            return squashed;
+        }
+
+        private async Task<Dictionary<AdapterRecordReference, GetEntityAsyncResult>> GetResultsFromAdaptersAsync(
+            string entityName,
+            EntityReference[] entityReferences,
+            IEnumerable<string> fields,
+            AggregatesRequest aggregatesRequest,
+            CancellationToken cancellationToken)
+        {
+            var results = new Dictionary<AdapterRecordReference, GetEntityAsyncResult>();
+
+            var adapterReferences = entityReferences
+                .SelectMany(x => x.AdapterRecordReferences)
+                .Distinct()
+                .GroupBy(x => x.Source)
+                .ToDictionary(x => x.Key, x => x.ToArray());
+            var adapterClients = adapterReferences.Keys
+                .ToDictionary(
+                    adapterName => adapterName,
+                    adapterName => this.entityAdapterClientFactory.Create(adapterName, null, null));
+
+            // TODO: Can also call adapters in parallel
+            foreach (var adapterName in adapterReferences.Keys)
+            {
+                var references = adapterReferences[adapterName];
+                var ids = references
+                    .Select(x => x.Id)
+                    .ToArray();
+
+                var adapterClient = adapterClients[adapterName];
+
+                var adapterResults = await adapterClient.GetEntitiesAsync(
+                    entityName,
+                    ids,
+                    fields,
+                    aggregatesRequest,
+                    cancellationToken);
+
+                for (var i = 0; i < references.Length; i++)
+                {
+                    var result = new GetEntityAsyncResult
+                    {
+                        EntityBase = adapterResults[i],
+                        AdapterRecordReference = references[i],
+                    };
+                    if (result.EntityBase == null)
+                    {
+                        result.EntityAdapterException = new EntityAdapterException
+                        {
+                            HttpStatusCode = HttpStatusCode.NotFound,
+                        };
+                    }
+
+                    results.Add(references[i], result);
+                }
+            }
+
+            return results;
         }
 
         private async Task<SquashedEntityResult> GetSquashedEntityResultAsync(
@@ -131,12 +246,12 @@
             {
                 InvokeEntityAdaptersResult adaptersLookupResult =
                     await this.entityAdapterInvoker.InvokeEntityAdaptersAsync(
-                        algorithm,
-                        entityName,
-                        fields,
-                        aggregatesRequest,
-                        entityReference,
-                        cancellationToken)
+                            algorithm,
+                            entityName,
+                            fields,
+                            aggregatesRequest,
+                            entityReference,
+                            cancellationToken)
                         .ConfigureAwait(false);
 
                 IEnumerable<GetEntityAsyncResult> getEntityAsyncResults =
@@ -155,11 +270,11 @@
 
                 squashedEntity =
                     await this.resultSquasher.SquashAsync(
-                        algorithm,
-                        entityName,
-                        toSquash,
-                        aggregatesRequest,
-                        cancellationToken)
+                            algorithm,
+                            entityName,
+                            toSquash,
+                            aggregatesRequest,
+                            cancellationToken)
                         .ConfigureAwait(false);
             }
             catch (AllAdaptersUnavailableException allAdaptersUnavailableException)

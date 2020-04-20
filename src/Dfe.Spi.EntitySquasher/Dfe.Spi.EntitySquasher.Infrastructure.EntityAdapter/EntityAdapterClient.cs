@@ -1,4 +1,7 @@
-﻿namespace Dfe.Spi.EntitySquasher.Infrastructure.EntityAdapter
+﻿using System.Threading;
+using Newtonsoft.Json.Linq;
+
+namespace Dfe.Spi.EntitySquasher.Infrastructure.EntityAdapter
 {
     using System;
     using System.Collections.Generic;
@@ -219,6 +222,32 @@
             return toReturn;
         }
 
+        public async Task<EntityBase[]> GetEntitiesAsync(
+            string entityName, 
+            string[] ids, 
+            IEnumerable<string> fields, 
+            AggregatesRequest aggregatesRequest,
+            CancellationToken cancellationToken)
+        {
+            var request = new RestRequest(GetEntityNameForUri(entityName), Method.POST);
+            request.AppendContext(this.spiExecutionContextManager.SpiExecutionContext);
+            
+            // TODO: Make this better
+            var batchRequest = new JObject(
+                    new JProperty("identifiers", new JArray(ids)),
+                    new JProperty("fields", new JArray(fields))
+                    //TODO : Aggregate requests
+                );
+            request.AddParameter("", batchRequest.ToString(), ParameterType.RequestBody);
+
+            var response = await this.restClient.ExecuteTaskAsync(request, cancellationToken);
+
+            var deserializationType = GetActualUnboxingType(entityName);
+            var results = JsonConvert.DeserializeObject(response.Content, deserializationType.MakeArrayType()) as EntityBase[];
+
+            return results;
+        }
+
         private Type GetActualUnboxingType(string entityName)
         {
             Type toReturn = null;
@@ -304,6 +333,25 @@
             this.loggerWrapper.Info($"{nameof(toReturn)} = {toReturn}");
 
             return toReturn;
+        }
+
+        private string GetEntityNameForUri(string entityName)
+        {
+            string pluralEntityName;
+            if (entityName == nameof(Census))
+            {
+                pluralEntityName = $"{entityName}es";
+            }
+            else if (entityName == nameof(LearningProviderRates) || entityName == nameof(ManagementGroupRates))
+            {
+                pluralEntityName = entityName;
+            }
+            else
+            {
+                pluralEntityName = $"{entityName}s";
+            }
+
+            return pluralEntityName.PascalToKebabCase();
         }
     }
 }

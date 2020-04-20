@@ -29,5 +29,7 @@
             string entityAdapterName,
             Uri baseUrl,
             Dictionary<string, string> headers);
+
+        IEntityAdapterClient Create(string entityAdapterName);
     }
 }

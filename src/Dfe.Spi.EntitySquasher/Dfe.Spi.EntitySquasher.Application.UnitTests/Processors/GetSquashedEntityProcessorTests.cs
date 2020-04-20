@@ -1,4 +1,6 @@
-﻿namespace Dfe.Spi.EntitySquasher.Application.UnitTests.Processors
+﻿using Dfe.Spi.EntitySquasher.Domain.Definitions.Factories;
+
+namespace Dfe.Spi.EntitySquasher.Application.UnitTests.Processors
 {
     using System;
     using System.Collections.Generic;
@@ -26,6 +28,7 @@
     [TestFixture]
     public class GetSquashedEntityProcessorTests
     {
+        private Mock<IEntityAdapterClientFactory> mockEntityAdapterClientFactory;
         private Mock<IEntityAdapterInvoker> mockEntityAdapterInvoker;
         private Mock<IGetSquashedEntityProcessorSettingsProvider> mockGetSquashedEntityProcessorSettingsProvider;
         private Mock<IResultSquasher> mockResultSquasher;
@@ -38,6 +41,8 @@
         {
             Type type = typeof(GetSquashedEntityProcessorTests);
             this.assembly = type.Assembly;
+            
+            this.mockEntityAdapterClientFactory = new Mock<IEntityAdapterClientFactory>();
 
             this.mockEntityAdapterInvoker =
                 new Mock<IEntityAdapterInvoker>();
@@ -55,6 +60,7 @@
             this.loggerWrapper = new LoggerWrapper();
 
             this.getSquashedEntityProcessor = new GetSquashedEntityProcessor(
+                this.mockEntityAdapterClientFactory.Object,
                 entityAdapterInvoker,
                 getSquashedEntityProcessorSettingsProvider,
                 this.loggerWrapper,
