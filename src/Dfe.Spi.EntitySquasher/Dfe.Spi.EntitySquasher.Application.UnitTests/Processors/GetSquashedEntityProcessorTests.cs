@@ -1,278 +1,250 @@
-﻿namespace Dfe.Spi.EntitySquasher.Application.UnitTests.Processors
-{
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Net;
-    using System.Reflection;
-    using System.Threading;
-    using System.Threading.Tasks;
-    using Dfe.Spi.Common.Models;
-    using Dfe.Spi.Common.UnitTesting;
-    using Dfe.Spi.Common.UnitTesting.Infrastructure;
-    using Dfe.Spi.EntitySquasher.Application.Definitions;
-    using Dfe.Spi.EntitySquasher.Application.Definitions.SettingsProviders;
-    using Dfe.Spi.EntitySquasher.Application.Models;
-    using Dfe.Spi.EntitySquasher.Application.Models.Processors;
-    using Dfe.Spi.EntitySquasher.Application.Models.Result;
-    using Dfe.Spi.EntitySquasher.Application.Processors;
-    using Dfe.Spi.EntitySquasher.Domain;
-    using Dfe.Spi.EntitySquasher.Domain.Models;
-    using Dfe.Spi.Models.Entities;
-    using Moq;
-    using Newtonsoft.Json;
-    using NUnit.Framework;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net;
+using System.Threading;
+using System.Threading.Tasks;
+using Dfe.Spi.Common.Logging.Definitions;
+using Dfe.Spi.Common.WellKnownIdentifiers;
+using Dfe.Spi.EntitySquasher.Application.Definitions;
+using Dfe.Spi.EntitySquasher.Application.Definitions.SettingsProviders;
+using Dfe.Spi.EntitySquasher.Application.Models;
+using Dfe.Spi.EntitySquasher.Application.Models.Processors;
+using Dfe.Spi.EntitySquasher.Application.Models.Result;
+using Dfe.Spi.EntitySquasher.Application.Processors;
+using Dfe.Spi.EntitySquasher.Domain;
+using Dfe.Spi.EntitySquasher.Domain.Definitions.Factories;
+using Dfe.Spi.EntitySquasher.Domain.Models;
+using Dfe.Spi.Models.Entities;
+using Moq;
+using NUnit.Framework;
+using RestSharp.Extensions;
 
-    [TestFixture]
+namespace Dfe.Spi.EntitySquasher.Application.UnitTests.Processors
+{
     public class GetSquashedEntityProcessorTests
     {
-        private Mock<IEntityAdapterInvoker> mockEntityAdapterInvoker;
-        private Mock<IGetSquashedEntityProcessorSettingsProvider> mockGetSquashedEntityProcessorSettingsProvider;
-        private Mock<IResultSquasher> mockResultSquasher;
-        private Assembly assembly;
-        private GetSquashedEntityProcessor getSquashedEntityProcessor;
-        private LoggerWrapper loggerWrapper;
+        private Random randomNumberGenerator;
+        private Mock<IEntityAdapterInvoker> entityAdapterInvokerMock;
+        private Mock<IGetSquashedEntityProcessorSettingsProvider> getSquashedEntityProcessorSettingsProviderMock;
+        private Mock<ILoggerWrapper> loggerWrapperMock;
+        private Mock<IResultSquasher> resultSquasherMock;
+        private GetSquashedEntityProcessor processor;
+        private CancellationToken cancellationToken;
 
         [SetUp]
         public void Arrange()
         {
-            Type type = typeof(GetSquashedEntityProcessorTests);
-            this.assembly = type.Assembly;
+            randomNumberGenerator = new Random();
 
-            this.mockEntityAdapterInvoker =
-                new Mock<IEntityAdapterInvoker>();
-            this.mockGetSquashedEntityProcessorSettingsProvider =
-                new Mock<IGetSquashedEntityProcessorSettingsProvider>();
-            this.mockResultSquasher =
-                new Mock<IResultSquasher>();
-
-            IEntityAdapterInvoker entityAdapterInvoker =
-                mockEntityAdapterInvoker.Object;
-            IGetSquashedEntityProcessorSettingsProvider getSquashedEntityProcessorSettingsProvider =
-                this.mockGetSquashedEntityProcessorSettingsProvider.Object;
-            IResultSquasher resultSquasher = mockResultSquasher.Object;
-
-            this.loggerWrapper = new LoggerWrapper();
-
-            this.getSquashedEntityProcessor = new GetSquashedEntityProcessor(
-                entityAdapterInvoker,
-                getSquashedEntityProcessorSettingsProvider,
-                this.loggerWrapper,
-                resultSquasher);
-        }
-
-        [Test]
-        public void GetSquashedEntityAsync_PostWithoutRequest_ThrowsArgumentNullException()
-        {
-            // Arrange
-            GetSquashedEntityRequest getSquashedEntityRequest = null;
-            CancellationToken cancellationToken = CancellationToken.None;
-
-            AsyncTestDelegate asyncTestDelegate =
-                async () =>
+            entityAdapterInvokerMock = new Mock<IEntityAdapterInvoker>();
+            entityAdapterInvokerMock.Setup(x =>
+                    x.GetResultsFromAdaptersAsync(
+                        It.IsAny<string>(),
+                        It.IsAny<EntityReference[]>(),
+                        It.IsAny<string[]>(),
+                        It.IsAny<AggregatesRequest>(),
+                        It.IsAny<CancellationToken>()))
+                .ReturnsAsync((string en, EntityReference[] er, string[] f, AggregatesRequest ar, CancellationToken ct) =>
                 {
-                    // Act
-                    await this.getSquashedEntityProcessor.GetSquashedEntityAsync(
-                        getSquashedEntityRequest,
-                        cancellationToken);
-                };
+                    var adapterReferences = er.SelectMany(x => x.AdapterRecordReferences);
+                    return adapterReferences
+                        .ToDictionary(
+                            x => x,
+                            x => new GetEntityAsyncResult
+                            {
+                                AdapterRecordReference = x,
+                                EntityAdapterException = new EntityAdapterException(new EntityAdapterErrorDetail
+                                {
+                                    AdapterName = x.Source,
+                                    RequestedFields = f,
+                                    RequestedId = x.Id,
+                                    HttpStatusCode = HttpStatusCode.NotFound,
+                                    RequestedEntityName = en,
+                                }, HttpStatusCode.NotFound, null),
+                            });
+                });
 
-            // Assert
-            Assert.ThrowsAsync<ArgumentNullException>(asyncTestDelegate);
+            getSquashedEntityProcessorSettingsProviderMock = new Mock<IGetSquashedEntityProcessorSettingsProvider>();
+
+            loggerWrapperMock = new Mock<ILoggerWrapper>();
+
+            resultSquasherMock = new Mock<IResultSquasher>();
+
+            processor = new GetSquashedEntityProcessor(
+                entityAdapterInvokerMock.Object,
+                getSquashedEntityProcessorSettingsProviderMock.Object,
+                loggerWrapperMock.Object,
+                resultSquasherMock.Object);
+
+            cancellationToken = new CancellationToken();
         }
 
         [Test]
-        public async Task GetSquashedEntityAsync_EntityAdapterInvokerThrowsAllAdaptersUnavailableException_OnlyErrorsReturned()
+        public async Task CallingGetSquashedEntityShouldGetDataFromAdapters()
         {
-            // Arrange
-            string getSquashedEntityRequestStr =
-                this.assembly.GetSample("get-squashed-entity-request-1.json");
+            var entityReferences = new[] {GetEntityReferenceForGiasAndUkrlp(), GetEntityReferenceForGiasAndUkrlp()};
+            var request = GetRequest(entityReferences);
 
-            GetSquashedEntityRequest getSquashedEntityRequest =
-                JsonConvert.DeserializeObject<GetSquashedEntityRequest>(
-                    getSquashedEntityRequestStr);
-            CancellationToken cancellationToken = CancellationToken.None;    
+            await processor.GetSquashedEntityAsync(request, cancellationToken);
 
-            HttpStatusCode httpStatusCode = HttpStatusCode.AlreadyReported;
+            entityAdapterInvokerMock.Verify(x =>
+                    x.GetResultsFromAdaptersAsync(request.EntityName, entityReferences, request.Fields, request.AggregatesRequest, cancellationToken),
+                Times.Once);
+        }
 
-            HttpErrorBody httpErrorBody = new HttpErrorBody()
+        [Test]
+        public async Task CallingGetSquashedEntityShouldReturnResultPerRequestedEntityReference()
+        {
+            var entityReferences = new[] {GetEntityReferenceForGiasAndUkrlp(), GetEntityReferenceForGiasAndUkrlp()};
+            var request = GetRequest(entityReferences);
+
+            var actual = await processor.GetSquashedEntityAsync(request, cancellationToken);
+
+            Assert.IsNotNull(actual);
+            Assert.IsNotNull(actual.SquashedEntityResults);
+            Assert.AreEqual(entityReferences.Length, actual.SquashedEntityResults.Count());
+            Assert.AreSame(entityReferences[0], actual.SquashedEntityResults.ElementAt(0).EntityReference);
+            Assert.AreSame(entityReferences[1], actual.SquashedEntityResults.ElementAt(1).EntityReference);
+        }
+
+        [Test]
+        public async Task CallingGetSquashedEntityShouldSquashResultsFromAdapters()
+        {
+            var entityReferences = new[] {GetEntityReferenceForGiasAndUkrlp(), GetEntityReferenceForGiasAndUkrlp()};
+            var entityResults = GetEntityResultsForAdapterReferences(entityReferences);
+            var request = GetRequest(entityReferences);
+            SetupEntityAdapterInvokerToReturnResults(entityReferences, entityResults);
+
+            await processor.GetSquashedEntityAsync(request, cancellationToken);
+
+            resultSquasherMock.Verify(s =>
+                    s.SquashAsync(
+                        It.IsAny<string>(),
+                        It.IsAny<string>(),
+                        It.IsAny<IEnumerable<GetEntityAsyncResult>>(),
+                        It.IsAny<AggregatesRequest>(),
+                        It.IsAny<CancellationToken>()),
+                Times.Exactly(entityReferences.Length));
+            resultSquasherMock.Verify(s =>
+                    s.SquashAsync(
+                        request.Algorithm,
+                        request.EntityName,
+                        It.Is<IEnumerable<GetEntityAsyncResult>>((toSquash) =>
+                            toSquash.Count() == entityReferences[0].AdapterRecordReferences.Count() &&
+                            toSquash.Any(x => x.EntityBase == entityResults[0]) &&
+                            toSquash.Any(x => x.EntityBase == entityResults[1])),
+                        request.AggregatesRequest,
+                        cancellationToken),
+                Times.Once);
+            resultSquasherMock.Verify(s =>
+                    s.SquashAsync(
+                        request.Algorithm,
+                        request.EntityName,
+                        It.Is<IEnumerable<GetEntityAsyncResult>>((toSquash) =>
+                            toSquash.Count() == entityReferences[1].AdapterRecordReferences.Count() &&
+                            toSquash.Any(x => x.EntityBase == entityResults[2]) &&
+                            toSquash.Any(x => x.EntityBase == entityResults[3])),
+                        request.AggregatesRequest,
+                        cancellationToken),
+                Times.Once);
+        }
+
+
+        private EntityReference GetEntityReferenceForGiasAndUkrlp(long? urn = null, long? ukprn = null)
+        {
+            return new EntityReference
             {
-                ErrorIdentifier = "ABC",
-                Message = "Some Error Message",
-                StatusCode = httpStatusCode,
-            };
-
-            EntityAdapterErrorDetail expectedEntityAdapterErrorDetail =
-                new EntityAdapterErrorDetail()
+                AdapterRecordReferences = new[]
                 {
-                    AdapterName = "some-adapter",
-                    HttpErrorBody = httpErrorBody,
-                    HttpStatusCode = httpStatusCode,
-                    RequestedEntityName = "LearningProvider",
-                    RequestedFields = new string[]
-                        {
-                            "Name",
-                        },
-                    RequestedId = "9c9f835f-723d-4461-bd9d-e7b955c45623",
-                };
-
-            EntityAdapterException entityAdapterException =
-                new EntityAdapterException(
-                    expectedEntityAdapterErrorDetail,
-                    httpStatusCode,
-                    httpErrorBody);
-
-            AllAdaptersUnavailableException allAdaptersUnavailableException =
-                new AllAdaptersUnavailableException(
-                    new EntityAdapterException[]
+                    new AdapterRecordReference
                     {
-                        entityAdapterException,
-                    });
-
-            this.mockEntityAdapterInvoker
-                .Setup(x => x.InvokeEntityAdaptersAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<IEnumerable<string>>(), It.IsAny<AggregatesRequest>(), It.IsAny<EntityReference>(), It.IsAny<CancellationToken>()))
-                .Throws(allAdaptersUnavailableException);
-
-            EntityBase entityBase = null;
-
-            SquashedEntityResult squashedEntityResult = null;
-            GetSquashedEntityResponse getSquashedEntityResponse = null;
-            EntityAdapterErrorDetail actualEntityAdapterErrorDetail = null;
-
-            // Act
-            getSquashedEntityResponse =
-                await this.getSquashedEntityProcessor.GetSquashedEntityAsync(
-                    getSquashedEntityRequest,
-                    cancellationToken);
-
-            // Assert
-            squashedEntityResult =
-                getSquashedEntityResponse.SquashedEntityResults.Single();
-
-            actualEntityAdapterErrorDetail =
-                squashedEntityResult.EntityAdapterErrorDetails.Single();
-
-            Assert.AreEqual(
-                expectedEntityAdapterErrorDetail,
-                actualEntityAdapterErrorDetail);
-
-            entityBase = squashedEntityResult.SquashedEntity;
-
-            Assert.IsNull(entityBase);
+                        Source = SourceSystemNames.GetInformationAboutSchools,
+                        Id = (urn ?? randomNumberGenerator.Next(100001, 999999)).ToString()
+                    },
+                    new AdapterRecordReference
+                    {
+                        Source = SourceSystemNames.UkRegisterOfLearningProviders,
+                        Id = (urn ?? randomNumberGenerator.Next(10000001, 99999999)).ToString()
+                    },
+                },
+            };
         }
 
-        [Test]
-        public async Task GetSquashedEntityAsync_UnderlyingServicesReturnOneModelAndOneError_SquashesCorrectlyAndReturnsError()
+        private GetSquashedEntityRequest GetRequest(EntityReference[] entityReferences)
         {
-            // Arrange
-            string defaultAlgorithm = "default-example";
-
-            this.mockGetSquashedEntityProcessorSettingsProvider
-                .Setup(x => x.DefaultAlgorithm)
-                .Returns(defaultAlgorithm);
-
-            string getSquashedEntityRequestStr =
-                this.assembly.GetSample("get-squashed-entity-request-1.json");
-
-            GetSquashedEntityRequest getSquashedEntityRequest =
-                JsonConvert.DeserializeObject<GetSquashedEntityRequest>(
-                    getSquashedEntityRequestStr);
-            CancellationToken cancellationToken = CancellationToken.None;
-
-            string actualGetSquashedEntityResponseStr =
-                this.assembly.GetSample(
-                    "invoke-entity-adapters-result-1.json");
-
-            InvokeEntityAdaptersResult invokeEntityAdaptersResult =
-                JsonConvert.DeserializeObject<InvokeEntityAdaptersResult>(
-                    actualGetSquashedEntityResponseStr);
-
-            GetEntityAsyncResult getEntityAsyncResult =
-                invokeEntityAdaptersResult.GetEntityAsyncResults.First();
-
-            HttpStatusCode httpStatusCode = HttpStatusCode.AlreadyReported;
-
-            HttpErrorBody httpErrorBody = new HttpErrorBody()
+            return new GetSquashedEntityRequest
             {
-                ErrorIdentifier = "ABC",
-                Message = "Some Error Message",
-                StatusCode = httpStatusCode,
+                Algorithm = "algo1",
+                Fields = new[]
+                {
+                    "name",
+                    "urn",
+                    "ukprn",
+                },
+                EntityName = "LearningProvider",
+                EntityReferences = entityReferences,
             };
+        }
 
-            EntityAdapterErrorDetail expectedEntityAdapterErrorDetail =
-                new EntityAdapterErrorDetail()
+        private EntityBase[] GetEntityResultsForAdapterReferences(EntityReference[] entityReferences)
+        {
+            var adapterRecordReferences = entityReferences
+                .SelectMany(x => x.AdapterRecordReferences)
+                .ToArray();
+
+            return GetEntityResultsForAdapterReferences(adapterRecordReferences);
+        }
+
+        private EntityBase[] GetEntityResultsForAdapterReferences(AdapterRecordReference[] adapterRecordReferences)
+        {
+            var entities = new EntityBase[adapterRecordReferences.Length];
+
+            for (var i = 0; i < adapterRecordReferences.Length; i++)
+            {
+                entities[i] = new LearningProvider
                 {
-                    AdapterName = "some-adapter",
-                    HttpErrorBody = httpErrorBody,
-                    HttpStatusCode = httpStatusCode,
-                    RequestedEntityName = "LearningProvider",
-                    RequestedFields = new string[]
-                        {
-                            "Name",
-                        },
-                    RequestedId = "9c9f835f-723d-4461-bd9d-e7b955c45623",
+                    Urn = adapterRecordReferences[i].Source == SourceSystemNames.GetInformationAboutSchools
+                        ? (long?) long.Parse(adapterRecordReferences[i].Id)
+                        : null,
+                    Ukprn = adapterRecordReferences[i].Source == SourceSystemNames.UkRegisterOfLearningProviders
+                        ? (long?) long.Parse(adapterRecordReferences[i].Id)
+                        : null,
                 };
+            }
 
-            getEntityAsyncResult.EntityAdapterException =
-                new EntityAdapterException(
-                    expectedEntityAdapterErrorDetail,
-                    httpStatusCode,
-                    httpErrorBody);
+            return entities;
+        }
 
-            this.mockEntityAdapterInvoker
-                .Setup(x => x.InvokeEntityAdaptersAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<IEnumerable<string>>(), It.IsAny<AggregatesRequest>(), It.IsAny<EntityReference>(), It.IsAny<CancellationToken>()))
-                .ReturnsAsync(invokeEntityAdaptersResult);
+        private void SetupEntityAdapterInvokerToReturnResults(EntityReference[] entityReferences, EntityBase[] entityResults)
+        {
+            var adapterRecordReferences = entityReferences
+                .SelectMany(x => x.AdapterRecordReferences)
+                .ToArray();
 
-            Spi.Models.Entities.LearningProvider learningProvider =
-                new Spi.Models.Entities.LearningProvider()
+            SetupEntityAdapterInvokerToReturnResults(adapterRecordReferences, entityResults);
+        }
+
+        private void SetupEntityAdapterInvokerToReturnResults(AdapterRecordReference[] adapterRecordReferences, EntityBase[] entityResults)
+        {
+            var results = new Dictionary<AdapterRecordReference, GetEntityAsyncResult>();
+            for (var i = 0; i < adapterRecordReferences.Length; i++)
+            {
+                results.Add(adapterRecordReferences[i], new GetEntityAsyncResult
                 {
-                    Name = "squashed thing",
-                };
-            Action<string, string, IEnumerable<GetEntityAsyncResult>, AggregatesRequest, CancellationToken> callback =
-                (v, w, x, y, z) =>
-                {
-                    // Enumerate the collection, to provide coverage.
-                    x.ToArray();
-                };
+                    AdapterRecordReference = adapterRecordReferences[i],
+                    EntityBase = entityResults[i],
+                });
+            }
 
-            this.mockResultSquasher
-                .Setup(x => x.SquashAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<IEnumerable<GetEntityAsyncResult>>(), It.IsAny<AggregatesRequest>(), It.IsAny<CancellationToken>()))
-                .Callback(callback)
-                .ReturnsAsync(learningProvider);
-
-            GetSquashedEntityResponse getSquashedEntityResponse = null;
-
-            SquashedEntityResult squashedEntityResult = null;
-            EntityAdapterErrorDetail actualEntityAdapterErrorDetail = null;
-
-            EntityBase entityBase = null;
-
-            // Act
-            getSquashedEntityResponse =
-                await this.getSquashedEntityProcessor.GetSquashedEntityAsync(
-                    getSquashedEntityRequest,
-                    cancellationToken);
-
-            // Assert
-            squashedEntityResult = getSquashedEntityResponse
-                .SquashedEntityResults
-                .First();
-
-            actualEntityAdapterErrorDetail = squashedEntityResult
-                .EntityAdapterErrorDetails
-                .First();
-
-            Assert.AreEqual(
-                expectedEntityAdapterErrorDetail,
-                actualEntityAdapterErrorDetail);
-
-            squashedEntityResult = getSquashedEntityResponse
-                .SquashedEntityResults
-                .Last();
-
-            entityBase = squashedEntityResult.SquashedEntity;
-
-            Assert.IsNotNull(entityBase);
+            entityAdapterInvokerMock.Setup(x =>
+                    x.GetResultsFromAdaptersAsync(
+                        It.IsAny<string>(),
+                        It.IsAny<EntityReference[]>(),
+                        It.IsAny<string[]>(),
+                        It.IsAny<AggregatesRequest>(),
+                        It.IsAny<CancellationToken>()))
+                .ReturnsAsync(results);
         }
     }
 }

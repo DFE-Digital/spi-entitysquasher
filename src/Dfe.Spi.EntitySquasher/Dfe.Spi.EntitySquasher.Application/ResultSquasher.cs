@@ -262,18 +262,9 @@
                 $"Extracting aggregation values for aggregation query " +
                 $"\"{name}\"...");
 
-            IEnumerable<decimal> aggregationValues = aggregationsToSquash
-                .Select(x =>
-                {
-                    decimal aggregationValue;
-
-                    Aggregation aggregation =
-                        x.SingleOrDefault(y => y.Name == name);
-
-                    aggregationValue = aggregation.Value;
-
-                    return aggregationValue;
-                });
+            decimal[] aggregationValues = aggregationsToSquash
+                .Select(x => x.Single(y => y.Name.Equals(name, StringComparison.InvariantCultureIgnoreCase)).Value)
+                .ToArray();
 
             string aggregationValuesStr = string.Join(
                 ", ",

@@ -71,8 +71,8 @@
                 .AddSingleton<IHttpErrorBodyResultProvider>(httpErrorBodyResultProvider)
                 .AddScoped<IHttpSpiExecutionContextManager, HttpSpiExecutionContextManager>()
                 .AddScoped<ISpiExecutionContextManager>(x => x.GetService<IHttpSpiExecutionContextManager>())
+                .AddScoped<IEntityAdapterInvoker, EntityAdapterInvoker >()
                 .AddScoped<IResultSquasher, ResultSquasher>()
-                .AddScoped<IEntityAdapterInvoker, EntityAdapterInvoker>()
                 .AddScoped<IGetSquashedEntityProcessor, GetSquashedEntityProcessor>()
                 .AddScoped<IAlgorithmConfigurationDeclarationFileStorageAdapter, AlgorithmConfigurationDeclarationFileStorageAdapter>();
         }
@@ -89,6 +89,7 @@
         {
             serviceCollection
                 .AddSingleton<IGetSquashedEntityProcessorSettingsProvider, GetSquashedEntityProcessorSettingsProvider>()
+                .AddSingleton<IEntityAdapterSettingsProvider, EntityAdapterSettingsProvider>()
                 .AddSingleton<IAlgorithmConfigurationDeclarationFileStorageAdapterSettingsProvider, AlgorithmConfigurationDeclarationFileStorageAdapterSettingsProvider>();
         }
 
@@ -97,15 +98,13 @@
         {
             serviceCollection
                 .AddScoped<IAlgorithmConfigurationDeclarationFileCacheManagerFactory, AlgorithmConfigurationDeclarationFileManagerFactory>()
-                .AddScoped<IEntityAdapterClientCacheManagerFactory, EntityAdapterClientManagerFactory>()
                 .AddScoped<IEntityAdapterClientFactory, EntityAdapterClientFactory>();
         }
 
         private static void AddCaches(IServiceCollection serviceCollection)
         {
             serviceCollection
-                .AddSingleton<IAlgorithmConfigurationDeclarationFileCache, AlgorithmConfigurationDeclarationFileCache>()
-                .AddScoped<IEntityAdapterClientCache, EntityAdapterClientCache>();
+                .AddSingleton<IAlgorithmConfigurationDeclarationFileCache, AlgorithmConfigurationDeclarationFileCache>();
         }
 
         private static ILogger CreateILogger(IServiceProvider serviceProvider)

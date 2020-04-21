@@ -25,6 +25,7 @@
   <ItemGroup>
     <!-- Dfe.Spi.* -->
     <PackageReference Include="Dfe.Spi.Common.UnitTesting" Version="1.0.7" PrivateAssets="All" />
+    <PackageReference Include="Dfe.Spi.Common.WellKnownIdentifiers" Version="1.2.1" />
     
     <!-- Microsoft -->
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.9.0" PrivateAssets="All" />

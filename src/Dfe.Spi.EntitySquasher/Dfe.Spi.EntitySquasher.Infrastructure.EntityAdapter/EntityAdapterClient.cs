@@ -1,4 +1,8 @@
-﻿namespace Dfe.Spi.EntitySquasher.Infrastructure.EntityAdapter
+﻿using System.Threading;
+using Dfe.Spi.EntitySquasher.Infrastructure.EntityAdapter.Models;
+using Newtonsoft.Json.Linq;
+
+namespace Dfe.Spi.EntitySquasher.Infrastructure.EntityAdapter
 {
     using System;
     using System.Collections.Generic;
@@ -219,6 +223,71 @@
             return toReturn;
         }
 
+        public async Task<EntityBase[]> GetEntitiesAsync(
+            string entityName, 
+            string[] ids, 
+            string[] fields, 
+            AggregatesRequest aggregatesRequest,
+            CancellationToken cancellationToken)
+        {
+            var request = new RestRequest(GetEntityNameForUri(entityName), Method.POST);
+            request.AppendContext(this.spiExecutionContextManager.SpiExecutionContext);
+
+            var batchRequest = JsonConvert.SerializeObject(
+                new BatchGetEntitiesRequest
+                {
+                    Identifiers = ids,
+                    Fields = fields,
+                    AggregateQueries = aggregatesRequest?.AggregateQueries,
+                });
+            
+            request.AddParameter("", batchRequest, ParameterType.RequestBody);
+
+            var response = await this.restClient.ExecuteTaskAsync(request, cancellationToken);
+            if (!response.IsSuccessful)
+            {
+                HttpErrorBody httpErrorBody = null;
+                try
+                {
+                    httpErrorBody =
+                        JsonConvert.DeserializeObject<HttpErrorBody>(response.Content);
+
+                    this.loggerWrapper.Warning(
+                        $"{nameof(httpErrorBody)} = {httpErrorBody}");
+                }
+                catch (JsonException jsonException)
+                {
+                    this.loggerWrapper.Warning(
+                        $"Could not de-serialise error body to an instance " +
+                        $"of {nameof(HttpErrorBody)}.",
+                        jsonException);
+                }
+
+                HttpStatusCode httpStatusCode = response.StatusCode;
+
+                // Throw exception.
+                EntityAdapterErrorDetail entityAdapterErrorDetail =
+                    new EntityAdapterErrorDetail()
+                    {
+                        AdapterName = this.entityAdapterName,
+                        RequestedEntityName = entityName,
+                        RequestedFields = fields,
+                        RequestedId = ids[0],
+                        HttpStatusCode = httpStatusCode,
+                        HttpErrorBody = httpErrorBody,
+                    };
+                throw new EntityAdapterException(
+                    entityAdapterErrorDetail,
+                    httpStatusCode,
+                    httpErrorBody);
+            }
+
+            var deserializationType = GetActualUnboxingType(entityName);
+            var results = JsonConvert.DeserializeObject(response.Content, deserializationType.MakeArrayType()) as EntityBase[];
+
+            return results;
+        }
+
         private Type GetActualUnboxingType(string entityName)
         {
             Type toReturn = null;
@@ -304,6 +373,25 @@
             this.loggerWrapper.Info($"{nameof(toReturn)} = {toReturn}");
 
             return toReturn;
+        }
+
+        private string GetEntityNameForUri(string entityName)
+        {
+            string pluralEntityName;
+            if (entityName == nameof(Census))
+            {
+                pluralEntityName = $"{entityName}es";
+            }
+            else if (entityName == nameof(LearningProviderRates) || entityName == nameof(ManagementGroupRates))
+            {
+                pluralEntityName = entityName;
+            }
+            else
+            {
+                pluralEntityName = $"{entityName}s";
+            }
+
+            return pluralEntityName.PascalToKebabCase();
         }
     }
 }

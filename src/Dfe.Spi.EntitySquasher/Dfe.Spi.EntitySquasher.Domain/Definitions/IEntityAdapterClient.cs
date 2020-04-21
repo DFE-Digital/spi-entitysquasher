@@ -1,4 +1,6 @@
-﻿namespace Dfe.Spi.EntitySquasher.Domain.Definitions
+﻿using System.Threading;
+
+namespace Dfe.Spi.EntitySquasher.Domain.Definitions
 {
     using System.Collections.Generic;
     using System.Threading.Tasks;
@@ -33,5 +35,12 @@
             string id,
             IEnumerable<string> fields,
             AggregatesRequest aggregatesRequest);
+        
+        Task<EntityBase[]> GetEntitiesAsync(
+            string entityName,
+            string[] ids,
+            string[] fields,
+            AggregatesRequest aggregatesRequest,
+            CancellationToken cancellationToken);
     }
 }

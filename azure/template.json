@@ -55,6 +55,21 @@
       "minLength": 2,
       "maxLength": 2,
       "defaultValue": "01"
+    },
+    "giasBaseUrl": {
+      "type": "string"
+    },
+    "ukrlpBaseUrl": {
+      "type": "string"
+    },
+    "ratesBaseUrl": {
+      "type": "string"
+    },
+    "iStoreBaseUrl": {
+      "type": "string"
+    },
+    "subscriptionKey": {
+      "type": "string"
     }
   },
   "variables": {
@@ -165,6 +180,26 @@
             {
               "name": "DefaultAlgorithm",
               "value": "default"
+            },
+            {
+              "name": "GiasBaseUrl",
+              "value": "giasBaseUrl"
+            },
+            {
+              "name": "UkrlpBaseUrl",
+              "value": "ukrlpBaseUrl"
+            },
+            {
+              "name": "RatesBaseUrl",
+              "value": "ratesBaseUrl"
+            },
+            {
+              "name": "IStoreBaseUrl",
+              "value": "iStoreBaseUrl"
+            },
+            {
+              "name": "SubscriptionKey",
+              "value": "subscriptionKey"
             }
           ],
           "ipSecurityRestrictions": [

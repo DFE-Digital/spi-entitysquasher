@@ -9,6 +9,7 @@
     <!-- Dfe.Spi.* -->
     <PackageReference Include="Dfe.Spi.Common.Extensions" Version="1.0.1" />
     <PackageReference Include="Dfe.Spi.Common.Http.Client" Version="1.0.7" />
+    <PackageReference Include="Dfe.Spi.Common.WellKnownIdentifiers" Version="1.2.1" />
     
     <!-- Other -->
     <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />

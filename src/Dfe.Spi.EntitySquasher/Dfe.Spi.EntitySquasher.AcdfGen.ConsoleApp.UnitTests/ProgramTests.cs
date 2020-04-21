@@ -57,11 +57,6 @@
             Options options = new Options()
             {
                 Filename = "a-filename.json",
-                AdapterNames = new string[]
-                {
-                    "some-adapter",
-                    "someother-adapter",
-                },
             };
 
             this.mockGenerateAlgorithmConfigurationDeclarationFileProcessor
@@ -88,11 +83,6 @@
             Options options = new Options()
             {
                 Filename = "a-filename.json",
-                AdapterNames = new string[]
-                {
-                    "some-adapter",
-                    "someother-adapter",
-                },
             };
 
             GenerateAlgorithmConfigurationDeclarationFileResponse generateAlgorithmConfigurationDeclarationFileResponse =

@@ -77,7 +77,7 @@ steps:
     inputs:
       command: 'custom'
       custom: '$(Build.ArtifactStagingDirectory)/acdf-gen/Dfe.Spi.EntitySquasher.AcdfGen.ConsoleApp/acdf-gen.dll'
-      arguments: '--filename acdf-default.json --adapter-names GIAS UKRLP'
+      arguments: '--filename acdf-default.json'
 
   - task: CopyFiles@2
     displayName: 'Copy Generated ACDF'

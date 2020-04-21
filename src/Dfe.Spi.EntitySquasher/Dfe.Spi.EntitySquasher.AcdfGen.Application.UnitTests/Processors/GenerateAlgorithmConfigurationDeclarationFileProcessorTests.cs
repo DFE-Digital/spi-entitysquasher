@@ -66,7 +66,6 @@
 
             AlgorithmConfigurationDeclarationFile algorithmConfigurationDeclarationFile = null;
             IEnumerable<Entity> entities = null;
-            IEnumerable<EntityAdapter> entityAdapters = null;
             Func<string, AlgorithmConfigurationDeclarationFile, string> saveCallback =
                 (x, y) =>
                 {
@@ -84,14 +83,10 @@
             GenerateAlgorithmConfigurationDeclarationFileRequest generateAlgorithmConfigurationDeclarationFileRequest =
                 new GenerateAlgorithmConfigurationDeclarationFileRequest()
                 {
-                    AdapterNames = adapterNames,
                     Filename = filename, 
                 };
 
             GenerateAlgorithmConfigurationDeclarationFileResponse generateAlgorithmConfigurationDeclarationFileResponse = null;
-
-            int expectedAdapterCount = adapterNames.Length;
-            int actualAdapterCount;
 
             Entity modelsBaseEntity = null;
 
@@ -105,16 +100,6 @@
             // be null.
             Assert.IsNotNull(algorithmConfigurationDeclarationFile);
 
-            entityAdapters =
-                algorithmConfigurationDeclarationFile.EntityAdapters;
-
-            Assert.IsNotNull(entityAdapters);
-
-            // The number of generated adapters should match that of the number
-            // of requested ones.
-            actualAdapterCount = entityAdapters.Count();
-
-            Assert.AreEqual(expectedAdapterCount, actualAdapterCount);
 
             entities = algorithmConfigurationDeclarationFile.Entities;
 

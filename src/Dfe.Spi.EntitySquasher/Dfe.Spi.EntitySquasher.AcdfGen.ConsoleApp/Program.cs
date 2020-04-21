@@ -76,7 +76,6 @@
             GenerateAlgorithmConfigurationDeclarationFileRequest generateAlgorithmConfigurationDeclarationFileRequest =
                 new GenerateAlgorithmConfigurationDeclarationFileRequest()
                 {
-                    AdapterNames = options.AdapterNames,
                     Filename = options.Filename,
                 };
 

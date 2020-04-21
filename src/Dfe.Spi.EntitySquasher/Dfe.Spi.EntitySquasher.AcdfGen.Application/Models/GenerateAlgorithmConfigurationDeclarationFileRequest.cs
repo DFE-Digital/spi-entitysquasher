@@ -14,15 +14,6 @@
         : ModelsBase
     {
         /// <summary>
-        /// Gets or sets a set of adapter names.
-        /// </summary>
-        public IEnumerable<string> AdapterNames
-        {
-            get;
-            set;
-        }
-
-        /// <summary>
         /// Gets or sets the filename to save the
         /// <see cref="AlgorithmConfigurationDeclarationFile" /> to the
         /// underlying storage.
