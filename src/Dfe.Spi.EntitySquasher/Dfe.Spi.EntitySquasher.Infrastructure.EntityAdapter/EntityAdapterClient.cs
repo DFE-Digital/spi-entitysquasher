@@ -241,6 +241,43 @@ namespace Dfe.Spi.EntitySquasher.Infrastructure.EntityAdapter
             request.AddParameter("", batchRequest.ToString(), ParameterType.RequestBody);
 
             var response = await this.restClient.ExecuteTaskAsync(request, cancellationToken);
+            if (!response.IsSuccessful)
+            {
+                HttpErrorBody httpErrorBody = null;
+                try
+                {
+                    httpErrorBody =
+                        JsonConvert.DeserializeObject<HttpErrorBody>(response.Content);
+
+                    this.loggerWrapper.Warning(
+                        $"{nameof(httpErrorBody)} = {httpErrorBody}");
+                }
+                catch (JsonException jsonException)
+                {
+                    this.loggerWrapper.Warning(
+                        $"Could not de-serialise error body to an instance " +
+                        $"of {nameof(HttpErrorBody)}.",
+                        jsonException);
+                }
+
+                HttpStatusCode httpStatusCode = response.StatusCode;
+
+                // Throw exception.
+                EntityAdapterErrorDetail entityAdapterErrorDetail =
+                    new EntityAdapterErrorDetail()
+                    {
+                        AdapterName = this.entityAdapterName,
+                        RequestedEntityName = entityName,
+                        RequestedFields = fields,
+                        RequestedId = ids[0],
+                        HttpStatusCode = httpStatusCode,
+                        HttpErrorBody = httpErrorBody,
+                    };
+                throw new EntityAdapterException(
+                    entityAdapterErrorDetail,
+                    httpStatusCode,
+                    httpErrorBody);
+            }
 
             var deserializationType = GetActualUnboxingType(entityName);
             var results = JsonConvert.DeserializeObject(response.Content, deserializationType.MakeArrayType()) as EntityBase[];

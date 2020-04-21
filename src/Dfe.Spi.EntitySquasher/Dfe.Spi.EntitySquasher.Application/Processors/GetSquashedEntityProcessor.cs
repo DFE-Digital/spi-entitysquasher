@@ -35,6 +35,9 @@ namespace Dfe.Spi.EntitySquasher.Application.Processors
         /// Initialises a new instance of the
         /// <see cref="GetSquashedEntityProcessor" /> class.
         /// </summary>
+        /// <param name="entityAdapterClientFactory">
+        /// An instance of type <see cref="IEntityAdapterClientFactory" />.
+        /// </param>
         /// <param name="entityAdapterInvoker">
         /// An instance of type <see cref="IEntityAdapterInvoker" />.
         /// </param>
@@ -75,49 +78,14 @@ namespace Dfe.Spi.EntitySquasher.Application.Processors
                     nameof(getSquashedEntityRequest));
             }
 
-            string algorithm = getSquashedEntityRequest.Algorithm;
-            algorithm = this.CheckForDefaultAlgorithm(algorithm);
-
-            string entityName = getSquashedEntityRequest.EntityName;
-            IEnumerable<string> fields = getSquashedEntityRequest.Fields;
-
-            AggregatesRequest aggregatesRequest =
-                getSquashedEntityRequest.AggregatesRequest;
-
-            EntityReference[] entityReferences =
-                getSquashedEntityRequest.EntityReferences.ToArray();
-
-            // List<SquashedEntityResult> squashedEntityResults =
-            //     new List<SquashedEntityResult>();
-            //
-            // // It would probably be sensible to populate each entity in turn,
-            // // rather than in parallel.
-            // // We can call the adapters in parallel, if we have lots in this
-            // // array, we don't want to bombard the adapters too much.
-            // SquashedEntityResult squashedEntityResult = null;
-            // foreach (EntityReference entityReference in entityReferences)
-            // {
-            //     // This can be done with LINQ, but looks messy AF with the
-            //     // async stuff going on.
-            //     squashedEntityResult =
-            //         await this.GetSquashedEntityResultAsync(
-            //             algorithm,
-            //             entityName,
-            //             fields,
-            //             aggregatesRequest,
-            //             entityReference,
-            //             cancellationToken)
-            //             .ConfigureAwait(false);
-            //
-            //     squashedEntityResults.Add(squashedEntityResult);
-            // }
+            var algorithm = this.CheckForDefaultAlgorithm(getSquashedEntityRequest.Algorithm);
 
             var squashedEntityResults = await GetSquashedEntitiesAsync(
                 algorithm,
-                entityName,
-                entityReferences,
-                fields,
-                aggregatesRequest,
+                getSquashedEntityRequest.EntityName,
+                getSquashedEntityRequest.EntityReferences.ToArray(),
+                getSquashedEntityRequest.Fields.ToArray(),
+                getSquashedEntityRequest.AggregatesRequest,
                 cancellationToken);
 
             toReturn = new GetSquashedEntityResponse()
@@ -132,7 +100,7 @@ namespace Dfe.Spi.EntitySquasher.Application.Processors
             string algorithm,
             string entityName,
             EntityReference[] entityReferences,
-            IEnumerable<string> fields,
+            string[] fields,
             AggregatesRequest aggregatesRequest,
             CancellationToken cancellationToken)
         {
@@ -144,25 +112,41 @@ namespace Dfe.Spi.EntitySquasher.Application.Processors
             for (var i = 0; i < entityReferences.Length; i++)
             {
                 var entityReference = entityReferences[i];
-                var entityAdapterData = entityReference.AdapterRecordReferences
+                var squashableEntities = entityReference.AdapterRecordReferences
                     .Select(x => adapterData[x])
                     .Where(x => x.EntityBase != null)
                     .ToArray();
-
-                var squashedEntity = entityAdapterData.Length > 0
+                var squashedEntity = squashableEntities.Length > 0
                     ? await this.resultSquasher.SquashAsync(
                         algorithm,
                         entityName,
-                        entityAdapterData,
+                        squashableEntities,
                         aggregatesRequest,
                         cancellationToken)
                     : null;
+
+                var errors = entityReference.AdapterRecordReferences
+                    .Select(x => new
+                    {
+                        AdapterReference = x,
+                        AdapterException = adapterData[x].EntityAdapterException,
+                    })
+                    .Where(x => x.AdapterException != null)
+                    .Select(x => new EntityAdapterErrorDetail
+                    {
+                        AdapterName = x.AdapterReference.Source,
+                        RequestedFields = fields,
+                        RequestedId = x.AdapterReference.Id,
+                        RequestedEntityName = entityName,
+                        HttpStatusCode = x.AdapterException.HttpStatusCode,
+                        HttpErrorBody = x.AdapterException.HttpErrorBody,
+                    });
 
                 squashed[i] = new SquashedEntityResult
                 {
                     EntityReference = entityReference,
                     SquashedEntity = squashedEntity,
-                    EntityAdapterErrorDetails = new EntityAdapterErrorDetail[0], // TODO: Output errors
+                    EntityAdapterErrorDetails = errors,
                 };
             }
 
@@ -172,7 +156,7 @@ namespace Dfe.Spi.EntitySquasher.Application.Processors
         private async Task<Dictionary<AdapterRecordReference, GetEntityAsyncResult>> GetResultsFromAdaptersAsync(
             string entityName,
             EntityReference[] entityReferences,
-            IEnumerable<string> fields,
+            string[] fields,
             AggregatesRequest aggregatesRequest,
             CancellationToken cancellationToken)
         {
@@ -198,29 +182,43 @@ namespace Dfe.Spi.EntitySquasher.Application.Processors
 
                 var adapterClient = adapterClients[adapterName];
 
-                var adapterResults = await adapterClient.GetEntitiesAsync(
-                    entityName,
-                    ids,
-                    fields,
-                    aggregatesRequest,
-                    cancellationToken);
-
-                for (var i = 0; i < references.Length; i++)
+                try
                 {
-                    var result = new GetEntityAsyncResult
-                    {
-                        EntityBase = adapterResults[i],
-                        AdapterRecordReference = references[i],
-                    };
-                    if (result.EntityBase == null)
-                    {
-                        result.EntityAdapterException = new EntityAdapterException
-                        {
-                            HttpStatusCode = HttpStatusCode.NotFound,
-                        };
-                    }
+                    var adapterResults = await adapterClient.GetEntitiesAsync(
+                        entityName,
+                        ids,
+                        fields,
+                        aggregatesRequest,
+                        cancellationToken);
 
-                    results.Add(references[i], result);
+                    for (var i = 0; i < references.Length; i++)
+                    {
+                        var result = new GetEntityAsyncResult
+                        {
+                            EntityBase = adapterResults[i],
+                            AdapterRecordReference = references[i],
+                        };
+                        if (result.EntityBase == null)
+                        {
+                            result.EntityAdapterException = new EntityAdapterException
+                            {
+                                HttpStatusCode = HttpStatusCode.NotFound,
+                            };
+                        }
+
+                        results.Add(references[i], result);
+                    }
+                }
+                catch (EntityAdapterException ex)
+                {
+                    foreach (var reference in references)
+                    {
+                        results.Add(reference, new GetEntityAsyncResult
+                        {
+                            AdapterRecordReference = reference,
+                            EntityAdapterException = ex,
+                        });
+                    }
                 }
             }
 
