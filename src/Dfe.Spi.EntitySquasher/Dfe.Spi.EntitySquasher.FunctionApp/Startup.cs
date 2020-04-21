@@ -71,6 +71,7 @@
                 .AddSingleton<IHttpErrorBodyResultProvider>(httpErrorBodyResultProvider)
                 .AddScoped<IHttpSpiExecutionContextManager, HttpSpiExecutionContextManager>()
                 .AddScoped<ISpiExecutionContextManager>(x => x.GetService<IHttpSpiExecutionContextManager>())
+                .AddScoped<IEntityAdapterInvoker, EntityAdapterInvoker >()
                 .AddScoped<IResultSquasher, ResultSquasher>()
                 .AddScoped<IGetSquashedEntityProcessor, GetSquashedEntityProcessor>()
                 .AddScoped<IAlgorithmConfigurationDeclarationFileStorageAdapter, AlgorithmConfigurationDeclarationFileStorageAdapter>();

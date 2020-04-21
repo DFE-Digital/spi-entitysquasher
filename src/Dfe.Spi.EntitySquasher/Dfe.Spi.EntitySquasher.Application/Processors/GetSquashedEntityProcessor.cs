@@ -26,6 +26,7 @@ namespace Dfe.Spi.EntitySquasher.Application.Processors
     public class GetSquashedEntityProcessor : IGetSquashedEntityProcessor
     {
         private readonly IEntityAdapterClientFactory entityAdapterClientFactory;
+        private readonly IEntityAdapterInvoker entityAdapterInvoker;
         private readonly IGetSquashedEntityProcessorSettingsProvider getSquashedEntityProcessorSettingsProvider;
         private readonly ILoggerWrapper loggerWrapper;
         private readonly IResultSquasher resultSquasher;
@@ -36,6 +37,9 @@ namespace Dfe.Spi.EntitySquasher.Application.Processors
         /// </summary>
         /// <param name="entityAdapterClientFactory">
         /// An instance of type <see cref="IEntityAdapterClientFactory" />.
+        /// </param>
+        /// <param name="entityAdapterInvoker">
+        /// An instance of type <see cref="IEntityAdapterInvoker" />.
         /// </param>
         /// <param name="getSquashedEntityProcessorSettingsProvider">
         /// An instance of type
@@ -49,11 +53,13 @@ namespace Dfe.Spi.EntitySquasher.Application.Processors
         /// </param>
         public GetSquashedEntityProcessor(
             IEntityAdapterClientFactory entityAdapterClientFactory,
+            IEntityAdapterInvoker entityAdapterInvoker,
             IGetSquashedEntityProcessorSettingsProvider getSquashedEntityProcessorSettingsProvider,
             ILoggerWrapper loggerWrapper,
             IResultSquasher resultSquasher)
         {
             this.entityAdapterClientFactory = entityAdapterClientFactory;
+            this.entityAdapterInvoker = entityAdapterInvoker;
             this.getSquashedEntityProcessorSettingsProvider = getSquashedEntityProcessorSettingsProvider;
             this.loggerWrapper = loggerWrapper;
             this.resultSquasher = resultSquasher;
@@ -101,7 +107,7 @@ namespace Dfe.Spi.EntitySquasher.Application.Processors
             AggregatesRequest aggregatesRequest,
             CancellationToken cancellationToken)
         {
-            var adapterData = await GetResultsFromAdaptersAsync(
+            var adapterData = await this.entityAdapterInvoker.GetResultsFromAdaptersAsync(
                 entityName, entityReferences, fields, aggregatesRequest, cancellationToken);
 
             var squashed = new SquashedEntityResult[entityReferences.Length];
@@ -148,101 +154,6 @@ namespace Dfe.Spi.EntitySquasher.Application.Processors
             }
 
             return squashed;
-        }
-
-        private async Task<Dictionary<AdapterRecordReference, GetEntityAsyncResult>> GetResultsFromAdaptersAsync(
-            string entityName,
-            EntityReference[] entityReferences,
-            string[] fields,
-            AggregatesRequest aggregatesRequest,
-            CancellationToken cancellationToken)
-        {
-            var results = new Dictionary<AdapterRecordReference, GetEntityAsyncResult>();
-
-            var adapterReferences = entityReferences
-                .SelectMany(x => x.AdapterRecordReferences)
-                .Distinct()
-                .GroupBy(x => x.Source)
-                .ToDictionary(x => x.Key, x => x.ToArray());
-
-            var tasks = adapterReferences.Keys
-                .Select(adapterName =>
-                    GetResultsFromAdapterAsync(
-                        adapterName,
-                        entityName,
-                        adapterReferences[adapterName],
-                        fields,
-                        aggregatesRequest,
-                        cancellationToken));
-
-            var adapterResults = await Task.WhenAll(tasks);
-            foreach (var adapterResult in adapterResults)
-            {
-                foreach (var resultReference in adapterResult.Keys)
-                {
-                    results.Add(resultReference, adapterResult[resultReference]);
-                }
-            }
-
-            return results;
-        }
-
-        private async Task<Dictionary<AdapterRecordReference, GetEntityAsyncResult>> GetResultsFromAdapterAsync(
-            string adapterName, 
-            string entityName, 
-            AdapterRecordReference[] references, 
-            string[] fields,
-            AggregatesRequest aggregatesRequest,
-            CancellationToken cancellationToken)
-        {
-            var results = new Dictionary<AdapterRecordReference, GetEntityAsyncResult>();
-            
-            var ids = references
-                .Select(x => x.Id)
-                .ToArray();
-
-            var adapterClient = this.entityAdapterClientFactory.Create(adapterName);
-
-            try
-            {
-                var adapterResults = await adapterClient.GetEntitiesAsync(
-                    entityName,
-                    ids,
-                    fields,
-                    aggregatesRequest,
-                    cancellationToken);
-
-                for (var i = 0; i < references.Length; i++)
-                {
-                    var result = new GetEntityAsyncResult
-                    {
-                        EntityBase = adapterResults[i],
-                        AdapterRecordReference = references[i],
-                    };
-                    if (result.EntityBase == null)
-                    {
-                        result.EntityAdapterException = new EntityAdapterException
-                        {
-                            HttpStatusCode = HttpStatusCode.NotFound,
-                        };
-                    }
-
-                    results.Add(references[i], result);
-                }
-            }
-            catch (EntityAdapterException ex)
-            {
-                foreach (var reference in references)
-                {
-                    results.Add(reference, new GetEntityAsyncResult
-                    {
-                        AdapterRecordReference = reference,
-                        EntityAdapterException = ex,
-                    });
-                }
-            }
-
-            return results;
         }
 
         private string CheckForDefaultAlgorithm(string algorithm)
