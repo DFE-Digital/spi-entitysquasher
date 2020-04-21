@@ -39,4 +39,8 @@
     <ProjectReference Include="..\Dfe.Spi.EntitySquasher.Application\Dfe.Spi.EntitySquasher.Application.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Processors" />
+  </ItemGroup>
+
 </Project>

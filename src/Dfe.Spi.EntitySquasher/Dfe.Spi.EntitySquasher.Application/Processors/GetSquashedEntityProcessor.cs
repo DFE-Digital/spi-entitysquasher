@@ -26,7 +26,6 @@ namespace Dfe.Spi.EntitySquasher.Application.Processors
     public class GetSquashedEntityProcessor : IGetSquashedEntityProcessor
     {
         private readonly IEntityAdapterClientFactory entityAdapterClientFactory;
-        private readonly IEntityAdapterInvoker entityAdapterInvoker;
         private readonly IGetSquashedEntityProcessorSettingsProvider getSquashedEntityProcessorSettingsProvider;
         private readonly ILoggerWrapper loggerWrapper;
         private readonly IResultSquasher resultSquasher;
@@ -37,9 +36,6 @@ namespace Dfe.Spi.EntitySquasher.Application.Processors
         /// </summary>
         /// <param name="entityAdapterClientFactory">
         /// An instance of type <see cref="IEntityAdapterClientFactory" />.
-        /// </param>
-        /// <param name="entityAdapterInvoker">
-        /// An instance of type <see cref="IEntityAdapterInvoker" />.
         /// </param>
         /// <param name="getSquashedEntityProcessorSettingsProvider">
         /// An instance of type
@@ -53,13 +49,11 @@ namespace Dfe.Spi.EntitySquasher.Application.Processors
         /// </param>
         public GetSquashedEntityProcessor(
             IEntityAdapterClientFactory entityAdapterClientFactory,
-            IEntityAdapterInvoker entityAdapterInvoker,
             IGetSquashedEntityProcessorSettingsProvider getSquashedEntityProcessorSettingsProvider,
             ILoggerWrapper loggerWrapper,
             IResultSquasher resultSquasher)
         {
             this.entityAdapterClientFactory = entityAdapterClientFactory;
-            this.entityAdapterInvoker = entityAdapterInvoker;
             this.getSquashedEntityProcessorSettingsProvider = getSquashedEntityProcessorSettingsProvider;
             this.loggerWrapper = loggerWrapper;
             this.resultSquasher = resultSquasher;
@@ -226,80 +220,6 @@ namespace Dfe.Spi.EntitySquasher.Application.Processors
             }
 
             return results;
-        }
-
-        private async Task<SquashedEntityResult> GetSquashedEntityResultAsync(
-            string algorithm,
-            string entityName,
-            IEnumerable<string> fields,
-            AggregatesRequest aggregatesRequest,
-            EntityReference entityReference,
-            CancellationToken cancellationToken)
-        {
-            SquashedEntityResult toReturn = null;
-
-            // 1) Call all adapters specified in the entity reference
-            //    at the same time. First, get the tasks to pull back the
-            //    EntityBase.
-            IEnumerable<EntityAdapterErrorDetail> entityAdapterErrorDetails = null;
-            EntityBase squashedEntity = null;
-            try
-            {
-                InvokeEntityAdaptersResult adaptersLookupResult =
-                    await this.entityAdapterInvoker.InvokeEntityAdaptersAsync(
-                            algorithm,
-                            entityName,
-                            fields,
-                            aggregatesRequest,
-                            entityReference,
-                            cancellationToken)
-                        .ConfigureAwait(false);
-
-                IEnumerable<GetEntityAsyncResult> getEntityAsyncResults =
-                    adaptersLookupResult.GetEntityAsyncResults;
-
-                entityAdapterErrorDetails =
-                    getEntityAsyncResults
-                        .Where(x => x.EntityAdapterException != null)
-                        .Select(x => x.EntityAdapterException.EntityAdapterErrorDetail);
-
-                // 2) Perform the squashing and append to the result - with
-                //    *these* guys.
-                IEnumerable<GetEntityAsyncResult> toSquash =
-                    getEntityAsyncResults
-                        .Where(x => x.EntityBase != null);
-
-                squashedEntity =
-                    await this.resultSquasher.SquashAsync(
-                            algorithm,
-                            entityName,
-                            toSquash,
-                            aggregatesRequest,
-                            cancellationToken)
-                        .ConfigureAwait(false);
-            }
-            catch (AllAdaptersUnavailableException allAdaptersUnavailableException)
-            {
-                this.loggerWrapper.Warning(
-                    "Warning! All adapters were unavailable when attempting " +
-                    "to serve this request. This is probably an indicator " +
-                    "that something is very wrong! The request will still " +
-                    "be served, but the model will be empty.",
-                    allAdaptersUnavailableException);
-
-                entityAdapterErrorDetails = allAdaptersUnavailableException
-                    .EntityAdapterExceptions
-                    .Select(x => x.EntityAdapterErrorDetail);
-            }
-
-            toReturn = new SquashedEntityResult()
-            {
-                EntityReference = entityReference,
-                EntityAdapterErrorDetails = entityAdapterErrorDetails,
-                SquashedEntity = squashedEntity,
-            };
-
-            return toReturn;
         }
 
         private string CheckForDefaultAlgorithm(string algorithm)

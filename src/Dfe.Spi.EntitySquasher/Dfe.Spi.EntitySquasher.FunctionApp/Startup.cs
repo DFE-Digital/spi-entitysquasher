@@ -72,7 +72,6 @@
                 .AddScoped<IHttpSpiExecutionContextManager, HttpSpiExecutionContextManager>()
                 .AddScoped<ISpiExecutionContextManager>(x => x.GetService<IHttpSpiExecutionContextManager>())
                 .AddScoped<IResultSquasher, ResultSquasher>()
-                .AddScoped<IEntityAdapterInvoker, EntityAdapterInvoker>()
                 .AddScoped<IGetSquashedEntityProcessor, GetSquashedEntityProcessor>()
                 .AddScoped<IAlgorithmConfigurationDeclarationFileStorageAdapter, AlgorithmConfigurationDeclarationFileStorageAdapter>();
         }
@@ -98,15 +97,13 @@
         {
             serviceCollection
                 .AddScoped<IAlgorithmConfigurationDeclarationFileCacheManagerFactory, AlgorithmConfigurationDeclarationFileManagerFactory>()
-                .AddScoped<IEntityAdapterClientCacheManagerFactory, EntityAdapterClientManagerFactory>()
                 .AddScoped<IEntityAdapterClientFactory, EntityAdapterClientFactory>();
         }
 
         private static void AddCaches(IServiceCollection serviceCollection)
         {
             serviceCollection
-                .AddSingleton<IAlgorithmConfigurationDeclarationFileCache, AlgorithmConfigurationDeclarationFileCache>()
-                .AddScoped<IEntityAdapterClientCache, EntityAdapterClientCache>();
+                .AddSingleton<IAlgorithmConfigurationDeclarationFileCache, AlgorithmConfigurationDeclarationFileCache>();
         }
 
         private static ILogger CreateILogger(IServiceProvider serviceProvider)
