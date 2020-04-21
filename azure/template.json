@@ -183,23 +183,23 @@
             },
             {
               "name": "GiasBaseUrl",
-              "value": "giasBaseUrl"
+              "value": "[parameters('giasBaseUrl')]"
             },
             {
               "name": "UkrlpBaseUrl",
-              "value": "ukrlpBaseUrl"
+              "value": "[parameters('ukrlpBaseUrl')]"
             },
             {
               "name": "RatesBaseUrl",
-              "value": "ratesBaseUrl"
+              "value": "[parameters('ratesBaseUrl')]"
             },
             {
               "name": "IStoreBaseUrl",
-              "value": "iStoreBaseUrl"
+              "value": "[parameters('iStoreBaseUrl')]"
             },
             {
               "name": "SubscriptionKey",
-              "value": "subscriptionKey"
+              "value": "[parameters('subscriptionKey')]"
             }
           ],
           "ipSecurityRestrictions": [
