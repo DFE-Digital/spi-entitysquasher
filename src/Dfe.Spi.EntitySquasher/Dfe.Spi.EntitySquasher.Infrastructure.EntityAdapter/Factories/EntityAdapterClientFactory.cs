@@ -44,21 +44,6 @@ namespace Dfe.Spi.EntitySquasher.Infrastructure.EntityAdapter.Factories
         }
 
         /// <inheritdoc />
-        public IEntityAdapterClient Create(
-            string entityAdapterName,
-            Uri baseUrl,
-            Dictionary<string, string> headers)
-        {
-            // TODO: Make this defunct
-            if (baseUrl != null || headers != null)
-            {
-                return CreateClient(entityAdapterName, baseUrl, headers);
-            }
-
-            return Create(entityAdapterName);
-        }
-
-        /// <inheritdoc />
         public IEntityAdapterClient Create(string entityAdapterName)
         {
             var headers = new Dictionary<string, string>
