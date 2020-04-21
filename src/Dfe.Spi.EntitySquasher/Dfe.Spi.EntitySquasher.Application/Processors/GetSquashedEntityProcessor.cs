@@ -25,7 +25,6 @@ namespace Dfe.Spi.EntitySquasher.Application.Processors
     /// </summary>
     public class GetSquashedEntityProcessor : IGetSquashedEntityProcessor
     {
-        private readonly IEntityAdapterClientFactory entityAdapterClientFactory;
         private readonly IEntityAdapterInvoker entityAdapterInvoker;
         private readonly IGetSquashedEntityProcessorSettingsProvider getSquashedEntityProcessorSettingsProvider;
         private readonly ILoggerWrapper loggerWrapper;
@@ -52,13 +51,11 @@ namespace Dfe.Spi.EntitySquasher.Application.Processors
         /// An instance of type <see cref="IResultSquasher" />.
         /// </param>
         public GetSquashedEntityProcessor(
-            IEntityAdapterClientFactory entityAdapterClientFactory,
             IEntityAdapterInvoker entityAdapterInvoker,
             IGetSquashedEntityProcessorSettingsProvider getSquashedEntityProcessorSettingsProvider,
             ILoggerWrapper loggerWrapper,
             IResultSquasher resultSquasher)
         {
-            this.entityAdapterClientFactory = entityAdapterClientFactory;
             this.entityAdapterInvoker = entityAdapterInvoker;
             this.getSquashedEntityProcessorSettingsProvider = getSquashedEntityProcessorSettingsProvider;
             this.loggerWrapper = loggerWrapper;

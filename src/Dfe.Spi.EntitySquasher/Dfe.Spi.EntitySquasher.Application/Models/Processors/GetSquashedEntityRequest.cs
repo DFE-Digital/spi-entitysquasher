@@ -44,7 +44,7 @@
         /// <summary>
         /// Gets or sets a list of fields to include in the response.
         /// </summary>
-        public IEnumerable<string> Fields
+        public string[] Fields
         {
             get;
             set;
