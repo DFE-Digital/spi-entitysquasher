@@ -17,14 +17,5 @@
             get;
             set;
         }
-
-        /// <summary>
-        /// Gets or sets a set of <see cref="EntityAdapter" /> instances.
-        /// </summary>
-        public IEnumerable<EntityAdapter> EntityAdapters
-        {
-            get;
-            set;
-        }
     }
 }

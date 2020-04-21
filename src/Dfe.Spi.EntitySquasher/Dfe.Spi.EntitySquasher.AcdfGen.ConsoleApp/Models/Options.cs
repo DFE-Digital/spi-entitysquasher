@@ -11,19 +11,6 @@
     public class Options
     {
         /// <summary>
-        /// Gets or sets a list of adapter names.
-        /// </summary>
-        [Option(
-            "adapter-names",
-            Required = true,
-            HelpText = "A list of adapter names.")]
-        public IEnumerable<string> AdapterNames
-        {
-            get;
-            set;
-        }
-
-        /// <summary>
         /// Gets or sets the destination filename for the generated file.
         /// </summary>
         [Option(

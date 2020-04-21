@@ -62,26 +62,11 @@
             this.loggerWrapper.Info(
                 $"{entities.Count()} {nameof(Entity)}(s) generated.");
 
-            // 2) Generate placeholders for the adapters based on the input.
-            IEnumerable<string> adapterNames =
-                generateAlgorithmConfigurationDeclarationFileRequest.AdapterNames;
-
-            this.loggerWrapper.Debug(
-                $"Generating {nameof(EntityAdapter)}(s)...");
-
-            IEnumerable<EntityAdapter> entityAdapters =
-                this.GenerateEntityAdapters(adapterNames);
-
-            this.loggerWrapper.Info(
-                $"{entityAdapters.Count()} {nameof(EntityAdapter)}(s) " +
-                $"generated.");
-
             // Construct the instance fully.
             AlgorithmConfigurationDeclarationFile algorithmConfigurationDeclarationFile =
                 new AlgorithmConfigurationDeclarationFile()
                 {
                     Entities = entities,
-                    EntityAdapters = entityAdapters,
                 };
 
             this.loggerWrapper.Debug(
@@ -108,16 +93,6 @@
                 // Nothing for now.
                 // Just return an instance to indicate success.
             };
-
-            return toReturn;
-        }
-
-        private IEnumerable<EntityAdapter> GenerateEntityAdapters(
-            IEnumerable<string> adapterNames)
-        {
-            IEnumerable<EntityAdapter> toReturn = null;
-
-            toReturn = adapterNames.Select(this.Map).ToArray();
 
             return toReturn;
         }
@@ -151,22 +126,6 @@
                 .Select(this.Map)
                 .OrderBy(x => x.Name)
                 .ToArray();
-
-            return toReturn;
-        }
-
-        private EntityAdapter Map(string name)
-        {
-            EntityAdapter toReturn = new EntityAdapter()
-            {
-                BaseUrl = null,
-                Headers = null,
-                Name = name,
-            };
-
-            this.loggerWrapper.Info(
-                $"Generated {nameof(EntityAdapter)} with " +
-                $"{nameof(toReturn.Name)} = \"{toReturn.Name}\".");
 
             return toReturn;
         }
