@@ -1,4 +1,5 @@
 ﻿using System.Threading;
+using Dfe.Spi.EntitySquasher.Infrastructure.EntityAdapter.Models;
 using Newtonsoft.Json.Linq;
 
 namespace Dfe.Spi.EntitySquasher.Infrastructure.EntityAdapter
@@ -225,20 +226,22 @@ namespace Dfe.Spi.EntitySquasher.Infrastructure.EntityAdapter
         public async Task<EntityBase[]> GetEntitiesAsync(
             string entityName, 
             string[] ids, 
-            IEnumerable<string> fields, 
+            string[] fields, 
             AggregatesRequest aggregatesRequest,
             CancellationToken cancellationToken)
         {
             var request = new RestRequest(GetEntityNameForUri(entityName), Method.POST);
             request.AppendContext(this.spiExecutionContextManager.SpiExecutionContext);
+
+            var batchRequest = JsonConvert.SerializeObject(
+                new BatchGetEntitiesRequest
+                {
+                    Identifiers = ids,
+                    Fields = fields,
+                    AggregateQueries = aggregatesRequest.AggregateQueries,
+                });
             
-            // TODO: Make this better
-            var batchRequest = new JObject(
-                    new JProperty("identifiers", new JArray(ids)),
-                    new JProperty("fields", new JArray(fields))
-                    //TODO : Aggregate requests
-                );
-            request.AddParameter("", batchRequest.ToString(), ParameterType.RequestBody);
+            request.AddParameter("", batchRequest, ParameterType.RequestBody);
 
             var response = await this.restClient.ExecuteTaskAsync(request, cancellationToken);
             if (!response.IsSuccessful)

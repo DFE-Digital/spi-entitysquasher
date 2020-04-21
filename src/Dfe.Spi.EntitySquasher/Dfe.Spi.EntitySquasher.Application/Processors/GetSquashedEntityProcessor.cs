@@ -79,12 +79,15 @@ namespace Dfe.Spi.EntitySquasher.Application.Processors
             }
 
             var algorithm = this.CheckForDefaultAlgorithm(getSquashedEntityRequest.Algorithm);
+            var fields = getSquashedEntityRequest.Fields != null
+                ? getSquashedEntityRequest.Fields.ToArray()
+                : null;
 
             var squashedEntityResults = await GetSquashedEntitiesAsync(
                 algorithm,
                 getSquashedEntityRequest.EntityName,
                 getSquashedEntityRequest.EntityReferences.ToArray(),
-                getSquashedEntityRequest.Fields.ToArray(),
+                fields,
                 getSquashedEntityRequest.AggregatesRequest,
                 cancellationToken);
 

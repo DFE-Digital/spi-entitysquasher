@@ -39,7 +39,7 @@ namespace Dfe.Spi.EntitySquasher.Domain.Definitions
         Task<EntityBase[]> GetEntitiesAsync(
             string entityName,
             string[] ids,
-            IEnumerable<string> fields,
+            string[] fields,
             AggregatesRequest aggregatesRequest,
             CancellationToken cancellationToken);
     }
