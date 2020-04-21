@@ -164,58 +164,81 @@ namespace Dfe.Spi.EntitySquasher.Application.Processors
                 .Distinct()
                 .GroupBy(x => x.Source)
                 .ToDictionary(x => x.Key, x => x.ToArray());
-            var adapterClients = adapterReferences.Keys
-                .ToDictionary(
-                    adapterName => adapterName,
-                    adapterName => this.entityAdapterClientFactory.Create(adapterName, null, null));
 
-            // TODO: Can also call adapters in parallel
-            foreach (var adapterName in adapterReferences.Keys)
-            {
-                var references = adapterReferences[adapterName];
-                var ids = references
-                    .Select(x => x.Id)
-                    .ToArray();
-
-                var adapterClient = adapterClients[adapterName];
-
-                try
-                {
-                    var adapterResults = await adapterClient.GetEntitiesAsync(
+            var tasks = adapterReferences.Keys
+                .Select(adapterName =>
+                    GetResultsFromAdapterAsync(
+                        adapterName,
                         entityName,
-                        ids,
+                        adapterReferences[adapterName],
                         fields,
                         aggregatesRequest,
-                        cancellationToken);
+                        cancellationToken));
 
-                    for (var i = 0; i < references.Length; i++)
-                    {
-                        var result = new GetEntityAsyncResult
-                        {
-                            EntityBase = adapterResults[i],
-                            AdapterRecordReference = references[i],
-                        };
-                        if (result.EntityBase == null)
-                        {
-                            result.EntityAdapterException = new EntityAdapterException
-                            {
-                                HttpStatusCode = HttpStatusCode.NotFound,
-                            };
-                        }
-
-                        results.Add(references[i], result);
-                    }
-                }
-                catch (EntityAdapterException ex)
+            var adapterResults = await Task.WhenAll(tasks);
+            foreach (var adapterResult in adapterResults)
+            {
+                foreach (var resultReference in adapterResult.Keys)
                 {
-                    foreach (var reference in references)
+                    results.Add(resultReference, adapterResult[resultReference]);
+                }
+            }
+
+            return results;
+        }
+
+        private async Task<Dictionary<AdapterRecordReference, GetEntityAsyncResult>> GetResultsFromAdapterAsync(
+            string adapterName, 
+            string entityName, 
+            AdapterRecordReference[] references, 
+            string[] fields,
+            AggregatesRequest aggregatesRequest,
+            CancellationToken cancellationToken)
+        {
+            var results = new Dictionary<AdapterRecordReference, GetEntityAsyncResult>();
+            
+            var ids = references
+                .Select(x => x.Id)
+                .ToArray();
+
+            var adapterClient = this.entityAdapterClientFactory.Create(adapterName);
+
+            try
+            {
+                var adapterResults = await adapterClient.GetEntitiesAsync(
+                    entityName,
+                    ids,
+                    fields,
+                    aggregatesRequest,
+                    cancellationToken);
+
+                for (var i = 0; i < references.Length; i++)
+                {
+                    var result = new GetEntityAsyncResult
                     {
-                        results.Add(reference, new GetEntityAsyncResult
+                        EntityBase = adapterResults[i],
+                        AdapterRecordReference = references[i],
+                    };
+                    if (result.EntityBase == null)
+                    {
+                        result.EntityAdapterException = new EntityAdapterException
                         {
-                            AdapterRecordReference = reference,
-                            EntityAdapterException = ex,
-                        });
+                            HttpStatusCode = HttpStatusCode.NotFound,
+                        };
                     }
+
+                    results.Add(references[i], result);
+                }
+            }
+            catch (EntityAdapterException ex)
+            {
+                foreach (var reference in references)
+                {
+                    results.Add(reference, new GetEntityAsyncResult
+                    {
+                        AdapterRecordReference = reference,
+                        EntityAdapterException = ex,
+                    });
                 }
             }
 
