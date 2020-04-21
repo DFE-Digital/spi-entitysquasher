@@ -238,7 +238,7 @@ namespace Dfe.Spi.EntitySquasher.Infrastructure.EntityAdapter
                 {
                     Identifiers = ids,
                     Fields = fields,
-                    AggregateQueries = aggregatesRequest.AggregateQueries,
+                    AggregateQueries = aggregatesRequest?.AggregateQueries,
                 });
             
             request.AddParameter("", batchRequest, ParameterType.RequestBody);
