@@ -59,5 +59,14 @@
             get;
             set;
         }
+
+        /// <summary>
+        /// Gets or sets whether adapters should query live or cache (where available)
+        /// </summary>
+        public bool Live
+        {
+            get;
+            set;
+        }
     }
 }

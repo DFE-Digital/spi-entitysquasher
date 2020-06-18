@@ -114,6 +114,9 @@
       "required": [
         "aggregateQueries"
       ]
+    },
+    "live": {
+      "type": "boolean"
     }
   },
   "required": [

@@ -23,5 +23,10 @@ namespace Dfe.Spi.EntitySquasher.Infrastructure.EntityAdapter.Models
         /// Gets or sets the aggregations to request from the adapter.
         /// </summary>
         public Dictionary<string, AggregateQuery> AggregateQueries { get; set; }
+        
+        /// <summary>
+        /// Gets or sets whether adapter should make live query or use cache (where available)
+        /// </summary>
+        public bool Live { get; set; }
     }
 }

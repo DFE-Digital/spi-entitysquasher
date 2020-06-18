@@ -38,6 +38,7 @@ namespace Dfe.Spi.EntitySquasher.Application.Definitions
             EntityReference[] entityReferences,
             string[] fields,
             AggregatesRequest aggregatesRequest,
+            bool live,
             CancellationToken cancellationToken);
     }
 }
