@@ -44,8 +44,9 @@ namespace Dfe.Spi.EntitySquasher.Application.UnitTests.Processors
                         It.IsAny<EntityReference[]>(),
                         It.IsAny<string[]>(),
                         It.IsAny<AggregatesRequest>(),
+                        It.IsAny<bool>(),
                         It.IsAny<CancellationToken>()))
-                .ReturnsAsync((string en, EntityReference[] er, string[] f, AggregatesRequest ar, CancellationToken ct) =>
+                .ReturnsAsync((string en, EntityReference[] er, string[] f, AggregatesRequest ar, bool live, CancellationToken ct) =>
                 {
                     var adapterReferences = er.SelectMany(x => x.AdapterRecordReferences);
                     return adapterReferences
@@ -89,7 +90,7 @@ namespace Dfe.Spi.EntitySquasher.Application.UnitTests.Processors
             await processor.GetSquashedEntityAsync(request, cancellationToken);
 
             entityAdapterInvokerMock.Verify(x =>
-                    x.GetResultsFromAdaptersAsync(request.EntityName, entityReferences, request.Fields, request.AggregatesRequest, cancellationToken),
+                    x.GetResultsFromAdaptersAsync(request.EntityName, entityReferences, request.Fields, request.AggregatesRequest, request.Live, cancellationToken),
                 Times.Once);
         }
 
@@ -243,6 +244,7 @@ namespace Dfe.Spi.EntitySquasher.Application.UnitTests.Processors
                         It.IsAny<EntityReference[]>(),
                         It.IsAny<string[]>(),
                         It.IsAny<AggregatesRequest>(),
+                        It.IsAny<bool>(),
                         It.IsAny<CancellationToken>()))
                 .ReturnsAsync(results);
         }

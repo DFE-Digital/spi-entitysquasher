@@ -78,14 +78,16 @@ namespace Dfe.Spi.EntitySquasher.Infrastructure.EntityAdapter
             string entityName,
             string id,
             IEnumerable<string> fields,
-            AggregatesRequest aggregatesRequest)
+            AggregatesRequest aggregatesRequest,
+            bool live)
         {
             EntityBase toReturn = null;
 
             Uri resourceUri = this.CreateRelativeResourceUri(
                 entityName,
                 id,
-                fields);
+                fields,
+                live);
 
             bool includeAggregatesRequest = aggregatesRequest != null;
 
@@ -228,6 +230,7 @@ namespace Dfe.Spi.EntitySquasher.Infrastructure.EntityAdapter
             string[] ids, 
             string[] fields, 
             AggregatesRequest aggregatesRequest,
+            bool live,
             CancellationToken cancellationToken)
         {
             var request = new RestRequest(GetEntityNameForUri(entityName), Method.POST);
@@ -239,6 +242,7 @@ namespace Dfe.Spi.EntitySquasher.Infrastructure.EntityAdapter
                     Identifiers = ids,
                     Fields = fields,
                     AggregateQueries = aggregatesRequest?.AggregateQueries,
+                    Live = live,
                 });
             
             request.AddParameter("", batchRequest, ParameterType.RequestBody);
@@ -319,7 +323,8 @@ namespace Dfe.Spi.EntitySquasher.Infrastructure.EntityAdapter
         private Uri CreateRelativeResourceUri(
             string entityName,
             string id,
-            IEnumerable<string> fields)
+            IEnumerable<string> fields,
+            bool live)
         {
             Uri toReturn = null;
 
@@ -359,6 +364,13 @@ namespace Dfe.Spi.EntitySquasher.Infrastructure.EntityAdapter
                     CultureInfo.InvariantCulture,
                     RelativeResourceQueryStringFormat,
                     fieldsList);
+            }
+
+            if (live)
+            {
+                queryString = string.IsNullOrEmpty(queryString)
+                    ? "live=true"
+                    : $"{queryString}&live=true";
             }
 
             string toReturnStr = string.Format(

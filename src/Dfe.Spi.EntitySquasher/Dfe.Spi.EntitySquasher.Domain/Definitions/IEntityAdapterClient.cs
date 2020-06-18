@@ -34,13 +34,15 @@ namespace Dfe.Spi.EntitySquasher.Domain.Definitions
             string entityName,
             string id,
             IEnumerable<string> fields,
-            AggregatesRequest aggregatesRequest);
+            AggregatesRequest aggregatesRequest,
+            bool live);
         
         Task<EntityBase[]> GetEntitiesAsync(
             string entityName,
             string[] ids,
             string[] fields,
             AggregatesRequest aggregatesRequest,
+            bool live,
             CancellationToken cancellationToken);
     }
 }

@@ -40,6 +40,7 @@ namespace Dfe.Spi.EntitySquasher.Application
             EntityReference[] entityReferences, 
             string[] fields, 
             AggregatesRequest aggregatesRequest,
+            bool live,
             CancellationToken cancellationToken)
         {
             var results = new Dictionary<AdapterRecordReference, GetEntityAsyncResult>();
@@ -58,6 +59,7 @@ namespace Dfe.Spi.EntitySquasher.Application
                         adapterReferences[adapterName],
                         fields,
                         aggregatesRequest,
+                        live,
                         cancellationToken));
 
             var adapterResults = await Task.WhenAll(tasks);
@@ -80,6 +82,7 @@ namespace Dfe.Spi.EntitySquasher.Application
             AdapterRecordReference[] references, 
             string[] fields,
             AggregatesRequest aggregatesRequest,
+            bool live,
             CancellationToken cancellationToken)
         {
             var results = new Dictionary<AdapterRecordReference, GetEntityAsyncResult>();
@@ -97,6 +100,7 @@ namespace Dfe.Spi.EntitySquasher.Application
                     ids,
                     fields,
                     aggregatesRequest,
+                    live,
                     cancellationToken);
 
                 for (var i = 0; i < references.Length; i++)

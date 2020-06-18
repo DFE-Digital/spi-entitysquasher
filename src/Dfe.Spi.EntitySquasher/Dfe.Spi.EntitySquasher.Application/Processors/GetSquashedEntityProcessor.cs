@@ -86,6 +86,7 @@ namespace Dfe.Spi.EntitySquasher.Application.Processors
                 getSquashedEntityRequest.EntityReferences.ToArray(),
                 fields,
                 getSquashedEntityRequest.AggregatesRequest,
+                getSquashedEntityRequest.Live,
                 cancellationToken);
 
             toReturn = new GetSquashedEntityResponse()
@@ -102,10 +103,11 @@ namespace Dfe.Spi.EntitySquasher.Application.Processors
             EntityReference[] entityReferences,
             string[] fields,
             AggregatesRequest aggregatesRequest,
+            bool live,
             CancellationToken cancellationToken)
         {
             var adapterData = await this.entityAdapterInvoker.GetResultsFromAdaptersAsync(
-                entityName, entityReferences, fields, aggregatesRequest, cancellationToken);
+                entityName, entityReferences, fields, aggregatesRequest, live, cancellationToken);
 
             var squashed = new SquashedEntityResult[entityReferences.Length];
 
