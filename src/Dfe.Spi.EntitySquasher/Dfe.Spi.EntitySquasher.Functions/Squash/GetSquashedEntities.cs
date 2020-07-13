@@ -1,3 +1,4 @@
+using System.Linq;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
@@ -63,7 +64,23 @@ namespace Dfe.Spi.Registry.Functions.Squash
             var response = await _squashManager.SquashAsync(request, cancellationToken);
             var statusCode = HttpStatusCode.OK;
             
-            // TODO: Process response for non-200 status codes
+            if (response.SquashedEntityResults.Count(x => x.SquashedEntity == null) == response.SquashedEntityResults.Length)
+            {
+                // No adapter calls have worked
+                return new HttpErrorBodyResult(
+                    new HttpErrorBody
+                    {
+                        Message = "Unable to serve any requests - all adapters are unavailable.",
+                        ErrorIdentifier = "SPI-ESQ-4",
+                        StatusCode = HttpStatusCode.FailedDependency,
+                    });
+            }
+
+            if (response.SquashedEntityResults.Count(x => x.EntityAdapterErrorDetails != null && x.EntityAdapterErrorDetails.Any()) > 0)
+            {
+                // Some errors, but some worked
+                statusCode = HttpStatusCode.PartialContent;
+            }
             
             return new FormattedJsonResult(response, statusCode);
         }
