@@ -126,6 +126,7 @@ namespace Dfe.Spi.EntitySquasher.Application.Squash
                 }
                 catch (DataAdapterException ex)
                 {
+                    _logger.Warning($"{adapterName} adapter returned error status {(int)ex.HttpStatusCode}:\n{ex.HttpErrorBody}");
                     var adapterIdentifiers = adapterReferences[i].Identifiers;
                     adapterResults = adapterIdentifiers
                         .Select(id =>
@@ -138,6 +139,7 @@ namespace Dfe.Spi.EntitySquasher.Application.Squash
                 }
                 catch (Exception ex)
                 {
+                    _logger.Warning($"{adapterName} adapter encountered an unexpected error: {ex.Message}");
                     var adapterIdentifiers = adapterReferences[i].Identifiers;
                     adapterResults = adapterIdentifiers
                         .Select(id =>
