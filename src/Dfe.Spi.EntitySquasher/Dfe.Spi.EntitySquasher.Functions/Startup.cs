@@ -37,8 +37,6 @@ namespace Dfe.Spi.Registry.Functions
 
         public void Configure(IFunctionsHostBuilder builder, IConfigurationRoot rawConfiguration)
         {
-            
-            
             var services = builder.Services;
 
             AddConfiguration(services, rawConfiguration);
@@ -71,9 +69,12 @@ namespace Dfe.Spi.Registry.Functions
         private void AddAdapters(IServiceCollection services)
         {
             services
-                .AddScoped<IDataAdapter<LearningProvider>, GiasDataAdapter>()
-                .AddScoped<IDataAdapter<ManagementGroup>, GiasDataAdapter>()
-                .AddScoped<IDataAdapter<LearningProvider>, UkrlpDataAdapter>();
+                .AddHttpClient()
+                .AddScoped<GiasDataAdapter>()
+                .AddScoped<UkrlpDataAdapter>()
+                .AddScoped<IDataAdapter<LearningProvider>>(sp => sp.GetService<GiasDataAdapter>())
+                .AddScoped<IDataAdapter<ManagementGroup>>(sp => sp.GetService<GiasDataAdapter>())
+                .AddScoped<IDataAdapter<LearningProvider>>(sp => sp.GetService<UkrlpDataAdapter>());
         }
 
         private void AddSquashing(IServiceCollection services)

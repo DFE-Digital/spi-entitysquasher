@@ -27,17 +27,20 @@ namespace Dfe.Spi.EntitySquasher.Infrastructure.SpiAdapter
         
         private readonly string _baseUrl;
         private readonly string _subscriptionKey;
+        private readonly HttpClient _httpClient;
         private readonly ISpiExecutionContextManager _executionContextManager;
         private readonly ILoggerWrapper _logger;
 
         protected SpiAdapter(
             string baseUrl,
             string subscriptionKey,
+            HttpClient httpClient,
             ISpiExecutionContextManager executionContextManager,
             ILoggerWrapper logger)
         {
             _baseUrl = baseUrl;
             _subscriptionKey = subscriptionKey;
+            _httpClient = httpClient;
             _executionContextManager = executionContextManager;
             _logger = logger;
         }

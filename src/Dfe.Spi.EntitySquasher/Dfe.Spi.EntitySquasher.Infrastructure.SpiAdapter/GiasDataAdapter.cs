@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using Dfe.Spi.Common.Context.Definitions;
@@ -12,8 +13,8 @@ namespace Dfe.Spi.EntitySquasher.Infrastructure.SpiAdapter
 {
     public class GiasDataAdapter : SpiAdapter, IDataAdapter<LearningProvider>, IDataAdapter<ManagementGroup>
     {
-        public GiasDataAdapter(EntitySquasherConfiguration configuration, ISpiExecutionContextManager executionContextManager, ILoggerWrapper logger) 
-            : base(configuration.Gias.Url, configuration.Gias.SubscriptionKey, executionContextManager, logger)
+        public GiasDataAdapter(EntitySquasherConfiguration configuration, HttpClient httpClient, ISpiExecutionContextManager executionContextManager, ILoggerWrapper logger) 
+            : base(configuration.Gias.Url, configuration.Gias.SubscriptionKey, httpClient, executionContextManager, logger)
         {
         }
 

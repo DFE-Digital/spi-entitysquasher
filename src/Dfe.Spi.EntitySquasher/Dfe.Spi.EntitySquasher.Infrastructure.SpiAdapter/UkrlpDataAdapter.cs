@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using Dfe.Spi.Common.Context.Definitions;
@@ -12,8 +13,8 @@ namespace Dfe.Spi.EntitySquasher.Infrastructure.SpiAdapter
 {
     public class UkrlpDataAdapter : SpiAdapter, IDataAdapter<LearningProvider>
     {
-        public UkrlpDataAdapter(EntitySquasherConfiguration configuration, ISpiExecutionContextManager executionContextManager, ILoggerWrapper logger) 
-            : base(configuration.Ukrlp.Url, configuration.Ukrlp.SubscriptionKey, executionContextManager, logger)
+        public UkrlpDataAdapter(EntitySquasherConfiguration configuration, HttpClient httpClient, ISpiExecutionContextManager executionContextManager, ILoggerWrapper logger) 
+            : base(configuration.Ukrlp.Url, configuration.Ukrlp.SubscriptionKey, httpClient, executionContextManager, logger)
         {
         }
 
