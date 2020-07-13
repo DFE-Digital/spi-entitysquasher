@@ -1,5 +1,3 @@
-using System;
-
 namespace Dfe.Spi.EntitySquasher.Domain.Adapters
 {
     public class DataAdapterResult<T>

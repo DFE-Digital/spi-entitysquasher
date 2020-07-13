@@ -13,7 +13,6 @@ using Dfe.Spi.EntitySquasher.Domain.Adapters;
 using Dfe.Spi.EntitySquasher.Domain.RequestResponseModels;
 using Dfe.Spi.Models.Entities;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Serialization;
 
 namespace Dfe.Spi.EntitySquasher.Infrastructure.SpiAdapter
