@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>netstandard2.0</TargetFramework>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\Dfe.Spi.EntitySquasher.Domain\Dfe.Spi.EntitySquasher.Domain.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Dfe.Spi.Common.Logging" Version="1.1.1" />
+      <PackageReference Include="Dfe.Spi.Models" Version="2.1.0" />
+    </ItemGroup>
+
+</Project>
