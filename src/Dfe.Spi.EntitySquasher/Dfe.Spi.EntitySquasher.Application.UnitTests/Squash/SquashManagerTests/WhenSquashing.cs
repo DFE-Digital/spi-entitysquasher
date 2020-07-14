@@ -1,7 +1,6 @@
 using System.Threading;
 using System.Threading.Tasks;
 using AutoFixture;
-using AutoFixture.NUnit3;
 using Dfe.Spi.Common.Logging.Definitions;
 using Dfe.Spi.EntitySquasher.Application.Squash;
 using Dfe.Spi.EntitySquasher.Domain.Profiles;
@@ -17,6 +16,7 @@ namespace Dfe.Spi.EntitySquasher.Application.UnitTests.Squash.SquashManagerTests
         private Fixture _fixture;
         private Mock<IProfileRepository> _profileRepositoryMock;
         private Mock<ITypedSquasher<LearningProvider>> _learningProviderSquasherMock;
+        private Mock<ITypedSquasher<ManagementGroup>> _managementGroupSquasherMock;
         private Mock<ILoggerWrapper> _loggerMock;
         private SquashManager _squashManager;
         private CancellationToken _cancellationToken;
@@ -34,11 +34,14 @@ namespace Dfe.Spi.EntitySquasher.Application.UnitTests.Squash.SquashManagerTests
             
             _learningProviderSquasherMock = new Mock<ITypedSquasher<LearningProvider>>();
             
+            _managementGroupSquasherMock = new Mock<ITypedSquasher<ManagementGroup>>();
+            
             _loggerMock = new Mock<ILoggerWrapper>();
             
             _squashManager = new SquashManager(
                 _profileRepositoryMock.Object,
                 _learningProviderSquasherMock.Object,
+                _managementGroupSquasherMock.Object,
                 _loggerMock.Object);
             
             _cancellationToken = new CancellationToken();
@@ -110,6 +113,50 @@ namespace Dfe.Spi.EntitySquasher.Application.UnitTests.Squash.SquashManagerTests
 
             var result = _fixture.Create<SquashedEntityResult[]>();
             _learningProviderSquasherMock.Setup(s => s.SquashAsync(
+                    It.IsAny<EntityReference[]>(),
+                    It.IsAny<AggregatesRequest>(),
+                    It.IsAny<string[]>(),
+                    It.IsAny<bool>(),
+                    It.IsAny<Profile>(),
+                    It.IsAny<CancellationToken>()))
+                .ReturnsAsync(result);
+            
+            var actual = await _squashManager.SquashAsync(request, _cancellationToken);
+            
+            Assert.IsNotNull(actual);
+            Assert.AreSame(result, actual.SquashedEntityResults);
+        }
+
+        [Test]
+        public async Task ThenItShouldSquashManagementGroup()
+        {
+            var request = _fixture.Create<SquashRequest>();
+            request.EntityName = nameof(ManagementGroup);
+
+            var profile = _fixture.Create<Profile>();
+            _profileRepositoryMock.Setup(r => r.GetProfileAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync(profile);
+
+            await _squashManager.SquashAsync(request, _cancellationToken);
+
+            _managementGroupSquasherMock.Verify(s => s.SquashAsync(
+                    request.EntityReferences,
+                    request.AggregatesRequest,
+                    request.Fields,
+                    request.Live,
+                    profile,
+                    _cancellationToken),
+                Times.Once);
+        }
+
+        [Test]
+        public async Task ThenItShouldReturnSquasherResultForManagementGroup()
+        {
+            var request = _fixture.Create<SquashRequest>();
+            request.EntityName = nameof(ManagementGroup);
+
+            var result = _fixture.Create<SquashedEntityResult[]>();
+            _managementGroupSquasherMock.Setup(s => s.SquashAsync(
                     It.IsAny<EntityReference[]>(),
                     It.IsAny<AggregatesRequest>(),
                     It.IsAny<string[]>(),

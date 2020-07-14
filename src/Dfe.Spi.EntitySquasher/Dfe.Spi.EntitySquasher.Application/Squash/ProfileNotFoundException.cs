@@ -1,5 +1,3 @@
-using System;
-
 namespace Dfe.Spi.EntitySquasher.Application.Squash
 {
     public class ProfileNotFoundException : InvalidRequestException

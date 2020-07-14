@@ -130,6 +130,11 @@ namespace Dfe.Spi.EntitySquasher.Infrastructure.SpiAdapter
             {
                 return "learning-providers";
             }
+            
+            if (typeof(T) == typeof(ManagementGroup))
+            {
+                return "management-groups";
+            }
 
             return null;
         }

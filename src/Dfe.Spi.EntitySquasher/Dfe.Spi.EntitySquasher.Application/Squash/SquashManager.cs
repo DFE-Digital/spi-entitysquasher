@@ -16,18 +16,22 @@ namespace Dfe.Spi.EntitySquasher.Application.Squash
     public class SquashManager : ISquashManager
     {
         private const string LearningProviderEntityName = nameof(LearningProvider);
+        private const string ManagementGroupEntityName = nameof(ManagementGroup);
 
         private readonly IProfileRepository _profileRepository;
         private readonly ITypedSquasher<LearningProvider> _learningProviderSquasher;
+        private readonly ITypedSquasher<ManagementGroup> _managementGroupSquasher;
         private readonly ILoggerWrapper _logger;
 
         public SquashManager(
             IProfileRepository profileRepository,
             ITypedSquasher<LearningProvider> learningProviderSquasher,
+            ITypedSquasher<ManagementGroup> managementGroupSquasher,
             ILoggerWrapper logger)
         {
             _profileRepository = profileRepository;
             _learningProviderSquasher = learningProviderSquasher;
+            _managementGroupSquasher = managementGroupSquasher;
             _logger = logger;
         }
 
@@ -55,6 +59,18 @@ namespace Dfe.Spi.EntitySquasher.Application.Squash
             {
                 _logger.Info("Squashing learning providers");
                 return await _learningProviderSquasher.SquashAsync(
+                    request.EntityReferences,
+                    request.AggregatesRequest,
+                    request.Fields ?? new string[0],
+                    request.Live,
+                    profile,
+                    cancellationToken);
+            }
+            
+            if (request.EntityName.Equals(ManagementGroupEntityName, StringComparison.InvariantCultureIgnoreCase))
+            {
+                _logger.Info("Squashing management groups");
+                return await _managementGroupSquasher.SquashAsync(
                     request.EntityReferences,
                     request.AggregatesRequest,
                     request.Fields ?? new string[0],
