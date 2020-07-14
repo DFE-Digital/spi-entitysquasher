@@ -73,11 +73,13 @@ namespace Dfe.Spi.Registry.Functions
                 .AddScoped<GiasDataAdapter>()
                 .AddScoped<UkrlpDataAdapter>()
                 .AddScoped<RatesDataAdapter>()
+                .AddScoped<IStoreDataAdapter>()
                 .AddScoped<IDataAdapter<LearningProvider>>(sp => sp.GetService<GiasDataAdapter>())
                 .AddScoped<IDataAdapter<ManagementGroup>>(sp => sp.GetService<GiasDataAdapter>())
                 .AddScoped<IDataAdapter<LearningProvider>>(sp => sp.GetService<UkrlpDataAdapter>())
                 .AddScoped<IDataAdapter<LearningProviderRates>>(sp => sp.GetService<RatesDataAdapter>())
-                .AddScoped<IDataAdapter<ManagementGroupRates>>(sp => sp.GetService<RatesDataAdapter>());
+                .AddScoped<IDataAdapter<ManagementGroupRates>>(sp => sp.GetService<RatesDataAdapter>())
+                .AddScoped<IDataAdapter<Census>>(sp => sp.GetService<IStoreDataAdapter>());
         }
 
         private void AddSquashing(IServiceCollection services)

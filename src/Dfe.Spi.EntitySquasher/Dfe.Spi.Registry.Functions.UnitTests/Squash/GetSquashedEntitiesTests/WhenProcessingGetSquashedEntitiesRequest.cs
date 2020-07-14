@@ -37,7 +37,8 @@ namespace Dfe.Spi.Registry.Functions.UnitTests.Squash.GetSquashedEntitiesTests
         {
             _fixture = new Fixture();
             _fixture.Customize<SquashRequest>(b =>
-                b.With(x => x.EntityName, nameof(LearningProvider)));
+                b.With(x => x.EntityName, nameof(LearningProvider))
+                 .With(x=>x.AggregatesRequest, (AggregatesRequest)null));
             
             _squashManagerMock = new Mock<ISquashManager>();
             _squashManagerMock.Setup(m => m.SquashAsync(It.IsAny<SquashRequest>(), It.IsAny<CancellationToken>()))

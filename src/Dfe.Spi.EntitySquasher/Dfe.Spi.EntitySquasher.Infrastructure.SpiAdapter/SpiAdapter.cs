@@ -145,6 +145,11 @@ namespace Dfe.Spi.EntitySquasher.Infrastructure.SpiAdapter
             {
                 return "management-group-rates";
             }
+            
+            if (typeof(T) == typeof(Census))
+            {
+                return "censuses";
+            }
 
             return null;
         }

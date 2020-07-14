@@ -40,7 +40,8 @@ namespace Dfe.Spi.EntitySquasher.Application.Squash
 
             _typeProperties = typeof(T)
                 .GetProperties()
-                .Where(p => !p.Name.Equals("_lineage", StringComparison.InvariantCultureIgnoreCase))
+                .Where(p => !p.Name.Equals("_lineage", StringComparison.InvariantCultureIgnoreCase) &&
+                            !p.Name.Equals("_aggregations", StringComparison.InvariantCultureIgnoreCase))
                 .ToArray();
         }
 

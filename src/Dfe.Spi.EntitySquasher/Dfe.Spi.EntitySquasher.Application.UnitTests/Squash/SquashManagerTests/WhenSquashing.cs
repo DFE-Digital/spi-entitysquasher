@@ -19,6 +19,7 @@ namespace Dfe.Spi.EntitySquasher.Application.UnitTests.Squash.SquashManagerTests
         private Mock<ITypedSquasher<ManagementGroup>> _managementGroupSquasherMock;
         private Mock<ITypedSquasher<LearningProviderRates>> _learningProviderRatesSquasherMock;
         private Mock<ITypedSquasher<ManagementGroupRates>> _managementGroupRatesSquasherMock;
+        private Mock<ITypedSquasher<Census>> _censusSquasherMock;
         private Mock<ILoggerWrapper> _loggerMock;
         private SquashManager _squashManager;
         private CancellationToken _cancellationToken;
@@ -42,6 +43,8 @@ namespace Dfe.Spi.EntitySquasher.Application.UnitTests.Squash.SquashManagerTests
             
             _managementGroupRatesSquasherMock = new Mock<ITypedSquasher<ManagementGroupRates>>();
             
+            _censusSquasherMock = new Mock<ITypedSquasher<Census>>();
+            
             _loggerMock = new Mock<ILoggerWrapper>();
             
             _squashManager = new SquashManager(
@@ -50,6 +53,7 @@ namespace Dfe.Spi.EntitySquasher.Application.UnitTests.Squash.SquashManagerTests
                 _managementGroupSquasherMock.Object,
                 _learningProviderRatesSquasherMock.Object,
                 _managementGroupRatesSquasherMock.Object,
+                _censusSquasherMock.Object,
                 _loggerMock.Object);
             
             _cancellationToken = new CancellationToken();
@@ -253,6 +257,50 @@ namespace Dfe.Spi.EntitySquasher.Application.UnitTests.Squash.SquashManagerTests
 
             var result = _fixture.Create<SquashedEntityResult[]>();
             _managementGroupRatesSquasherMock.Setup(s => s.SquashAsync(
+                    It.IsAny<EntityReference[]>(),
+                    It.IsAny<AggregatesRequest>(),
+                    It.IsAny<string[]>(),
+                    It.IsAny<bool>(),
+                    It.IsAny<Profile>(),
+                    It.IsAny<CancellationToken>()))
+                .ReturnsAsync(result);
+            
+            var actual = await _squashManager.SquashAsync(request, _cancellationToken);
+            
+            Assert.IsNotNull(actual);
+            Assert.AreSame(result, actual.SquashedEntityResults);
+        }
+
+        [Test]
+        public async Task ThenItShouldSquashCensuses()
+        {
+            var request = _fixture.Create<SquashRequest>();
+            request.EntityName = nameof(Census);
+
+            var profile = _fixture.Create<Profile>();
+            _profileRepositoryMock.Setup(r => r.GetProfileAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync(profile);
+
+            await _squashManager.SquashAsync(request, _cancellationToken);
+
+            _censusSquasherMock.Verify(s => s.SquashAsync(
+                    request.EntityReferences,
+                    request.AggregatesRequest,
+                    request.Fields,
+                    request.Live,
+                    profile,
+                    _cancellationToken),
+                Times.Once);
+        }
+
+        [Test]
+        public async Task ThenItShouldReturnSquasherResultForCensuses()
+        {
+            var request = _fixture.Create<SquashRequest>();
+            request.EntityName = nameof(Census);
+
+            var result = _fixture.Create<SquashedEntityResult[]>();
+            _censusSquasherMock.Setup(s => s.SquashAsync(
                     It.IsAny<EntityReference[]>(),
                     It.IsAny<AggregatesRequest>(),
                     It.IsAny<string[]>(),
