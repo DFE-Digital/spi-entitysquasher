@@ -17,21 +17,29 @@ namespace Dfe.Spi.EntitySquasher.Application.Squash
     {
         private const string LearningProviderEntityName = nameof(LearningProvider);
         private const string ManagementGroupEntityName = nameof(ManagementGroup);
+        private const string LearningProviderRatesEntityName = nameof(LearningProviderRates);
+        private const string ManagementGroupRatesEntityName = nameof(ManagementGroupRates);
 
         private readonly IProfileRepository _profileRepository;
         private readonly ITypedSquasher<LearningProvider> _learningProviderSquasher;
         private readonly ITypedSquasher<ManagementGroup> _managementGroupSquasher;
+        private readonly ITypedSquasher<LearningProviderRates> _learningProviderRatesSquasher;
+        private readonly ITypedSquasher<ManagementGroupRates> _managementGroupRatesSquasher;
         private readonly ILoggerWrapper _logger;
 
         public SquashManager(
             IProfileRepository profileRepository,
             ITypedSquasher<LearningProvider> learningProviderSquasher,
             ITypedSquasher<ManagementGroup> managementGroupSquasher,
+            ITypedSquasher<LearningProviderRates> learningProviderRatesSquasher,
+            ITypedSquasher<ManagementGroupRates> managementGroupRatesSquasher,
             ILoggerWrapper logger)
         {
             _profileRepository = profileRepository;
             _learningProviderSquasher = learningProviderSquasher;
             _managementGroupSquasher = managementGroupSquasher;
+            _learningProviderRatesSquasher = learningProviderRatesSquasher;
+            _managementGroupRatesSquasher = managementGroupRatesSquasher;
             _logger = logger;
         }
 
@@ -71,6 +79,30 @@ namespace Dfe.Spi.EntitySquasher.Application.Squash
             {
                 _logger.Info("Squashing management groups");
                 return await _managementGroupSquasher.SquashAsync(
+                    request.EntityReferences,
+                    request.AggregatesRequest,
+                    request.Fields ?? new string[0],
+                    request.Live,
+                    profile,
+                    cancellationToken);
+            }
+            
+            if (request.EntityName.Equals(LearningProviderRatesEntityName, StringComparison.InvariantCultureIgnoreCase))
+            {
+                _logger.Info("Squashing learning provider rates");
+                return await _learningProviderRatesSquasher.SquashAsync(
+                    request.EntityReferences,
+                    request.AggregatesRequest,
+                    request.Fields ?? new string[0],
+                    request.Live,
+                    profile,
+                    cancellationToken);
+            }
+            
+            if (request.EntityName.Equals(ManagementGroupRatesEntityName, StringComparison.InvariantCultureIgnoreCase))
+            {
+                _logger.Info("Squashing management group rates");
+                return await _managementGroupRatesSquasher.SquashAsync(
                     request.EntityReferences,
                     request.AggregatesRequest,
                     request.Fields ?? new string[0],
