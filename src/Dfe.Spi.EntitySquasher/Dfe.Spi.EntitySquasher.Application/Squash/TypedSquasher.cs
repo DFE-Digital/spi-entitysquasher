@@ -55,7 +55,7 @@ namespace Dfe.Spi.EntitySquasher.Application.Squash
             var entityProfile = profile.Entities.SingleOrDefault(x => x.Name.Equals(typeof(T).Name, StringComparison.InvariantCultureIgnoreCase));
             if (entityProfile == null)
             {
-                throw new Exception($"Profile does not contain definition for entity {typeof(T).Name}");
+                throw new ProfileMisconfiguredException(profile.Name, typeof(T));
             }
 
             _logger.Info($"Getting {entityReferences.Length} references from adapters");
@@ -126,7 +126,7 @@ namespace Dfe.Spi.EntitySquasher.Application.Squash
                 }
                 catch (DataAdapterException ex)
                 {
-                    _logger.Warning($"{adapterName} adapter returned error status {(int)ex.HttpStatusCode}:\n{ex.HttpErrorBody}");
+                    _logger.Warning($"{adapterName} adapter returned error status {(int) ex.HttpStatusCode}:\n{ex.HttpErrorBody}");
                     var adapterIdentifiers = adapterReferences[i].Identifiers;
                     adapterResults = adapterIdentifiers
                         .Select(id =>
@@ -174,7 +174,7 @@ namespace Dfe.Spi.EntitySquasher.Application.Squash
 
                 foreach (var adapterRecordReference in entityReference.AdapterRecordReferences)
                 {
-                    var adapterResult = adapterResults[adapterRecordReference.Source]
+                    var adapterResult = adapterResults[adapterRecordReference.Source.ToUpper()]
                         .SingleOrDefault(r => r.Identifier.Equals(adapterRecordReference.Id, StringComparison.InvariantCultureIgnoreCase));
 
                     sourceEntities.Add(new SourceSystemEntity<T>
@@ -233,6 +233,7 @@ namespace Dfe.Spi.EntitySquasher.Application.Squash
                         var sources = fieldProfile?.Sources != null && fieldProfile.Sources.Length > 0
                             ? fieldProfile.Sources
                             : entityProfile.Sources;
+                        var treatWhitespaceAsNull = fieldProfile?.TreatWhitespaceAsNull ?? false;
 
                         var orderedSources = OrderCandidates(nonErroredSources, sources);
                         var orderedCandidateProperties = orderedSources
@@ -242,7 +243,9 @@ namespace Dfe.Spi.EntitySquasher.Application.Squash
                                 PropertyValue = c.Entity == null ? null : property.GetValue(c.Entity),
                             })
                             .ToArray();
-                        var primaryCandidate = orderedCandidateProperties.FirstOrDefault(x => x.PropertyValue != null);
+                        var primaryCandidate = orderedCandidateProperties
+                            .FirstOrDefault(x => x.PropertyValue != null &&
+                                                 !(treatWhitespaceAsNull && x.PropertyValue == string.Empty));
                         if (primaryCandidate == null)
                         {
                             primaryCandidate = orderedCandidateProperties.First();
@@ -311,19 +314,5 @@ namespace Dfe.Spi.EntitySquasher.Application.Squash
 
             return ordered.ToArray();
         }
-    }
-
-    public class EntityReferenceSourceData<T>
-    {
-        public EntityReference EntityReference { get; set; }
-        public SourceSystemEntity<T>[] SourceEntities { get; set; }
-    }
-
-    public class SourceSystemEntity<T>
-    {
-        public string SourceName { get; set; }
-        public string SourceId { get; set; }
-        public T Entity { get; set; }
-        public DataAdapterException AdapterError { get; set; }
     }
 }

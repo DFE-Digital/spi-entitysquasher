@@ -39,7 +39,7 @@ namespace Dfe.Spi.EntitySquasher.Application.Squash
             var profile = await _profileRepository.GetProfileAsync(profileName, cancellationToken);
             if (profile == null)
             {
-                throw new Exception($"Cannot find profile with name {profileName}");
+                throw new ProfileNotFoundException(profileName);
             }
 
             var result = await SquashAsync(request, profile, cancellationToken);
@@ -63,7 +63,7 @@ namespace Dfe.Spi.EntitySquasher.Application.Squash
                     cancellationToken);
             }
 
-            throw new Exception($"Unsupported entity type {request.EntityName}");
+            throw new InvalidRequestException($"Unsupported entity type {request.EntityName}");
         }
     }
 }

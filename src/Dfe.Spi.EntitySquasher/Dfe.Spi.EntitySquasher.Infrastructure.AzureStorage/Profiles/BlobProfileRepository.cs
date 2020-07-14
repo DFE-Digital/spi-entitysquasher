@@ -26,7 +26,10 @@ namespace Dfe.Spi.EntitySquasher.Infrastructure.AzureStorage.Profiles
             using var reader = new StreamReader(data.Value.Content);
             var json = await reader.ReadToEndAsync();
 
-            return JsonConvert.DeserializeObject<Profile>(json);
+            var profile = JsonConvert.DeserializeObject<Profile>(json);
+            profile.Name = name;
+            
+            return profile;
         }
     }
 }

@@ -61,28 +61,51 @@ namespace Dfe.Spi.Registry.Functions.Squash
             FunctionRunContext runContext, 
             CancellationToken cancellationToken)
         {
-            var response = await _squashManager.SquashAsync(request, cancellationToken);
-            var statusCode = HttpStatusCode.OK;
-            
-            if (response.SquashedEntityResults.Count(x => x.SquashedEntity == null) == response.SquashedEntityResults.Length)
+            try
             {
-                // No adapter calls have worked
+                var response = await _squashManager.SquashAsync(request, cancellationToken);
+                var statusCode = HttpStatusCode.OK;
+
+                if (response.SquashedEntityResults.Count(x => x.SquashedEntity == null) == response.SquashedEntityResults.Length)
+                {
+                    // No adapter calls have worked
+                    return new HttpErrorBodyResult(
+                        new HttpErrorBody
+                        {
+                            Message = "Unable to serve any requests - all adapters are unavailable.",
+                            ErrorIdentifier = "SPI-ESQ-4",
+                            StatusCode = HttpStatusCode.FailedDependency,
+                        });
+                }
+
+                if (response.SquashedEntityResults.Count(x => x.EntityAdapterErrorDetails != null && x.EntityAdapterErrorDetails.Any()) > 0)
+                {
+                    // Some errors, but some worked
+                    statusCode = HttpStatusCode.PartialContent;
+                }
+
+                return new FormattedJsonResult(response, statusCode);
+            }
+            catch (ProfileNotFoundException ex)
+            {
                 return new HttpErrorBodyResult(
                     new HttpErrorBody
                     {
-                        Message = "Unable to serve any requests - all adapters are unavailable.",
-                        ErrorIdentifier = "SPI-ESQ-4",
-                        StatusCode = HttpStatusCode.FailedDependency,
+                        Message = $"Could not find an Algorithm Configuration Declaration File for the specified algorithm '{ex.ProfileName}'.",
+                        ErrorIdentifier = "SPI-ESQ-3",
+                        StatusCode = HttpStatusCode.BadRequest,
                     });
             }
-
-            if (response.SquashedEntityResults.Count(x => x.EntityAdapterErrorDetails != null && x.EntityAdapterErrorDetails.Any()) > 0)
+            catch (InvalidRequestException ex)
             {
-                // Some errors, but some worked
-                statusCode = HttpStatusCode.PartialContent;
+                return new HttpErrorBodyResult(
+                    new HttpErrorBody
+                    {
+                        Message = ex.Message,
+                        ErrorIdentifier = "SPI-ESQ-7",
+                        StatusCode = HttpStatusCode.BadRequest,
+                    });
             }
-            
-            return new FormattedJsonResult(response, statusCode);
         }
     }
 }
