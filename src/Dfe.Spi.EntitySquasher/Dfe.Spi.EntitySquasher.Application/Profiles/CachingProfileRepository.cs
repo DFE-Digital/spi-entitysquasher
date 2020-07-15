@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using Dfe.Spi.Common.Logging.Definitions;
 using Dfe.Spi.EntitySquasher.Domain.Configuration;
 using Dfe.Spi.EntitySquasher.Domain.Profiles;
 
@@ -10,10 +9,9 @@ namespace Dfe.Spi.EntitySquasher.Application.Profiles
 {
     public class CachingProfileRepository : IProfileRepository
     {
-        private readonly Dictionary<string, CacheItem> Cache = new Dictionary<string, CacheItem>();
-        
         private readonly IProfileRepository _innerRepository;
         private readonly EntitySquasherConfiguration _configuration;
+        private readonly Dictionary<string, CacheItem> _cache;
 
         public CachingProfileRepository(
             IProfileRepository innerRepository,
@@ -21,26 +19,27 @@ namespace Dfe.Spi.EntitySquasher.Application.Profiles
         {
             _innerRepository = innerRepository;
             _configuration = configuration;
+            _cache = new Dictionary<string, CacheItem>();
         }
         
         public async Task<Profile> GetProfileAsync(string name, CancellationToken cancellationToken)
         {
             var cacheKey = name.ToUpper();
-            if (Cache.ContainsKey(cacheKey))
+            if (_cache.ContainsKey(cacheKey))
             {
-                var cacheItem = Cache[cacheKey];
+                var cacheItem = _cache[cacheKey];
                 if (DateTime.Now < cacheItem.Expiry)
                 {
                     return cacheItem.Value;
                 }
 
-                Cache.Remove(cacheKey);
+                _cache.Remove(cacheKey);
             }
 
             var profile = await _innerRepository.GetProfileAsync(name, cancellationToken);
             if (_configuration.Profile.CacheDurationSeconds.HasValue)
             {
-                Cache.Add(cacheKey, new CacheItem
+                _cache.Add(cacheKey, new CacheItem
                 {
                     Value = profile,
                     Expiry = DateTime.Now.AddSeconds(_configuration.Profile.CacheDurationSeconds.Value)
