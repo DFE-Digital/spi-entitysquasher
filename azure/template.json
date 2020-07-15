@@ -166,40 +166,48 @@
               "value": "[reference(resourceId(variables('sharedResourceGroupName'), 'microsoft.insights/components/', variables('appInsightsName')), '2015-05-01').InstrumentationKey]"
             },
             {
-              "name": "AcdfFilenameFormat",
-              "value": "acdf-{0}.json"
-            },
-            {
-              "name": "AcdfStorageConnectionString",
-              "value": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('storageAccountName'), ';AccountKey=', listKeys(variables('storageAccountId'),'2015-05-01-preview').key1)]"
-            },
-            {
-              "name": "AcdfStorageContainerName",
-              "value": "algorithm-configuration-declaration-files"
-            },
-            {
-              "name": "DefaultAlgorithm",
-              "value": "default"
-            },
-            {
-              "name": "GiasBaseUrl",
+              "name": "SPI_Gias__Url",
               "value": "[parameters('giasBaseUrl')]"
             },
             {
-              "name": "UkrlpBaseUrl",
+              "name": "SPI_Gias__SubscriptionKey",
+              "value": "[parameters('subscriptionKey')]"
+            },
+            {
+              "name": "SPI_Ukrlp__Url",
               "value": "[parameters('ukrlpBaseUrl')]"
             },
             {
-              "name": "RatesBaseUrl",
+              "name": "SPI_Ukrlp__SubscriptionKey",
+              "value": "[parameters('subscriptionKey')]"
+            },
+            {
+              "name": "SPI_Rates__Url",
               "value": "[parameters('ratesBaseUrl')]"
             },
             {
-              "name": "IStoreBaseUrl",
+              "name": "SPI_Rates__SubscriptionKey",
+              "value": "[parameters('subscriptionKey')]"
+            },
+            {
+              "name": "SPI_IStore__Url",
               "value": "[parameters('iStoreBaseUrl')]"
             },
             {
-              "name": "SubscriptionKey",
+              "name": "SPI_IStore__SubscriptionKey",
               "value": "[parameters('subscriptionKey')]"
+            },
+            {
+              "name": "SPI_Profile__BlobConnectionString",
+              "value": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('storageAccountName'), ';AccountKey=', listKeys(variables('storageAccountId'),'2015-05-01-preview').key1)]"
+            },
+            {
+              "name": "SPI_ContainerName__BlobConnectionString",
+              "value": "algorithm-configuration-declaration-files"
+            },
+            {
+              "name": "SPI_ContainerName__CacheDurationSeconds",
+              "value": "600"
             }
           ],
           "ipSecurityRestrictions": [
