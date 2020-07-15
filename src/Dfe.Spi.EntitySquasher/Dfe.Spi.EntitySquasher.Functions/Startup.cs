@@ -4,6 +4,7 @@ using Dfe.Spi.Common.Http.Server;
 using Dfe.Spi.Common.Http.Server.Definitions;
 using Dfe.Spi.Common.Logging;
 using Dfe.Spi.Common.Logging.Definitions;
+using Dfe.Spi.EntitySquasher.Application.Profiles;
 using Dfe.Spi.EntitySquasher.Application.Squash;
 using Dfe.Spi.EntitySquasher.Domain.Adapters;
 using Dfe.Spi.EntitySquasher.Domain.Configuration;
@@ -85,7 +86,10 @@ namespace Dfe.Spi.Registry.Functions
         private void AddSquashing(IServiceCollection services)
         {
             services
-                .AddScoped<IProfileRepository, BlobProfileRepository>()
+                .AddScoped<BlobProfileRepository>()
+                .AddScoped<IProfileRepository>(sp => new CachingProfileRepository(
+                    sp.GetService<BlobProfileRepository>(),
+                    sp.GetService<EntitySquasherConfiguration>()))
                 .AddScoped(typeof(ITypedSquasher<>), typeof(TypedSquasher<>))
                 .AddScoped<ISquashManager, SquashManager>();
         }

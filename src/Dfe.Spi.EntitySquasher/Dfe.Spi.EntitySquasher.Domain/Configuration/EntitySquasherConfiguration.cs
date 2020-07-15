@@ -1,3 +1,5 @@
+using System;
+
 namespace Dfe.Spi.EntitySquasher.Domain.Configuration
 {
     public class EntitySquasherConfiguration
@@ -19,5 +21,6 @@ namespace Dfe.Spi.EntitySquasher.Domain.Configuration
     {
         public string BlobConnectionString { get; set; }
         public string ContainerName { get; set; }
+        public int? CacheDurationSeconds { get; set; }
     }
 }
