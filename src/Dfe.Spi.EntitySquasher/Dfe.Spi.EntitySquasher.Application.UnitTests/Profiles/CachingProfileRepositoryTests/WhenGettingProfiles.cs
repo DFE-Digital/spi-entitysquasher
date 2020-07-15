@@ -38,7 +38,7 @@ namespace Dfe.Spi.EntitySquasher.Application.UnitTests.Profiles.CachingProfileRe
         [Test]
         public async Task ThenItShouldReturnValueFromInnerRepositoryIfFirstCall()
         {
-            var profile = new Profile();
+            var profile = new Profile {Name = "Profile1"};
             _innerRepositoryMock.Setup(r => r.GetProfileAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(profile);
 
@@ -50,13 +50,13 @@ namespace Dfe.Spi.EntitySquasher.Application.UnitTests.Profiles.CachingProfileRe
         [Test]
         public async Task ThenItShouldReturnValueFromCacheOnSubsequentCallsBeforeCacheItemExpires()
         {
-            var profile = new Profile();
+            var profile = new Profile {Name = "Profile1"};
             var callCount = 0;
             _innerRepositoryMock.Setup(r => r.GetProfileAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync((string name, CancellationToken cancellationToken) =>
                 {
                     callCount++;
-                    return callCount == 1 ? profile : new Profile();
+                    return callCount == 1 ? profile : new Profile {Name = $"ProfileForCall{callCount}"};
                 });
 
             var actual1 = await _cachingProfileRepository.GetProfileAsync("test", _cancellationToken);
@@ -73,8 +73,8 @@ namespace Dfe.Spi.EntitySquasher.Application.UnitTests.Profiles.CachingProfileRe
         [Test]
         public async Task ThenItShouldReturnFreshValueFromRepositoryOnceCacheItemExpires()
         {
-            var profile1 = new Profile();
-            var profile2 = new Profile();
+            var profile1 = new Profile {Name = "Profile1"};
+            var profile2 = new Profile {Name = "Profile2"};
             var callCount = 0;
             _innerRepositoryMock.Setup(r => r.GetProfileAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync((string name, CancellationToken cancellationToken) =>
@@ -89,8 +89,8 @@ namespace Dfe.Spi.EntitySquasher.Application.UnitTests.Profiles.CachingProfileRe
                     {
                         return profile2;
                     }
-                    
-                    return new Profile();
+
+                    return new Profile {Name = $"ProfileForCall{callCount}"};
                 });
 
             var actual1 = await _cachingProfileRepository.GetProfileAsync("test", _cancellationToken);
@@ -109,9 +109,9 @@ namespace Dfe.Spi.EntitySquasher.Application.UnitTests.Profiles.CachingProfileRe
         public async Task ThenItShouldReturnFreshValueFromRepositoryEveryTimeIfCacheDurationNotConfigured()
         {
             _configuration.Profile.CacheDurationSeconds = null;
-            var profile1 = new Profile();
-            var profile2 = new Profile();
-            var profile3 = new Profile();
+            var profile1 = new Profile {Name = "Profile1"};
+            var profile2 = new Profile {Name = "Profile2"};
+            var profile3 = new Profile {Name = "Profile3"};
             var callCount = 0;
             _innerRepositoryMock.Setup(r => r.GetProfileAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync((string name, CancellationToken cancellationToken) =>
@@ -131,8 +131,8 @@ namespace Dfe.Spi.EntitySquasher.Application.UnitTests.Profiles.CachingProfileRe
                     {
                         return profile3;
                     }
-                    
-                    return new Profile();
+
+                    return new Profile {Name = $"ProfileForCall{callCount}"};
                 });
 
             var actual1 = await _cachingProfileRepository.GetProfileAsync("test", _cancellationToken);
