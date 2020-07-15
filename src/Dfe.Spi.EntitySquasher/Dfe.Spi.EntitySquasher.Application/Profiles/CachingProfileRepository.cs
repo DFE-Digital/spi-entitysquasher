@@ -10,7 +10,7 @@ namespace Dfe.Spi.EntitySquasher.Application.Profiles
 {
     public class CachingProfileRepository : IProfileRepository
     {
-        private static readonly Dictionary<string, CacheItem> Cache = new Dictionary<string, CacheItem>();
+        private readonly Dictionary<string, CacheItem> Cache = new Dictionary<string, CacheItem>();
         
         private readonly IProfileRepository _innerRepository;
         private readonly EntitySquasherConfiguration _configuration;

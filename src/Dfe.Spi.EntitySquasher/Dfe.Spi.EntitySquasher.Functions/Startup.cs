@@ -87,7 +87,7 @@ namespace Dfe.Spi.Registry.Functions
         {
             services
                 .AddScoped<BlobProfileRepository>()
-                .AddScoped<IProfileRepository>(sp => new CachingProfileRepository(
+                .AddSingleton<IProfileRepository>(sp => new CachingProfileRepository(
                     sp.GetService<BlobProfileRepository>(),
                     sp.GetService<EntitySquasherConfiguration>()))
                 .AddScoped(typeof(ITypedSquasher<>), typeof(TypedSquasher<>))
