@@ -39,6 +39,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dfe.Spi.Registry.Functions.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dfe.Spi.EntitySquasher.Application.UnitTests", "Dfe.Spi.EntitySquasher.Application.UnitTests\Dfe.Spi.EntitySquasher.Application.UnitTests.csproj", "{2B86B7BF-D378-40FD-9228-25754EBF84D3}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tools", "Tools", "{A2B0AF2A-4A92-4D55-BAC1-4A32CC455AB8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dfe.Spi.EntitySquasher.ProfileGenerator", "Dfe.Spi.EntitySquasher.ProfileGenerator\Dfe.Spi.EntitySquasher.ProfileGenerator.csproj", "{4EE9EF28-53D3-484A-A114-0F37D8F625B9}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -73,6 +77,10 @@ Global
 		{2B86B7BF-D378-40FD-9228-25754EBF84D3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2B86B7BF-D378-40FD-9228-25754EBF84D3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2B86B7BF-D378-40FD-9228-25754EBF84D3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4EE9EF28-53D3-484A-A114-0F37D8F625B9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4EE9EF28-53D3-484A-A114-0F37D8F625B9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4EE9EF28-53D3-484A-A114-0F37D8F625B9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4EE9EF28-53D3-484A-A114-0F37D8F625B9}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -83,6 +91,7 @@ Global
 		{06DFA11F-7F76-4226-9164-80EF3A2DF55F} = {07B5133C-3432-4FDF-B1A9-A14F2BAD9D56}
 		{08902143-F0DC-477B-B590-5CE0215D6843} = {7049BA93-BB9C-4739-8013-F59455D83173}
 		{2B86B7BF-D378-40FD-9228-25754EBF84D3} = {7049BA93-BB9C-4739-8013-F59455D83173}
+		{4EE9EF28-53D3-484A-A114-0F37D8F625B9} = {A2B0AF2A-4A92-4D55-BAC1-4A32CC455AB8}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {356C00E0-904D-48D4-B07F-85915B12516D}
