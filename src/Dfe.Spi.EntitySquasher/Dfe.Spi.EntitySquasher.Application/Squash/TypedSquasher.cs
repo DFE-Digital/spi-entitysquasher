@@ -64,7 +64,7 @@ namespace Dfe.Spi.EntitySquasher.Application.Squash
             _logger.Info($"Collating {adapterResults.Count} adapter results");
             var candidates = CollateAdapterResults(entityReferences, adapterResults);
 
-            var squashed = Squash(candidates, fields, entityProfile);
+            var squashed = Squash(candidates, aggregatesRequest, fields, entityProfile);
             return squashed;
         }
 
@@ -196,7 +196,8 @@ namespace Dfe.Spi.EntitySquasher.Application.Squash
             return candidates;
         }
 
-        private SquashedEntityResult[] Squash(EntityReferenceSourceData<T>[] candidates, string[] fields, EntityProfile entityProfile)
+        private SquashedEntityResult[] Squash(EntityReferenceSourceData<T>[] candidates, AggregatesRequest aggregatesRequest, string[] fields,
+            EntityProfile entityProfile)
         {
             var results = new SquashedEntityResult[candidates.Length];
 
@@ -235,44 +236,13 @@ namespace Dfe.Spi.EntitySquasher.Application.Squash
                             : entityProfile.Sources;
                         var treatWhitespaceAsNull = fieldProfile?.TreatWhitespaceAsNull ?? false;
 
-                        var orderedSources = OrderCandidates(nonErroredSources, sources);
-                        var orderedCandidateProperties = orderedSources
-                            .Select(c => new
-                            {
-                                Candidate = c,
-                                PropertyValue = c.Entity == null ? null : property.GetValue(c.Entity),
-                            })
-                            .ToArray();
-                        var primaryCandidate = orderedCandidateProperties
-                            .FirstOrDefault(x => x.PropertyValue != null &&
-                                                 !(treatWhitespaceAsNull && x.PropertyValue == string.Empty));
-                        if (primaryCandidate == null)
+                        if (property.Name.Equals("_aggregations", StringComparison.InvariantCultureIgnoreCase))
                         {
-                            primaryCandidate = orderedCandidateProperties.First();
+                            SquashAggregationsForEntity(property, entity, nonErroredSources, sources, aggregatesRequest);
                         }
-
-                        property.SetValue(entity, primaryCandidate.PropertyValue);
-                        if (isLineageRequired && !property.Name.Equals("_aggregations", StringComparison.InvariantCultureIgnoreCase))
+                        else
                         {
-                            var lineageEntry = new LineageEntry
-                            {
-                                AdapterName = primaryCandidate.Candidate.SourceName,
-                                EntityId = primaryCandidate.Candidate.SourceId,
-                                Value = primaryCandidate.PropertyValue,
-                                ReadDate = DateTime.Now,
-                                Alternatives = orderedCandidateProperties
-                                    .Where(x => x != primaryCandidate)
-                                    .Select(x =>
-                                        new LineageEntry
-                                        {
-                                            AdapterName = x.Candidate.SourceName,
-                                            EntityId = x.Candidate.SourceId,
-                                            Value = x.PropertyValue,
-                                            ReadDate = DateTime.Now,
-                                        })
-                                    .ToArray(),
-                            };
-                            entityBase._Lineage.Add(property.Name, lineageEntry);
+                            SquashPropertyForEntity(property, entity, entityBase, nonErroredSources, sources, treatWhitespaceAsNull, isLineageRequired);
                         }
                     }
                 }
@@ -298,6 +268,86 @@ namespace Dfe.Spi.EntitySquasher.Application.Squash
             }
 
             return results;
+        }
+
+        private void SquashPropertyForEntity(
+            PropertyInfo property,
+            T entity,
+            EntityBase entityBase,
+            SourceSystemEntity<T>[] nonErroredSources,
+            string[] sources,
+            bool treatWhitespaceAsNull,
+            bool isLineageRequired)
+        {
+            var orderedSources = OrderCandidates(nonErroredSources, sources);
+            var orderedCandidateProperties = orderedSources
+                .Select(c => new
+                {
+                    Candidate = c,
+                    PropertyValue = c.Entity == null ? null : property.GetValue(c.Entity),
+                })
+                .ToArray();
+            var primaryCandidate = orderedCandidateProperties
+                .FirstOrDefault(x => x.PropertyValue != null &&
+                                     !(treatWhitespaceAsNull && x.PropertyValue == string.Empty));
+            if (primaryCandidate == null)
+            {
+                primaryCandidate = orderedCandidateProperties.First();
+            }
+
+            property.SetValue(entity, primaryCandidate.PropertyValue);
+            if (isLineageRequired)
+            {
+                var lineageEntry = new LineageEntry
+                {
+                    AdapterName = primaryCandidate.Candidate.SourceName,
+                    EntityId = primaryCandidate.Candidate.SourceId,
+                    Value = primaryCandidate.PropertyValue,
+                    ReadDate = DateTime.Now,
+                    Alternatives = orderedCandidateProperties
+                        .Where(x => x != primaryCandidate)
+                        .Select(x =>
+                            new LineageEntry
+                            {
+                                AdapterName = x.Candidate.SourceName,
+                                EntityId = x.Candidate.SourceId,
+                                Value = x.PropertyValue,
+                                ReadDate = DateTime.Now,
+                            })
+                        .ToArray(),
+                };
+                entityBase._Lineage.Add(property.Name, lineageEntry);
+            }
+        }
+
+        private void SquashAggregationsForEntity(
+            PropertyInfo property,
+            T entity,
+            SourceSystemEntity<T>[] nonErroredSources,
+            string[] sources,
+            AggregatesRequest aggregatesRequest)
+        {
+            var aggregations = new List<Aggregation>();
+
+            foreach (var aggregationName in aggregatesRequest.AggregateQueries.Keys)
+            {
+                var candidateAggregations = nonErroredSources
+                    .Where(c => sources.Any(s => s.Equals(c.SourceName, StringComparison.InvariantCultureIgnoreCase)))
+                    .SelectMany(c => (Aggregation[]) property.GetValue(c.Entity))
+                    .Where(x => x != null && x.Name.Equals(aggregationName, StringComparison.InvariantCultureIgnoreCase))
+                    .ToArray();
+
+                // Currently only supports count. Though this should work for others such as sum
+                var value = candidateAggregations.Sum(x => x.Value);
+
+                aggregations.Add(new Aggregation
+                {
+                    Name = aggregationName,
+                    Value = value,
+                });
+            }
+
+            property.SetValue(entity, aggregations.ToArray());
         }
 
         private SourceSystemEntity<T>[] OrderCandidates(SourceSystemEntity<T>[] candidateSourceEntities, string[] sources)
