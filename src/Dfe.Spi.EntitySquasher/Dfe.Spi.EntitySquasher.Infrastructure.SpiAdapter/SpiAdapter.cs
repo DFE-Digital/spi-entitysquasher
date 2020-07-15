@@ -78,6 +78,7 @@ namespace Dfe.Spi.EntitySquasher.Infrastructure.SpiAdapter
                         Fields = fields,
                         Live = live,
                     }, SerializerSettings);
+                _logger.Debug($"Calling {SourceName} adapter at {_baseUrl} with {body}");
                 var response = await client.PostAsync(
                     entityType,
                     new StringContent(body, Encoding.UTF8, "application/json"),

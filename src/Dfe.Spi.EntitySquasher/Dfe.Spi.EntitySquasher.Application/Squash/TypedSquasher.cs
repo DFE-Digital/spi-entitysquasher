@@ -40,8 +40,7 @@ namespace Dfe.Spi.EntitySquasher.Application.Squash
 
             _typeProperties = typeof(T)
                 .GetProperties()
-                .Where(p => !p.Name.Equals("_lineage", StringComparison.InvariantCultureIgnoreCase) &&
-                            !p.Name.Equals("_aggregations", StringComparison.InvariantCultureIgnoreCase))
+                .Where(p => !p.Name.Equals("_lineage", StringComparison.InvariantCultureIgnoreCase))
                 .ToArray();
         }
 
@@ -253,7 +252,7 @@ namespace Dfe.Spi.EntitySquasher.Application.Squash
                         }
 
                         property.SetValue(entity, primaryCandidate.PropertyValue);
-                        if (isLineageRequired)
+                        if (isLineageRequired && !property.Name.Equals("_aggregations", StringComparison.InvariantCultureIgnoreCase))
                         {
                             var lineageEntry = new LineageEntry
                             {
