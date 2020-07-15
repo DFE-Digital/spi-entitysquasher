@@ -202,11 +202,11 @@
               "value": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('storageAccountName'), ';AccountKey=', listKeys(variables('storageAccountId'),'2015-05-01-preview').key1)]"
             },
             {
-              "name": "SPI_ContainerName__BlobConnectionString",
+              "name": "SPI_Profile__ContainerName",
               "value": "algorithm-configuration-declaration-files"
             },
             {
-              "name": "SPI_ContainerName__CacheDurationSeconds",
+              "name": "SPI_Profile__CacheDurationSeconds",
               "value": "600"
             }
           ],
