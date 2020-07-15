@@ -45,6 +45,8 @@ namespace Dfe.Spi.EntitySquasher.Application.UnitTests.Profiles.CachingProfileRe
             var actual = await _cachingProfileRepository.GetProfileAsync("test", _cancellationToken);
 
             Assert.AreSame(profile, actual);
+            _innerRepositoryMock.Verify(r => r.GetProfileAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()),
+                Times.Once);
         }
 
         [Test]
@@ -95,7 +97,7 @@ namespace Dfe.Spi.EntitySquasher.Application.UnitTests.Profiles.CachingProfileRe
 
             var actual1 = await _cachingProfileRepository.GetProfileAsync("test", _cancellationToken);
             var actual2 = await _cachingProfileRepository.GetProfileAsync("test", _cancellationToken);
-            await Task.Delay(1000);
+            await Task.Delay(1500);
             var actual3 = await _cachingProfileRepository.GetProfileAsync("test", _cancellationToken);
 
             Assert.AreSame(profile1, actual1);
