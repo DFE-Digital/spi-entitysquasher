@@ -280,6 +280,12 @@ namespace Dfe.Spi.EntitySquasher.Application.Squash
             bool isLineageRequired)
         {
             var orderedSources = OrderCandidates(nonErroredSources, sources);
+            if (!orderedSources.Any())
+            {
+                // No sources that are configured to provide the value have any entities
+                return;
+            }
+            
             var orderedCandidateProperties = orderedSources
                 .Select(c => new
                 {
