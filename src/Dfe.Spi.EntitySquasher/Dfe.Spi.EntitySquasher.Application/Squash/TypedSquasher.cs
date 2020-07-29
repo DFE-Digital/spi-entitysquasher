@@ -86,6 +86,7 @@ namespace Dfe.Spi.EntitySquasher.Application.Squash
                         Identifiers = grp
                             .Where(ar => !string.IsNullOrEmpty(ar.Id))
                             .Select(ar => ar.Id)
+                            .Distinct()
                             .ToArray(),
                     })
                     .ToArray();
@@ -282,6 +283,7 @@ namespace Dfe.Spi.EntitySquasher.Application.Squash
             var orderedSources = OrderCandidates(nonErroredSources, sources);
             if (!orderedSources.Any())
             {
+                // No sources that are configured to provide the value have any entities
                 // No sources that are configured to provide the value have any entities
                 return;
             }
