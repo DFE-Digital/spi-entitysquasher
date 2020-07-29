@@ -44,7 +44,7 @@ steps:
     inputs:
       command: publish
       publishWebProjects: false
-      projects: 'src/Dfe.Spi.EntitySquasher/Dfe.Spi.EntitySquasher.FunctionApp/Dfe.Spi.EntitySquasher.FunctionApp.csproj'
+      projects: 'src/Dfe.Spi.EntitySquasher/Dfe.Spi.EntitySquasher.Functions/Dfe.Spi.EntitySquasher.Functions.csproj'
       arguments: '--configuration $(BuildConfiguration) --output $(Build.ArtifactStagingDirectory)/publish --no-restore --no-build'
 
   - task: DotNetCoreCLI@2
@@ -52,7 +52,7 @@ steps:
     inputs:
       command: publish
       publishWebProjects: false
-      projects: 'src/Dfe.Spi.EntitySquasher/Dfe.Spi.EntitySquasher.AcdfGen.ConsoleApp/Dfe.Spi.EntitySquasher.AcdfGen.ConsoleApp.csproj'
+      projects: 'src/Dfe.Spi.EntitySquasher/Dfe.Spi.EntitySquasher.ProfileGenerator/Dfe.Spi.EntitySquasher.ProfileGenerator.csproj'
       arguments: '--configuration $(BuildConfiguration) --output $(Build.ArtifactStagingDirectory)/acdf-gen --no-restore --no-build'
       zipAfterPublish: false
 
@@ -76,7 +76,7 @@ steps:
     displayName: 'Run acdf-gen'
     inputs:
       command: 'custom'
-      custom: '$(Build.ArtifactStagingDirectory)/acdf-gen/Dfe.Spi.EntitySquasher.AcdfGen.ConsoleApp/acdf-gen.dll'
+      custom: '$(Build.ArtifactStagingDirectory)/acdf-gen/Dfe.Spi.EntitySquasher.ProfileGenerator/Dfe.Spi.EntitySquasher.ProfileGenerator.dll'
       arguments: '--filename acdf-default.json'
 
   - task: CopyFiles@2
