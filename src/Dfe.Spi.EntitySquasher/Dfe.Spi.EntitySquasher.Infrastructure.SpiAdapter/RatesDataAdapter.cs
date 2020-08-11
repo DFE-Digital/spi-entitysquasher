@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading;
@@ -23,9 +24,10 @@ namespace Dfe.Spi.EntitySquasher.Infrastructure.SpiAdapter
             Dictionary<string, AggregateQuery> aggregateQueries, 
             string[] fields, 
             bool live, 
+            DateTime? pointInTime,
             CancellationToken cancellationToken)
         {
-            return await GetEntitiesFromApi<LearningProviderRates>(identifiers, aggregateQueries, fields, live, cancellationToken);
+            return await GetEntitiesFromApi<LearningProviderRates>(identifiers, aggregateQueries, fields, live, pointInTime, cancellationToken);
         }
 
         async Task<DataAdapterResult<ManagementGroupRates>[]> IDataAdapter<ManagementGroupRates>.GetEntitiesAsync(
@@ -33,9 +35,10 @@ namespace Dfe.Spi.EntitySquasher.Infrastructure.SpiAdapter
             Dictionary<string, AggregateQuery> aggregateQueries, 
             string[] fields, 
             bool live, 
+            DateTime? pointInTime,
             CancellationToken cancellationToken)
         {
-            return await GetEntitiesFromApi<ManagementGroupRates>(identifiers, aggregateQueries, fields, live, cancellationToken);
+            return await GetEntitiesFromApi<ManagementGroupRates>(identifiers, aggregateQueries, fields, live, pointInTime, cancellationToken);
         }
 
         public override string SourceName => "Rates";

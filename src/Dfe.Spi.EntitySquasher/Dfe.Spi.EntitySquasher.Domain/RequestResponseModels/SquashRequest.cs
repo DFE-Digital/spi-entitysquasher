@@ -1,3 +1,4 @@
+using System;
 using Dfe.Spi.Common.Models;
 
 namespace Dfe.Spi.EntitySquasher.Domain.RequestResponseModels
@@ -9,6 +10,7 @@ namespace Dfe.Spi.EntitySquasher.Domain.RequestResponseModels
         public AggregatesRequest AggregatesRequest { get; set; }
         public string[] Fields { get; set; }
         public bool Live { get; set; }
+        public DateTime? PointInTime { get; set; }
         public string Algorithm { get; set; }
     }
 }

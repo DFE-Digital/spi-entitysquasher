@@ -1,3 +1,4 @@
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 using AutoFixture;
@@ -112,6 +113,7 @@ namespace Dfe.Spi.EntitySquasher.Application.UnitTests.Squash.SquashManagerTests
                     request.AggregatesRequest,
                     request.Fields,
                     request.Live,
+                    request.PointInTime,
                     profile,
                     _cancellationToken),
                 Times.Once);
@@ -129,6 +131,7 @@ namespace Dfe.Spi.EntitySquasher.Application.UnitTests.Squash.SquashManagerTests
                     It.IsAny<AggregatesRequest>(),
                     It.IsAny<string[]>(),
                     It.IsAny<bool>(),
+                    It.IsAny<DateTime?>(),
                     It.IsAny<Profile>(),
                     It.IsAny<CancellationToken>()))
                 .ReturnsAsync(result);
@@ -156,6 +159,7 @@ namespace Dfe.Spi.EntitySquasher.Application.UnitTests.Squash.SquashManagerTests
                     request.AggregatesRequest,
                     request.Fields,
                     request.Live,
+                    request.PointInTime,
                     profile,
                     _cancellationToken),
                 Times.Once);
@@ -173,6 +177,7 @@ namespace Dfe.Spi.EntitySquasher.Application.UnitTests.Squash.SquashManagerTests
                     It.IsAny<AggregatesRequest>(),
                     It.IsAny<string[]>(),
                     It.IsAny<bool>(),
+                    It.IsAny<DateTime?>(),
                     It.IsAny<Profile>(),
                     It.IsAny<CancellationToken>()))
                 .ReturnsAsync(result);
@@ -200,6 +205,7 @@ namespace Dfe.Spi.EntitySquasher.Application.UnitTests.Squash.SquashManagerTests
                     request.AggregatesRequest,
                     request.Fields,
                     request.Live,
+                    request.PointInTime,
                     profile,
                     _cancellationToken),
                 Times.Once);
@@ -217,6 +223,7 @@ namespace Dfe.Spi.EntitySquasher.Application.UnitTests.Squash.SquashManagerTests
                     It.IsAny<AggregatesRequest>(),
                     It.IsAny<string[]>(),
                     It.IsAny<bool>(),
+                    It.IsAny<DateTime?>(),
                     It.IsAny<Profile>(),
                     It.IsAny<CancellationToken>()))
                 .ReturnsAsync(result);
@@ -244,6 +251,7 @@ namespace Dfe.Spi.EntitySquasher.Application.UnitTests.Squash.SquashManagerTests
                     request.AggregatesRequest,
                     request.Fields,
                     request.Live,
+                    request.PointInTime,
                     profile,
                     _cancellationToken),
                 Times.Once);
@@ -261,6 +269,7 @@ namespace Dfe.Spi.EntitySquasher.Application.UnitTests.Squash.SquashManagerTests
                     It.IsAny<AggregatesRequest>(),
                     It.IsAny<string[]>(),
                     It.IsAny<bool>(),
+                    It.IsAny<DateTime?>(),
                     It.IsAny<Profile>(),
                     It.IsAny<CancellationToken>()))
                 .ReturnsAsync(result);
@@ -288,6 +297,7 @@ namespace Dfe.Spi.EntitySquasher.Application.UnitTests.Squash.SquashManagerTests
                     request.AggregatesRequest,
                     request.Fields,
                     request.Live,
+                    request.PointInTime,
                     profile,
                     _cancellationToken),
                 Times.Once);
@@ -305,6 +315,7 @@ namespace Dfe.Spi.EntitySquasher.Application.UnitTests.Squash.SquashManagerTests
                     It.IsAny<AggregatesRequest>(),
                     It.IsAny<string[]>(),
                     It.IsAny<bool>(),
+                    It.IsAny<DateTime?>(),
                     It.IsAny<Profile>(),
                     It.IsAny<CancellationToken>()))
                 .ReturnsAsync(result);
