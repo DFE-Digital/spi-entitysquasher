@@ -20,6 +20,7 @@ namespace Dfe.Spi.EntitySquasher.Application.Squash
             AggregatesRequest aggregatesRequest,
             string[] fields,
             bool live,
+            DateTime? pointInTime,
             Profile profile,
             CancellationToken cancellationToken);
     }
@@ -49,6 +50,7 @@ namespace Dfe.Spi.EntitySquasher.Application.Squash
             AggregatesRequest aggregatesRequest,
             string[] fields,
             bool live,
+            DateTime? pointInTime,
             Profile profile,
             CancellationToken cancellationToken)
         {
@@ -59,7 +61,7 @@ namespace Dfe.Spi.EntitySquasher.Application.Squash
             }
 
             _logger.Info($"Getting {entityReferences.Length} references from adapters");
-            var adapterResults = await GetEntitiesFromAdapters(entityReferences, aggregatesRequest, fields, live, cancellationToken);
+            var adapterResults = await GetEntitiesFromAdapters(entityReferences, aggregatesRequest, fields, live, pointInTime, cancellationToken);
 
             _logger.Info($"Collating {adapterResults.Count} adapter results");
             var candidates = CollateAdapterResults(entityReferences, adapterResults);
@@ -73,6 +75,7 @@ namespace Dfe.Spi.EntitySquasher.Application.Squash
             AggregatesRequest aggregatesRequest,
             string[] fields,
             bool live,
+            DateTime? pointInTime,
             CancellationToken cancellationToken)
         {
             // Split request for adapters
@@ -110,7 +113,7 @@ namespace Dfe.Spi.EntitySquasher.Application.Squash
                     continue;
                 }
 
-                tasks[i] = adapter.GetEntitiesAsync(adapterIdentifiers, aggregatesRequest?.AggregateQueries, fields, live, cancellationToken);
+                tasks[i] = adapter.GetEntitiesAsync(adapterIdentifiers, aggregatesRequest?.AggregateQueries, fields, live, pointInTime, cancellationToken);
             }
 
             // Collate results from adapters

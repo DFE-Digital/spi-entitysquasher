@@ -47,7 +47,13 @@ namespace Dfe.Spi.EntitySquasher.Infrastructure.SpiAdapter
 
         public abstract string SourceName { get; }
 
-        protected async Task<DataAdapterResult<T>[]> GetEntitiesFromApi<T>(string[] identifiers, Dictionary<string, AggregateQuery> aggregateQueries, string[] fields, bool live, CancellationToken cancellationToken)
+        protected async Task<DataAdapterResult<T>[]> GetEntitiesFromApi<T>(
+            string[] identifiers, 
+            Dictionary<string, AggregateQuery> aggregateQueries, 
+            string[] fields, 
+            bool live, 
+            DateTime? pointInTime,
+            CancellationToken cancellationToken)
         {
             var bearerToken = _executionContextManager.SpiExecutionContext.IdentityToken;
             var entityType = GetPluralUrlEntityName<T>();
@@ -77,6 +83,7 @@ namespace Dfe.Spi.EntitySquasher.Infrastructure.SpiAdapter
                         AggregateQueries = aggregateQueries,
                         Fields = fields,
                         Live = live,
+                        PointInTime = pointInTime,
                     }, SerializerSettings);
                 _logger.Debug($"Calling {SourceName} adapter at {_baseUrl} with {body}");
                 var response = await client.PostAsync(

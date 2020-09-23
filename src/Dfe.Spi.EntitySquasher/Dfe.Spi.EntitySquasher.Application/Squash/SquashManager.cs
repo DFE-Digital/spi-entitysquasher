@@ -75,6 +75,7 @@ namespace Dfe.Spi.EntitySquasher.Application.Squash
                     request.AggregatesRequest,
                     request.Fields ?? new string[0],
                     request.Live,
+                    request.PointInTime,
                     profile,
                     cancellationToken);
             }
@@ -87,6 +88,7 @@ namespace Dfe.Spi.EntitySquasher.Application.Squash
                     request.AggregatesRequest,
                     request.Fields ?? new string[0],
                     request.Live,
+                    request.PointInTime,
                     profile,
                     cancellationToken);
             }
@@ -99,6 +101,7 @@ namespace Dfe.Spi.EntitySquasher.Application.Squash
                     request.AggregatesRequest,
                     request.Fields ?? new string[0],
                     request.Live,
+                    request.PointInTime,
                     profile,
                     cancellationToken);
             }
@@ -111,6 +114,7 @@ namespace Dfe.Spi.EntitySquasher.Application.Squash
                     request.AggregatesRequest,
                     request.Fields ?? new string[0],
                     request.Live,
+                    request.PointInTime,
                     profile,
                     cancellationToken);
             }
@@ -123,6 +127,7 @@ namespace Dfe.Spi.EntitySquasher.Application.Squash
                     request.AggregatesRequest,
                     request.Fields ?? new string[0],
                     request.Live,
+                    request.PointInTime,
                     profile,
                     cancellationToken);
             }

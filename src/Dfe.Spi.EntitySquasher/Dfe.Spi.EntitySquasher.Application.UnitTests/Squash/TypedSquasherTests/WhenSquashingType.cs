@@ -58,6 +58,7 @@ namespace Dfe.Spi.EntitySquasher.Application.UnitTests.Squash.TypedSquasherTests
                     requestParameters.AggregatesRequest,
                     requestParameters.Fields,
                     requestParameters.Live,
+                    requestParameters.PointInTime,
                     requestParameters.Profile,
                     _cancellationToken));
             Assert.AreEqual(requestParameters.Profile.Name, actual.ProfileName);
@@ -80,6 +81,7 @@ namespace Dfe.Spi.EntitySquasher.Application.UnitTests.Squash.TypedSquasherTests
                 requestParameters.AggregatesRequest,
                 requestParameters.Fields,
                 requestParameters.Live,
+                requestParameters.PointInTime,
                 requestParameters.Profile,
                 _cancellationToken);
 
@@ -91,6 +93,7 @@ namespace Dfe.Spi.EntitySquasher.Application.UnitTests.Squash.TypedSquasherTests
                     requestParameters.AggregatesRequest == null ? null : requestParameters.AggregatesRequest.AggregateQueries,
                     requestParameters.Fields,
                     requestParameters.Live,
+                    requestParameters.PointInTime,
                     _cancellationToken),
                 Times.Once);
             _adapter2Mock.Verify(a => a.GetEntitiesAsync(
@@ -101,6 +104,7 @@ namespace Dfe.Spi.EntitySquasher.Application.UnitTests.Squash.TypedSquasherTests
                     requestParameters.AggregatesRequest == null ? null : requestParameters.AggregatesRequest.AggregateQueries,
                     requestParameters.Fields,
                     requestParameters.Live,
+                    requestParameters.PointInTime,
                     _cancellationToken),
                 Times.Once);
         }
@@ -121,6 +125,7 @@ namespace Dfe.Spi.EntitySquasher.Application.UnitTests.Squash.TypedSquasherTests
                 requestParameters.AggregatesRequest,
                 requestParameters.Fields,
                 requestParameters.Live,
+                requestParameters.PointInTime,
                 requestParameters.Profile,
                 _cancellationToken);
 
@@ -160,6 +165,7 @@ namespace Dfe.Spi.EntitySquasher.Application.UnitTests.Squash.TypedSquasherTests
                 requestParameters.AggregatesRequest,
                 requestParameters.Fields,
                 requestParameters.Live,
+                requestParameters.PointInTime,
                 requestParameters.Profile,
                 _cancellationToken);
 
@@ -196,6 +202,7 @@ namespace Dfe.Spi.EntitySquasher.Application.UnitTests.Squash.TypedSquasherTests
                 requestParameters.AggregatesRequest,
                 requestParameters.Fields,
                 requestParameters.Live,
+                requestParameters.PointInTime,
                 requestParameters.Profile,
                 _cancellationToken);
 
@@ -219,6 +226,7 @@ namespace Dfe.Spi.EntitySquasher.Application.UnitTests.Squash.TypedSquasherTests
                 requestParameters.AggregatesRequest,
                 requestParameters.Fields,
                 requestParameters.Live,
+                requestParameters.PointInTime,
                 requestParameters.Profile,
                 _cancellationToken);
 
@@ -242,6 +250,7 @@ namespace Dfe.Spi.EntitySquasher.Application.UnitTests.Squash.TypedSquasherTests
                 requestParameters.AggregatesRequest,
                 requestParameters.Fields,
                 requestParameters.Live,
+                requestParameters.PointInTime,
                 requestParameters.Profile,
                 _cancellationToken);
 
@@ -266,6 +275,7 @@ namespace Dfe.Spi.EntitySquasher.Application.UnitTests.Squash.TypedSquasherTests
                 requestParameters.AggregatesRequest,
                 requestParameters.Fields,
                 requestParameters.Live,
+                requestParameters.PointInTime,
                 requestParameters.Profile,
                 _cancellationToken);
 
@@ -288,6 +298,7 @@ namespace Dfe.Spi.EntitySquasher.Application.UnitTests.Squash.TypedSquasherTests
                 requestParameters.AggregatesRequest,
                 requestParameters.Fields,
                 requestParameters.Live,
+                requestParameters.PointInTime,
                 requestParameters.Profile,
                 _cancellationToken);
 
@@ -316,6 +327,7 @@ namespace Dfe.Spi.EntitySquasher.Application.UnitTests.Squash.TypedSquasherTests
                 requestParameters.AggregatesRequest,
                 requestParameters.Fields,
                 requestParameters.Live,
+                requestParameters.PointInTime,
                 requestParameters.Profile,
                 _cancellationToken);
 
@@ -347,6 +359,7 @@ namespace Dfe.Spi.EntitySquasher.Application.UnitTests.Squash.TypedSquasherTests
                 requestParameters.AggregatesRequest,
                 requestParameters.Fields,
                 requestParameters.Live,
+                requestParameters.PointInTime,
                 requestParameters.Profile,
                 _cancellationToken);
 
@@ -372,6 +385,7 @@ namespace Dfe.Spi.EntitySquasher.Application.UnitTests.Squash.TypedSquasherTests
                 requestParameters.AggregatesRequest,
                 requestParameters.Fields,
                 requestParameters.Live,
+                requestParameters.PointInTime,
                 requestParameters.Profile,
                 _cancellationToken);
 
@@ -393,6 +407,7 @@ namespace Dfe.Spi.EntitySquasher.Application.UnitTests.Squash.TypedSquasherTests
                     It.IsAny<Dictionary<string, AggregateQuery>>(),
                     It.IsAny<string[]>(),
                     It.IsAny<bool>(),
+                    It.IsAny<DateTime?>(),
                     It.IsAny<CancellationToken>()))
                 .ThrowsAsync(adapterException);
 
@@ -401,6 +416,7 @@ namespace Dfe.Spi.EntitySquasher.Application.UnitTests.Squash.TypedSquasherTests
                 requestParameters.AggregatesRequest,
                 requestParameters.Fields,
                 requestParameters.Live,
+                requestParameters.PointInTime,
                 requestParameters.Profile,
                 _cancellationToken);
 
@@ -424,6 +440,7 @@ namespace Dfe.Spi.EntitySquasher.Application.UnitTests.Squash.TypedSquasherTests
                     It.IsAny<Dictionary<string, AggregateQuery>>(),
                     It.IsAny<string[]>(),
                     It.IsAny<bool>(),
+                    It.IsAny<DateTime?>(),
                     It.IsAny<CancellationToken>()))
                 .ThrowsAsync(new Exception("testing"));
 
@@ -432,6 +449,7 @@ namespace Dfe.Spi.EntitySquasher.Application.UnitTests.Squash.TypedSquasherTests
                 requestParameters.AggregatesRequest,
                 requestParameters.Fields,
                 requestParameters.Live,
+                requestParameters.PointInTime,
                 requestParameters.Profile,
                 _cancellationToken);
 
@@ -452,8 +470,9 @@ namespace Dfe.Spi.EntitySquasher.Application.UnitTests.Squash.TypedSquasherTests
                     It.IsAny<Dictionary<string, AggregateQuery>>(),
                     It.IsAny<string[]>(),
                     It.IsAny<bool>(),
+                    It.IsAny<DateTime?>(),
                     It.IsAny<CancellationToken>()))
-                .ReturnsAsync((string[] identifiers, Dictionary<string, AggregateQuery> aggregateQueries, string[] fields, bool live,
+                .ReturnsAsync((string[] identifiers, Dictionary<string, AggregateQuery> aggregateQueries, string[] fields, bool live, DateTime? pointInTime,
                     CancellationToken cancellationToken) =>
                 {
                     var results = new DataAdapterResult<TestEntity>[identifiers.Length];
@@ -489,6 +508,9 @@ namespace Dfe.Spi.EntitySquasher.Application.UnitTests.Squash.TypedSquasherTests
 
             var live = _random.Next(0, 100) >= 50;
 
+            var daysAgo = _random.Next(0, 100);
+            var pointInTime = daysAgo < 10 ? null : (DateTime?)DateTime.Today.AddDays(-daysAgo);
+
             var profile = new Profile
             {
                 Name = $"ProfileName-{Guid.NewGuid().ToString()}",
@@ -517,6 +539,7 @@ namespace Dfe.Spi.EntitySquasher.Application.UnitTests.Squash.TypedSquasherTests
                 AggregatesRequest = aggregatesRequest,
                 Fields = fields,
                 Live = live,
+                PointInTime = pointInTime,
                 Profile = profile,
             };
         }
@@ -590,6 +613,7 @@ namespace Dfe.Spi.EntitySquasher.Application.UnitTests.Squash.TypedSquasherTests
             public AggregatesRequest AggregatesRequest { get; set; }
             public string[] Fields { get; set; }
             public bool Live { get; set; }
+            public DateTime? PointInTime { get; set; }
             public Profile Profile { get; set; }
         }
     }

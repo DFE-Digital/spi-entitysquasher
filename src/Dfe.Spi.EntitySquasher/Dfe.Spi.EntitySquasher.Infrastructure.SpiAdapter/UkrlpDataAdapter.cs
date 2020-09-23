@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading;
@@ -23,9 +24,10 @@ namespace Dfe.Spi.EntitySquasher.Infrastructure.SpiAdapter
             Dictionary<string, AggregateQuery> aggregateQueries, 
             string[] fields, 
             bool live, 
+            DateTime? pointInTime,
             CancellationToken cancellationToken)
         {
-            return await GetEntitiesFromApi<LearningProvider>(identifiers, aggregateQueries, fields, live, cancellationToken);
+            return await GetEntitiesFromApi<LearningProvider>(identifiers, aggregateQueries, fields, live, pointInTime, cancellationToken);
         }
 
         public override string SourceName => "UKRLP";
