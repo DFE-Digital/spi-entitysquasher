@@ -9,7 +9,7 @@ namespace Dfe.Spi.EntitySquasher.Domain.RequestResponseModels
         public override string ToString()
         {
             return AdapterRecordReferences
-                .Select(x => $"[{x.Source}:{x.Id}]")
+                .Select(x => $"[{x.SourceSystemName}:{x.SourceSystemId}]")
                 .Aggregate((x, y) => $"{x}, {y}");
         }
     }

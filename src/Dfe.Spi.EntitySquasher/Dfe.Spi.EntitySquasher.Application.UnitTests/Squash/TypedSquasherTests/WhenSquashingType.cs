@@ -88,8 +88,8 @@ namespace Dfe.Spi.EntitySquasher.Application.UnitTests.Squash.TypedSquasherTests
             _adapter1Mock.Verify(a => a.GetEntitiesAsync(
                     It.Is<string[]>(ids =>
                         ids.Length == 2 &&
-                        ids[0] == requestParameters.EntityReferences[0].AdapterRecordReferences[0].Id &&
-                        ids[1] == requestParameters.EntityReferences[1].AdapterRecordReferences[0].Id),
+                        ids[0] == requestParameters.EntityReferences[0].AdapterRecordReferences[0].SourceSystemId &&
+                        ids[1] == requestParameters.EntityReferences[1].AdapterRecordReferences[0].SourceSystemId),
                     requestParameters.AggregatesRequest == null ? null : requestParameters.AggregatesRequest.AggregateQueries,
                     requestParameters.Fields,
                     requestParameters.Live,
@@ -99,8 +99,8 @@ namespace Dfe.Spi.EntitySquasher.Application.UnitTests.Squash.TypedSquasherTests
             _adapter2Mock.Verify(a => a.GetEntitiesAsync(
                     It.Is<string[]>(ids =>
                         ids.Length == 2 &&
-                        ids[0] == requestParameters.EntityReferences[0].AdapterRecordReferences[1].Id &&
-                        ids[1] == requestParameters.EntityReferences[2].AdapterRecordReferences[0].Id),
+                        ids[0] == requestParameters.EntityReferences[0].AdapterRecordReferences[1].SourceSystemId &&
+                        ids[1] == requestParameters.EntityReferences[2].AdapterRecordReferences[0].SourceSystemId),
                     requestParameters.AggregatesRequest == null ? null : requestParameters.AggregatesRequest.AggregateQueries,
                     requestParameters.Fields,
                     requestParameters.Live,
@@ -426,7 +426,7 @@ namespace Dfe.Spi.EntitySquasher.Application.UnitTests.Squash.TypedSquasherTests
             Assert.IsNotNull(actual[0].EntityAdapterErrorDetails);
             Assert.AreEqual(1, actual[0].EntityAdapterErrorDetails.Length);
             Assert.AreEqual("Source1", actual[0].EntityAdapterErrorDetails[0].AdapterName);
-            Assert.AreEqual(requestParameters.EntityReferences[0].AdapterRecordReferences[0].Id, actual[0].EntityAdapterErrorDetails[0].RequestedId);
+            Assert.AreEqual(requestParameters.EntityReferences[0].AdapterRecordReferences[0].SourceSystemId, actual[0].EntityAdapterErrorDetails[0].RequestedId);
             Assert.AreEqual(adapterException.HttpStatusCode, actual[0].EntityAdapterErrorDetails[0].HttpStatusCode);
             Assert.AreEqual(adapterException.HttpErrorBody, actual[0].EntityAdapterErrorDetails[0].HttpErrorBody);
         }
@@ -459,7 +459,7 @@ namespace Dfe.Spi.EntitySquasher.Application.UnitTests.Squash.TypedSquasherTests
             Assert.IsNotNull(actual[0].EntityAdapterErrorDetails);
             Assert.AreEqual(1, actual[0].EntityAdapterErrorDetails.Length);
             Assert.AreEqual("Source1", actual[0].EntityAdapterErrorDetails[0].AdapterName);
-            Assert.AreEqual(requestParameters.EntityReferences[0].AdapterRecordReferences[0].Id, actual[0].EntityAdapterErrorDetails[0].RequestedId);
+            Assert.AreEqual(requestParameters.EntityReferences[0].AdapterRecordReferences[0].SourceSystemId, actual[0].EntityAdapterErrorDetails[0].RequestedId);
         }
 
 
@@ -552,7 +552,7 @@ namespace Dfe.Spi.EntitySquasher.Application.UnitTests.Squash.TypedSquasherTests
                 {
                     AdapterRecordReferences = new[]
                     {
-                        new AdapterRecordReference {Source = "Source1", Id = _random.Next(1000, 9999).ToString()},
+                        new AdapterRecordReference {SourceSystemName = "Source1", SourceSystemId = _random.Next(1000, 9999).ToString()},
                     }
                 };
             }
@@ -563,7 +563,7 @@ namespace Dfe.Spi.EntitySquasher.Application.UnitTests.Squash.TypedSquasherTests
                 {
                     AdapterRecordReferences = new[]
                     {
-                        new AdapterRecordReference {Source = "Source2", Id = _random.Next(1000, 9999).ToString()},
+                        new AdapterRecordReference {SourceSystemName = "Source2", SourceSystemId = _random.Next(1000, 9999).ToString()},
                     }
                 };
             }
@@ -572,8 +572,8 @@ namespace Dfe.Spi.EntitySquasher.Application.UnitTests.Squash.TypedSquasherTests
             {
                 AdapterRecordReferences = new[]
                 {
-                    new AdapterRecordReference {Source = "Source1", Id = _random.Next(1000, 9999).ToString()},
-                    new AdapterRecordReference {Source = "Source2", Id = _random.Next(1000, 9999).ToString()},
+                    new AdapterRecordReference {SourceSystemName = "Source1", SourceSystemId = _random.Next(1000, 9999).ToString()},
+                    new AdapterRecordReference {SourceSystemName = "Source2", SourceSystemId = _random.Next(1000, 9999).ToString()},
                 }
             };
         }
