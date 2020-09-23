@@ -24,16 +24,16 @@
             "items": {
               "type": "object",
               "properties": {
-                "id": {
+                "sourceSystemId": {
                   "type": "string"
                 },
-                "source": {
+                "sourceSystemName": {
                   "type": "string"
                 }
               },
               "required": [
-                "id",
-                "source"
+                "sourceSystemId",
+                "sourceSystemName"
               ]
             }
           }

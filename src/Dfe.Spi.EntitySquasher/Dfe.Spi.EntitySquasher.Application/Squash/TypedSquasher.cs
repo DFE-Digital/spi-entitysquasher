@@ -82,13 +82,13 @@ namespace Dfe.Spi.EntitySquasher.Application.Squash
             var adapterReferences =
                 entityReferences
                     .SelectMany(er => er.AdapterRecordReferences)
-                    .GroupBy(ar => ar.Source.ToUpper())
+                    .GroupBy(ar => ar.SourceSystemName.ToUpper())
                     .Select(grp => new
                     {
                         SourceName = grp.Key,
                         Identifiers = grp
-                            .Where(ar => !string.IsNullOrEmpty(ar.Id))
-                            .Select(ar => ar.Id)
+                            .Where(ar => !string.IsNullOrEmpty(ar.SourceSystemId))
+                            .Select(ar => ar.SourceSystemId)
                             .Distinct()
                             .ToArray(),
                     })
@@ -178,13 +178,13 @@ namespace Dfe.Spi.EntitySquasher.Application.Squash
 
                 foreach (var adapterRecordReference in entityReference.AdapterRecordReferences)
                 {
-                    var adapterResult = adapterResults[adapterRecordReference.Source.ToUpper()]
-                        .SingleOrDefault(r => r.Identifier.Equals(adapterRecordReference.Id, StringComparison.InvariantCultureIgnoreCase));
+                    var adapterResult = adapterResults[adapterRecordReference.SourceSystemName.ToUpper()]
+                        .SingleOrDefault(r => r.Identifier.Equals(adapterRecordReference.SourceSystemId, StringComparison.InvariantCultureIgnoreCase));
 
                     sourceEntities.Add(new SourceSystemEntity<T>
                     {
-                        SourceName = adapterRecordReference.Source,
-                        SourceId = adapterRecordReference.Id,
+                        SourceName = adapterRecordReference.SourceSystemName,
+                        SourceId = adapterRecordReference.SourceSystemId,
                         Entity = adapterResult?.Entity,
                         AdapterError = adapterResult?.AdapterError,
                     });
