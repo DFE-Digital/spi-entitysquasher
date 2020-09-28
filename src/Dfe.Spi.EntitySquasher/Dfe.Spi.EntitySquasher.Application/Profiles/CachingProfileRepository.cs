@@ -9,6 +9,8 @@ namespace Dfe.Spi.EntitySquasher.Application.Profiles
 {
     public class CachingProfileRepository : IProfileRepository
     {
+        private static readonly SemaphoreSlim Semaphore = new SemaphoreSlim(1, 1);
+
         private readonly IProfileRepository _innerRepository;
         private readonly EntitySquasherConfiguration _configuration;
         private readonly Dictionary<string, CacheItem> _cache;
@@ -21,34 +23,58 @@ namespace Dfe.Spi.EntitySquasher.Application.Profiles
             _configuration = configuration;
             _cache = new Dictionary<string, CacheItem>();
         }
-        
+
         public async Task<Profile> GetProfileAsync(string name, CancellationToken cancellationToken)
         {
             var cacheKey = name.ToUpper();
+            
+            // Quick initial check of cache; expect it to be cached more often than not
             if (_cache.ContainsKey(cacheKey))
             {
                 var cacheItem = _cache[cacheKey];
-                if (DateTime.Now < cacheItem.Expiry)
+                if (DateTime.Now < cacheItem.Expiry) // Check the cache is still valid
                 {
                     return cacheItem.Value;
                 }
-
-                _cache.Remove(cacheKey);
             }
 
-            var profile = await _innerRepository.GetProfileAsync(name, cancellationToken);
-            if (_configuration.Profile.CacheDurationSeconds.HasValue)
+            Profile profile;
+            try
             {
-                _cache.Add(cacheKey, new CacheItem
+                // Get exclusive lock
+                await Semaphore.WaitAsync(cancellationToken);
+                
+                // Re-check; another thread may have loaded while we were waiting
+                if (_cache.ContainsKey(cacheKey))
                 {
-                    Value = profile,
-                    Expiry = DateTime.Now.AddSeconds(_configuration.Profile.CacheDurationSeconds.Value)
-                });
+                    var cacheItem = _cache[cacheKey];
+                    if (DateTime.Now < cacheItem.Expiry) // Check the cache is still valid
+                    {
+                        return cacheItem.Value;
+                    }
+                    
+                    _cache.Remove(cacheKey);
+                }
+
+                // Definitely not there. Reload
+                profile = await _innerRepository.GetProfileAsync(name, cancellationToken);
+                if (_configuration.Profile.CacheDurationSeconds.HasValue)
+                {
+                    _cache.Add(cacheKey, new CacheItem
+                    {
+                        Value = profile,
+                        Expiry = DateTime.Now.AddSeconds(_configuration.Profile.CacheDurationSeconds.Value)
+                    });
+                }
+            }
+            finally
+            {
+                Semaphore.Release();
             }
 
             return profile;
         }
-        
+
         private class CacheItem
         {
             public DateTime Expiry { get; set; }
