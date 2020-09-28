@@ -207,7 +207,7 @@
             },
             {
               "name": "SPI_Profile__CacheDurationSeconds",
-              "value": "600"
+              "value": "1800"
             }
           ],
           "ipSecurityRestrictions": [
