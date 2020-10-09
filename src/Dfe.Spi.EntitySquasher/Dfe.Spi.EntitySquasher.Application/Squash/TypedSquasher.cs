@@ -283,51 +283,44 @@ namespace Dfe.Spi.EntitySquasher.Application.Squash
             bool treatWhitespaceAsNull,
             bool isLineageRequired)
         {
-            var orderedSources = OrderCandidates(nonErroredSources, sources);
-            if (!orderedSources.Any())
-            {
-                // No sources that are configured to provide the value have any entities
-                // No sources that are configured to provide the value have any entities
-                return;
-            }
-            
-            var orderedCandidateProperties = orderedSources
-                .Select(c => new
+            var lineageEntries = sources
+                .SelectMany((source) =>
                 {
-                    Candidate = c,
-                    PropertyValue = c.Entity == null ? null : property.GetValue(c.Entity),
-                })
-                .ToArray();
-            var primaryCandidate = orderedCandidateProperties
-                .FirstOrDefault(x => x.PropertyValue != null &&
-                                     !(treatWhitespaceAsNull && x.PropertyValue == string.Empty));
-            if (primaryCandidate == null)
-            {
-                primaryCandidate = orderedCandidateProperties.First();
-            }
-
-            property.SetValue(entity, primaryCandidate.PropertyValue);
-            if (isLineageRequired)
-            {
-                var lineageEntry = new LineageEntry
-                {
-                    AdapterName = primaryCandidate.Candidate.SourceName,
-                    EntityId = primaryCandidate.Candidate.SourceId,
-                    Value = primaryCandidate.PropertyValue,
-                    ReadDate = DateTime.Now,
-                    Alternatives = orderedCandidateProperties
-                        .Where(x => x != primaryCandidate)
-                        .Select(x =>
+                    var sourceEntities = nonErroredSources
+                        .Where(x => x.SourceName.Equals(source, StringComparison.InvariantCultureIgnoreCase))
+                        .ToArray();
+                    if (!sourceEntities.Any())
+                    {
+                        return new[]
+                        {
                             new LineageEntry
                             {
-                                AdapterName = x.Candidate.SourceName,
-                                EntityId = x.Candidate.SourceId,
-                                Value = x.PropertyValue,
+                                AdapterName = source,
                                 ReadDate = DateTime.Now,
-                            })
-                        .ToArray(),
-                };
-                entityBase._Lineage.Add(property.Name, lineageEntry);
+                            }
+                        };
+                    }
+
+                    return sourceEntities
+                        .Select(e => new LineageEntry
+                        {
+                            AdapterName = e.SourceName,
+                            EntityId = e.SourceId,
+                            Value = e.Entity == null ? null : property.GetValue(e.Entity),
+                            ReadDate = DateTime.Now,
+                        })
+                        .ToArray();
+                })
+                .ToArray();
+            var primaryCandidate = lineageEntries
+                .FirstOrDefault(le => le.Value != null && !(treatWhitespaceAsNull && le.Value == string.Empty)) 
+                                   ?? lineageEntries.First();
+            property.SetValue(entity, primaryCandidate.Value);
+
+            if (isLineageRequired)
+            {
+                primaryCandidate.Alternatives = lineageEntries.Where(le => le != primaryCandidate).ToArray();
+                entityBase._Lineage.Add(property.Name, primaryCandidate);
             }
         }
 
