@@ -268,3 +268,4 @@ Dfe.Spi.EntitySquasher.*.xml
 
 # MacOS files
 .DS_Store
+/src/Dfe.Spi.EntitySquasher/Dfe.Spi.EntitySquasher.Functions/Properties/launchSettings.json

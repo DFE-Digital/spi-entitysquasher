@@ -66,10 +66,13 @@ namespace Dfe.Spi.EntitySquasher.Infrastructure.SpiAdapter
             using (var client = new HttpClient())
             {
                 client.BaseAddress = new Uri(_baseUrl, UriKind.Absolute);
-                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", bearerToken);
-                client.DefaultRequestHeaders.Add("Ocp-Apim-Subscription-Key", _subscriptionKey);
-                client.DefaultRequestHeaders.Add(SpiHeaderNames.InternalRequestIdHeaderName,
+                if (!System.Diagnostics.Debugger.IsAttached)
+                {
+                    client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", bearerToken);
+                    client.DefaultRequestHeaders.Add("Ocp-Apim-Subscription-Key", _subscriptionKey);
+                    client.DefaultRequestHeaders.Add(SpiHeaderNames.InternalRequestIdHeaderName,
                     _executionContextManager.SpiExecutionContext.InternalRequestId.ToString());
+                }
                 if (!string.IsNullOrEmpty(_executionContextManager.SpiExecutionContext.ExternalRequestId))
                 {
                     client.DefaultRequestHeaders.Add(SpiHeaderNames.ExternalRequestIdHeaderName,
